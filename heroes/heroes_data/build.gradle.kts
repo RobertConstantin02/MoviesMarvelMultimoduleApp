@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
-
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -14,8 +12,6 @@ android {
 
 dependencies {
     implementation(project(":heroes:heroes_domain"))
-    implementation("androidx.test:monitor:1.5.0")
-    androidTestImplementation("org.testng:testng:6.9.6")
 
     libs.bundles.apply {
         implementation(coroutines)

@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
-
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -14,7 +12,6 @@ android {
 
 dependencies {
     implementation(project(":core_ui"))
-    implementation(project(":heroes:heroes_domain"))
 
 
     libs.bundles.apply {
