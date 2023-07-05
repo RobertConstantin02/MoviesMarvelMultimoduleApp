@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">UdemyCourseApp</string>
+
+    <!-- TopLevelDestination -->
+    <string name="heroes_iconLabel"> Heroes </string>
+    <string name="heroes_screen_title"> Marvel Heroes </string>
+    <string name="favorites_heroes_icon_label"> Favorites </string>
+    <string name="favorites_heroes_screen_title"> Favorites Heroes </string>
+
 </resources>
