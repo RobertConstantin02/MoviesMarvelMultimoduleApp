@@ -14,8 +14,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "UdemyCourseApp"
 include ':app'
-include ':core_ui'
-include ':heroes'
-include ':heroes:heroes_data'
-include ':heroes:heroes_presentation'
-include ':heroes:heroes_domain'
+include ':featureHeroes'
+include ':featureHeroes:heroes_data'
+include ':featureHeroes:heroes_domain'
+include ':featureHeroes:heroes_presentation'

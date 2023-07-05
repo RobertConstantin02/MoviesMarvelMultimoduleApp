@@ -1,28 +1,31 @@
 plugins {
-    id("com.android.application")
-    kotlin("android")
-    kotlin("kapt")
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
     id("dagger.hilt.android.plugin")
+    kotlin("kapt")
 }
 
 android {
     namespace = "com.example.heroes_presentation"
     compileSdk = 33
+    kotlinOptions {
+        jvmTarget = libs.versions.jvmTarget.get()
+    }
 }
-
+kapt {
+    correctErrorTypes = true
+}
 dependencies {
-    implementation(project(":core_ui"))
 
-
+    implementation(project(":featureHeroes:heroes_domain"))
     libs.bundles.apply {
         implementation(compose)
+        implementation(hilt)
         implementation(coroutines)
         implementation(lifecycle)
     }
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
-    //Unit test
     testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.test.unit)
+    testImplementation(libs.bundles.test)
 }

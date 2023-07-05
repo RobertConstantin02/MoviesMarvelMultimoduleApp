@@ -1,3 +1,4 @@
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -9,29 +10,12 @@ android {
     namespace = "com.example.udemycourseapp"
     compileSdk = 33
 
-    defaultConfig {
-        applicationId = "com.example.udemycourseapp"
-        minSdk = 24
-        targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-    }
-
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled =  true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }
@@ -39,14 +23,9 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion =  "1.2.0"
+        kotlinCompilerExtensionVersion =  libs.versions.kotlinCompilerExtensionVersion.get()
     }
 
-    packagingOptions {
-        resources {
-            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
-        }
-    }
 }
 
 /**
@@ -59,33 +38,27 @@ android {
  * used for libraries that use annotation processing, such as Dagger or Hilt.
  */
 dependencies {
+    implementation(project(":featureHeroes:heroes_data"))
+    implementation(project(":featureHeroes:heroes_domain"))
+    implementation(project(":featureHeroes:heroes_presentation"))
 
     libs.bundles.apply {
         implementation(compose)
+        implementation(hilt)
         implementation(coroutines)
-        implementation(network)
         implementation(lifecycle)
     }
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
-    implementation(libs.gson)
-    constraints {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
-            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
-        }
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
-            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.test)
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
         }
     }
-    //Unit test
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.test.unit)
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-}

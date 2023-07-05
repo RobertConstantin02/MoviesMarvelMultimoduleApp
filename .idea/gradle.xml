@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
@@ -10,11 +11,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/core_ui" />
-            <option value="$PROJECT_DIR$/heroes" />
-            <option value="$PROJECT_DIR$/heroes/heroes_data" />
-            <option value="$PROJECT_DIR$/heroes/heroes_domain" />
-            <option value="$PROJECT_DIR$/heroes/heroes_presentation" />
+            <option value="$PROJECT_DIR$/featureHeroes" />
+            <option value="$PROJECT_DIR$/featureHeroes/heroes_data" />
+            <option value="$PROJECT_DIR$/featureHeroes/heroes_domain" />
+            <option value="$PROJECT_DIR$/featureHeroes/heroes_presentation" />
           </set>
         </option>
       </GradleProjectSettings>

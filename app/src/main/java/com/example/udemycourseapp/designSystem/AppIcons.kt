@@ -4,19 +4,19 @@ import androidx.annotation.DrawableRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
  * Holds Material icons [ImageVector]s and custom icons asss a drawable Id
  */
-object JetIcons {
+object AppIcons {
     /**BottomNavigation**/
-    val feedBottomIconFilled = Icons.Filled.List
-    val feedBottomIconBorder = Icons.Outlined.List
-    val favoriteBottomIconFilled = Icons.Default.Favorite
-    val favoriteBottomIconOutlined = Icons.Outlined.Favorite
+    val heroesListBottomIconFilled = Icons.Filled.List
+    val heroesListBottomIconBorder = Icons.Outlined.List
+    val favoriteBottomIconFilled = Icons.Rounded.Favorite
+    val favoriteBottomIconOutlined = Icons.Filled.Favorite
 }
 
 /**
