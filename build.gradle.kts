@@ -10,6 +10,7 @@ buildscript {
         classpath(libs.hilt.gradlePlugin)
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
+
 }
 
 plugins {

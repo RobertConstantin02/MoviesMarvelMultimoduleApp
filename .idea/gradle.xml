@@ -11,10 +11,17 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/featureHeroes" />
-            <option value="$PROJECT_DIR$/featureHeroes/heroes_data" />
-            <option value="$PROJECT_DIR$/featureHeroes/heroes_domain" />
-            <option value="$PROJECT_DIR$/featureHeroes/heroes_presentation" />
+            <option value="$PROJECT_DIR$/featureFavorites" />
+            <option value="$PROJECT_DIR$/featureFavorites/favorites_data" />
+            <option value="$PROJECT_DIR$/featureFavorites/favorites_domain" />
+            <option value="$PROJECT_DIR$/featureFavorites/favorites_presentation" />
+            <option value="$PROJECT_DIR$/featureFeed" />
+            <option value="$PROJECT_DIR$/featureFeed/feed_data" />
+            <option value="$PROJECT_DIR$/featureFeed/feed_domain" />
+            <option value="$PROJECT_DIR$/featureFeed/feed_presentation" />
+            <option value="$PROJECT_DIR$/toplevel" />
+            <option value="$PROJECT_DIR$/toplevel/designsystem" />
+            <option value="$PROJECT_DIR$/toplevel/navigationlogic" />
           </set>
         </option>
       </GradleProjectSettings>
