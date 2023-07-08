@@ -5,9 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.navigationlogic.Command
 import com.example.navigationlogic.Feature
-import com.example.navigationlogic.NavigationCommand
-import com.example.navigationlogic.asEntryPoint
 
 
 fun NavController.navigateToHeroFavoritesScreen(
@@ -18,22 +17,35 @@ fun NavController.navigateToHeroFavoritesScreen(
 }
 
 fun NavGraphBuilder.favoritesGraph(
-    favoritesFeature: Feature,
+    command: Command<Feature>,
     nestedGraphs: NavGraphBuilder.() -> Unit,
     onCharacterClick: (heroId: Int) -> Unit,
 ) {
-    NavigationCommand.GoToMain(favoritesFeature).asEntryPoint { entryPoint ->
-        navigation(
-            startDestination = entryPoint.route,
-            route = favoritesFeature.route
+    navigation(
+        startDestination = command.route,
+        route = command.feature.route
+    ) {
+        composable(
+            route = command.route,
+            arguments = command.args
         ) {
-            composable(
-                route = entryPoint.route,
-                arguments = entryPoint.args
-            ) {
-                FavoritesScreen()
-            }
-            nestedGraphs()
+            FavoritesScreen()
         }
+        nestedGraphs()
     }
+
+//    command.asEntryPoint { entryPoint ->
+//        navigation(
+//            startDestination = entryPoint.route,
+//            route = favoritesFeature.route
+//        ) {
+//            composable(
+//                route = entryPoint.route,
+//                arguments = entryPoint.args
+//            ) {
+//                FavoritesScreen()
+//            }
+//            nestedGraphs()
+//        }
+//    }
 }

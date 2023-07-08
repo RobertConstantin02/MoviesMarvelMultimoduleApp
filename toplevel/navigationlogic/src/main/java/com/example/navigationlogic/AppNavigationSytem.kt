@@ -7,18 +7,19 @@ import androidx.navigation.navArgument
 
 interface Feature { val route: String }
 
-interface Command {
+interface Command<T: Feature> {
     val route: String
     val args: List<NamedNavArgument>
+    val feature: T
 }
 
 sealed class NavigationCommand(
     val jetAppFeature: Feature,
     val subRoute: String = "main",
     private val navArgs: List<NavArg> = emptyList()
-): Command {
-    data class GoToMain(val feature: Feature) : NavigationCommand(feature)
-    data class GoToDetail(val feature: Feature) :
+): Command<Feature> {
+    data class GoToMain(override val feature: Feature) : NavigationCommand(feature)
+    data class GoToDetail(override val feature: Feature) :
         NavigationCommand(feature, DETAIL_SUBROUTE, listOf(NavArg.ITEM_ID)) {
         fun createRoute(itemId: String) =
             "${jetAppFeature.route}/$subRoute/${Uri.encode(itemId)}"
@@ -62,7 +63,6 @@ sealed class NavigationCommand(
     }
 }
 
-fun Command.asEntryPoint(use: (Command) -> Unit) { use(this) }
 
 //fun NavGraphBuilder.customComposable(
 //    navCommand: NavigationCommand,

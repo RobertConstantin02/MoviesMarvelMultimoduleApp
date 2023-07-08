@@ -22,7 +22,7 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-    implementation(project(":toplevel:navigationlogic"))
+    api(project(":toplevel:navigationlogic"))
     implementation(project(":featureFavorites:favorites_domain"))
     libs.bundles.apply {
         implementation(compose)

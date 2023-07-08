@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.example.favorites_presentation.heroFavoritesScreen.favoritesGraph
 import com.example.heroes_presentation.heroListScreen.feedGraph
+import com.example.navigationlogic.NavigationCommand
 import com.example.udemycourseapp.ui.MarvelAppState
 import com.example.udemycourseapp.ui.RickMortyAppFeature
 
@@ -19,7 +20,7 @@ fun RickMortyNavHost(
         startDestination = startDestination
     ) {
         feedGraph(
-            rickMortyFeedFeature = RickMortyAppFeature.RICK_MORTY_FEED,
+            command = NavigationCommand.GoToMain(RickMortyAppFeature.RICK_MORTY_FEED),
             onCharacterClick = {
 
             },
@@ -28,7 +29,7 @@ fun RickMortyNavHost(
             }
         )
         favoritesGraph(
-            favoritesFeature = RickMortyAppFeature.FAVORITES,
+            command = NavigationCommand.GoToMain(RickMortyAppFeature.FAVORITES),
             onCharacterClick = {
 
             },
