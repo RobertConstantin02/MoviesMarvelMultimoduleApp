@@ -14,7 +14,14 @@ dependencyResolutionManagement {
 }
 rootProject.name = "UdemyCourseApp"
 include ':app'
-include ':featureHeroes'
-include ':featureHeroes:heroes_data'
-include ':featureHeroes:heroes_domain'
-include ':featureHeroes:heroes_presentation'
+include ':featureFeed'
+include ':featureFeed:feed_data'
+include ':featureFeed:feed_domain'
+include ':featureFeed:feed_presentation'
+include ':toplevel'
+include ':toplevel:designsystem'
+include ':toplevel:navigationlogic'
+include ':featureFavorites'
+include ':featureFavorites:favorites_data'
+include ':featureFavorites:favorites_domain'
+include ':featureFavorites:favorites_presentation'

@@ -38,9 +38,14 @@ android {
  * used for libraries that use annotation processing, such as Dagger or Hilt.
  */
 dependencies {
-    implementation(project(":featureHeroes:heroes_data"))
-    implementation(project(":featureHeroes:heroes_domain"))
-    implementation(project(":featureHeroes:heroes_presentation"))
+    implementation(project(":toplevel:navigationlogic"))
+    implementation(project(":toplevel:designsystem"))
+    implementation(project(":featureFeed:feed_data"))
+    implementation(project(":featureFeed:feed_domain"))
+    implementation(project(":featureFeed:feed_presentation"))
+    implementation(project(":featureFavorites:favorites_data"))
+    implementation(project(":featureFavorites:favorites_domain"))
+    implementation(project(":featureFavorites:favorites_presentation"))
 
     libs.bundles.apply {
         implementation(compose)

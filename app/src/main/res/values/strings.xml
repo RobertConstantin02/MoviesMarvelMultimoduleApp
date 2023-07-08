@@ -2,9 +2,9 @@
     <string name="app_name">UdemyCourseApp</string>
 
     <!-- TopLevelDestination -->
-    <string name="heroes_iconLabel"> Heroes </string>
-    <string name="heroes_screen_title"> Marvel Heroes </string>
-    <string name="favorites_heroes_icon_label"> Favorites </string>
-    <string name="favorites_heroes_screen_title"> Favorites Heroes </string>
+    <string name="rick_morty_iconLabel"> List </string>
+    <string name="rick_morty_screen_title"> Characters </string>
+    <string name="rick_morty_favorites_icon_label"> Favorites </string>
+    <string name="rick_morty_favorites_screen_label"> Favorites Characters </string>
 
 </resources>

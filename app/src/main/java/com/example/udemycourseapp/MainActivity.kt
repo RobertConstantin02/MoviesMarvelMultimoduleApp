@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import com.example.udemycourseapp.designSystem.theme.UdemyCourseAppTheme
+import com.example.designsystem.theme.UdemyCourseAppTheme
 import com.example.udemycourseapp.ui.MarvelAndMoviesApp
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
