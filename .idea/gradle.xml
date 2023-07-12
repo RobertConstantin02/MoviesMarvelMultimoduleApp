@@ -22,6 +22,7 @@
             <option value="$PROJECT_DIR$/toplevel" />
             <option value="$PROJECT_DIR$/toplevel/designsystem" />
             <option value="$PROJECT_DIR$/toplevel/navigationlogic" />
+            <option value="$PROJECT_DIR$/toplevel/resources" />
           </set>
         </option>
       </GradleProjectSettings>

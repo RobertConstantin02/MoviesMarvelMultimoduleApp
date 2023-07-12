@@ -19,7 +19,8 @@ kapt {
 }
 dependencies {
 
-    implementation(project(":featureFeed:feed_domain"))
+    api(project(":featureFeed:feed_domain"))
+    implementation(project(":toplevel:resources"))
     libs.bundles.apply {
         implementation(hilt)
         implementation(network)
