@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.feed_data"
+    namespace = "com.example.database"
     compileSdk = 33
 
     kotlinOptions {
@@ -18,23 +18,16 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-
-    api(project(":featureFeed:feed_domain"))
-    implementation(project(":toplevel:resources"))
-    implementation(project(":toplevel:database"))
     libs.bundles.apply {
         implementation(hilt)
-        implementation(network)
-        implementation(coroutines)
         implementation(cache)
     }
     kapt(libs.hilt.compiler)
     kapt(libs.room.compiler)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.androidx.paging)
     //Unit test
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
+    implementation(libs.androidx.paging)
 
     tasks.withType<Test> {
         useJUnitPlatform()

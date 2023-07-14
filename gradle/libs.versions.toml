@@ -50,6 +50,9 @@ coroutines-test = "1.6.4"
 #arrow
 arrow = "1.2.0-RC"
 
+#paging
+paging = "3.1.1"
+
 [libraries]
 #kotlin
 jetbrains = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin-jetbrains" }
@@ -75,6 +78,10 @@ androidx-compose-navigation = { module = "androidx.navigation:navigation-compose
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+
+#paging
+androidx-paging = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "compose" }
 
 #room
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

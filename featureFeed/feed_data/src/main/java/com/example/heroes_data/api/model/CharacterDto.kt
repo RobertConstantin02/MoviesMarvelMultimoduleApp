@@ -1,4 +1,4 @@
-package com.example.heroes_data.model
+package com.example.heroes_data.api.model
 
 import com.google.gson.annotations.SerializedName
 
@@ -45,9 +45,6 @@ data class CharacterDto(
     val url: String?,
     @field:SerializedName("status")
     val status: String?,
-    @Transient
-    @field:SerializedName("isFavorite")
-    val isFavorite: Boolean?,
 )
 
 data class OriginDto(
