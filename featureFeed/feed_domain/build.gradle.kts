@@ -16,12 +16,13 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-
+    implementation(project(":toplevel:resources"))
     libs.bundles.apply {
         implementation(hilt)
         implementation(coroutines)
     }
     kapt(libs.hilt.compiler)
+    implementation(libs.androidx.paging)
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
 

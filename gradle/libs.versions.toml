@@ -30,7 +30,6 @@ coil = "2.2.2"
 
 #network
 retrofit = "2.9.0"
-arrow = "1.0.1"
 okhttp = "4.9.0"
 corutines = "1.6.4"
 gson = "2.10.1"
@@ -47,6 +46,12 @@ junit = "4.13.2"
 junit-ext = "1.1.5"
 mockk = "1.13.5"
 coroutines-test = "1.6.4"
+
+#arrow
+arrow = "1.2.0-RC"
+
+#paging
+paging = "3.1.1"
 
 [libraries]
 #kotlin
@@ -73,6 +78,10 @@ androidx-compose-navigation = { module = "androidx.navigation:navigation-compose
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+
+#paging
+androidx-paging = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "compose" }
 
 #room
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
@@ -106,6 +115,12 @@ junit-ext = { module = "androidx.test.ext:junit", version.ref = "junit-ext" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-test" }
 
+#arrow
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+arrow-syntax = { module = "io.arrow-kt:arrow-syntax", version.ref = "arrow" }
+arrow-kapt = { module = "io.arrow-kt:arrow-meta", version.ref = "arrow" }
+arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+
 
 [bundles]
 compose = ["androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-ui-tooling-preview", "androidx-constraint", "androidx-compose-material3", "androidx-compose-material3-windowSizeClass" ,"androidx-compose-runtime", "androidx-compose-activity", "androidx-compose-boom", "androidx-compose-navigation", "coil-compose"]
@@ -116,3 +131,4 @@ lifecycle = ["androidx-lifecycle-livedata-ktx", "androidx-lifecycle-runtimeCompo
 kotlin = ["jetbrains"]
 network = ["retrofit", "retrofit-converter-gson", "okhttp3", "okhttp3-logging-interceptor"]
 test = ["junit", "junit-ext", "mockk", "coroutines-test"]
+arrow = [ "arrow-core", "arrow-syntax", "arrow-kapt" ,"arrow-fx-coroutines" ]
