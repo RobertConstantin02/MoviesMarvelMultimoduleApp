@@ -6,7 +6,8 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+const val PAGE_PARAMETER = "page"
 interface RickAndMortyService {
     @GET(GET_ALL_CHARACTERS)
-    suspend fun getAllCharacters(@Query("page") page: Int): Response<FeedCharacterDto>
+    suspend fun getAllCharacters(@Query(PAGE_PARAMETER) page: Int): Response<FeedCharacterDto>
 }

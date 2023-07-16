@@ -18,6 +18,11 @@ interface ICharacterDao {
     @Query("SELECT * FROM character_entity")
     fun getAllCharacters(): PagingSource<Int, CharacterEntity>
 
+    @Query("SELECT * FROM character_entity WHERE id = :characterId")
+    fun getCharacterById(characterId: Int): CharacterEntity?
+
+
+
 
 
 }

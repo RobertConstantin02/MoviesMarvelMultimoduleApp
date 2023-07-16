@@ -8,5 +8,5 @@ data class PagingKeys(
     @PrimaryKey
     val itemId: Long,
     val prevKey: String?,
-    val nextKey: String,
+    val nextKey: String?,
 )

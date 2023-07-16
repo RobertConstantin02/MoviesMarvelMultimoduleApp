@@ -6,5 +6,9 @@ import com.example.database.entities.PagingKeys
 
 interface ICharacterLocalDatasource {
     fun getAllCharacters(): PagingSource<Int, CharacterEntity>
+
+    fun getCharacterById(characterId: Int): CharacterEntity?
     suspend fun getPagingKeysById(id: Long): PagingKeys?
+    suspend fun insertPagingKeys(keys: List<PagingKeys>)
+    suspend fun insertCharacters(characters : List<CharacterEntity>)
 }

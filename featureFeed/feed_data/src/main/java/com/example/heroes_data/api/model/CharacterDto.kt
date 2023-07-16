@@ -45,6 +45,8 @@ data class CharacterDto(
     val url: String?,
     @field:SerializedName("status")
     val status: String?,
+    @Transient
+    val isFavorite: Boolean = false
 )
 
 data class OriginDto(
