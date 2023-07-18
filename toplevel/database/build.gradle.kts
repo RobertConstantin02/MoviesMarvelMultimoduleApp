@@ -24,6 +24,7 @@ dependencies {
     }
     kapt(libs.hilt.compiler)
     kapt(libs.room.compiler)
+    implementation(libs.gson)
     //Unit test
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)

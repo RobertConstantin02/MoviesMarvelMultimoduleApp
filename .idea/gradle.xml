@@ -25,6 +25,7 @@
             <option value="$PROJECT_DIR$/toplevel/navigationlogic" />
             <option value="$PROJECT_DIR$/toplevel/network" />
             <option value="$PROJECT_DIR$/toplevel/resources" />
+            <option value="$PROJECT_DIR$/toplevel/usecase" />
           </set>
         </option>
       </GradleProjectSettings>

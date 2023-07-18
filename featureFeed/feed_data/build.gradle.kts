@@ -27,6 +27,7 @@ dependencies {
         implementation(network)
         implementation(coroutines)
         implementation(cache)
+        implementation(arrow)
     }
     kapt(libs.hilt.compiler)
     kapt(libs.room.compiler)

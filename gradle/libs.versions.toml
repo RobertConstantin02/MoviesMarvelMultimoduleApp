@@ -23,7 +23,7 @@ androidx-compose-boom = "2022.10.00"
 compose-navigation = "2.5.1"
 
 #room
-room = "2.5.1"
+room = "2.5.2"
 
 #image
 coil = "2.2.2"
@@ -48,7 +48,7 @@ mockk = "1.13.5"
 coroutines-test = "1.6.4"
 
 #arrow
-arrow = "1.2.0-RC"
+arrow = "1.2.0"
 
 #paging
 paging = "3.1.1"
@@ -87,6 +87,7 @@ androidx-paging-compose = { module = "androidx.paging:paging-compose", version.r
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 
 #retrofit
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
@@ -117,18 +118,16 @@ coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 
 #arrow
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
-arrow-syntax = { module = "io.arrow-kt:arrow-syntax", version.ref = "arrow" }
-arrow-kapt = { module = "io.arrow-kt:arrow-meta", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
 
 
 [bundles]
 compose = ["androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-ui-tooling-preview", "androidx-constraint", "androidx-compose-material3", "androidx-compose-material3-windowSizeClass" ,"androidx-compose-runtime", "androidx-compose-activity", "androidx-compose-boom", "androidx-compose-navigation", "coil-compose"]
-cache = ["room-runtime", "room-ktx"]
+cache = ["room-runtime", "room-ktx", "room-paging"]
 coroutines = ["coroutines-core", "coroutines-android"]
 hilt = ["hilt-android", "hilt-android-testing"]
 lifecycle = ["androidx-lifecycle-livedata-ktx", "androidx-lifecycle-runtimeCompose", "androidx-lifecycle-viewModelCompose"]
 kotlin = ["jetbrains"]
 network = ["retrofit", "retrofit-converter-gson", "okhttp3", "okhttp3-logging-interceptor"]
 test = ["junit", "junit-ext", "mockk", "coroutines-test"]
-arrow = [ "arrow-core", "arrow-syntax", "arrow-kapt" ,"arrow-fx-coroutines" ]
+arrow = [ "arrow-core","arrow-fx-coroutines" ]

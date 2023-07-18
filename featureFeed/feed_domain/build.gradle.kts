@@ -17,6 +17,7 @@ kapt {
 }
 dependencies {
     implementation(project(":toplevel:resources"))
+    implementation(project(":toplevel:usecase"))
     libs.bundles.apply {
         implementation(hilt)
         implementation(coroutines)

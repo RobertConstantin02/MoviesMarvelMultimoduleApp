@@ -2,8 +2,9 @@ package com.example.database.di
 
 import com.example.database.RickMortyDatabase
 import com.example.database.dao.ICharacterDao
-import dagger.Binds
+import com.example.database.dao.IPagingKeysDao
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -12,8 +13,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DaoModule {
 
+    @Provides
     @Singleton
-    @Binds
-    fun provideCharacterDao(database: RickMortyDatabase): ICharacterDao =
-        database.characterDao()
+    fun provideCharacterDao(database: RickMortyDatabase): ICharacterDao = database.characterDao()
+
+    @Provides
+    @Singleton
+    fun providePagingKeysDao(database: RickMortyDatabase): IPagingKeysDao = database.pagingKeysDao()
 }

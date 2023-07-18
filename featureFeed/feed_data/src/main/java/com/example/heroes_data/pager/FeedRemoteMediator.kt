@@ -11,7 +11,7 @@ import com.example.heroes_data.api.datasource.ICharacterRemoteDataSource
 import com.example.heroes_data.api.model.FeedCharacterDto
 import com.example.heroes_data.db.detasource.ICharacterLocalDatasource
 import com.example.heroes_data.mapper.DtoToEntityCharacterMapper.toCharactersEntity
-import com.example.heroes_data.network.PAGE_PARAMETER
+import com.example.heroes_data.api.network.PAGE_PARAMETER
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
@@ -42,11 +42,12 @@ class FeedRemoteMediator @Inject constructor(
 
     private suspend fun handleCacheSystem(page: Int?): MediatorResult {
         return try {
-            val response = page?.let { remoteDataSource.getAllCharacters(it).getOrNull() }
-                ?.also { response ->
-                    insertPagingKeys(response)
-                    insertCharacters(response)
-                }
+
+        val response = page?.let { remoteDataSource.getAllCharacters(it).getOrNull() }
+            ?.also { response ->
+                insertPagingKeys(response)
+                insertCharacters(response)
+            }
             MediatorResult.Success(endOfPaginationReached = response?.results?.isEmpty() == true)
         } catch (e: Exception) {
             MediatorResult.Error(e)

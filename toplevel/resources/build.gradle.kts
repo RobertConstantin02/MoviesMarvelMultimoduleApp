@@ -19,6 +19,7 @@ dependencies {
     libs.bundles.apply {
         implementation(arrow)
     }
+
     implementation(libs.bundles.network)
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)

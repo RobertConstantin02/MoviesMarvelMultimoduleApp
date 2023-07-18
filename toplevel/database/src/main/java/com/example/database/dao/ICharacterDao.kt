@@ -13,7 +13,7 @@ interface ICharacterDao {
     suspend fun insertCharacters(characters: List<CharacterEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCharacter(character: ICharacterDao)
+    suspend fun insertCharacter(character: CharacterEntity)
 
     @Query("SELECT * FROM character_entity")
     fun getAllCharacters(): PagingSource<Int, CharacterEntity>
