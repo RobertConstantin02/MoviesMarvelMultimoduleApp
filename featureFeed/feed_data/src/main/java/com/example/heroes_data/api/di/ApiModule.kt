@@ -3,6 +3,7 @@ package com.example.heroes_data.api.di
 import com.example.heroes_data.api.datasource.CharacterRemoteDataSource
 import com.example.heroes_data.api.datasource.ICharacterRemoteDataSource
 import com.example.heroes_data.api.network.RickAndMortyService
+import com.example.network.NetworkModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -11,7 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
-@Module(includes = [ApiModule.Declarations::class])
+@Module(includes = [ApiModule.Declarations::class, NetworkModule::class]) //be careful because NetworkModule is in an other module so we have to include it.
 @InstallIn(SingletonComponent::class)
 object ApiModule {
 

@@ -1,4 +1,4 @@
-package com.example.heroes_presentation.heroListScreen
+package com.example.heroes_presentation.feed_screen
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder

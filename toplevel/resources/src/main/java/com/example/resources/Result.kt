@@ -27,12 +27,11 @@ import java.io.IOException
 //        }
 //}
 
-interface Error
-typealias Result <T> = Either<Error, T>
-sealed class RemoteError: Error {
+typealias Result <T> = Either<Throwable, T>
+sealed class RemoteError: Throwable() {
     object Connectivity: RemoteError()
     data class Server(val codeError: Int? = null): RemoteError()
-    data class Unknown(val message: String? = null): RemoteError()
+    data class Unknown(override val message: String? = null): RemoteError()
 }
 
 fun Exception.toError(): RemoteError =

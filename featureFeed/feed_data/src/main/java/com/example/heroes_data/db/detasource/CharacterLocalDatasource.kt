@@ -15,7 +15,7 @@ class CharacterLocalDatasource @Inject constructor(
     override fun getAllCharacters(): PagingSource<Int, CharacterEntity> =
         characterDao.getAllCharacters()
 
-    override fun getCharacterById(characterId: Int): CharacterEntity? = characterDao.getCharacterById(characterId)
+    override suspend fun getCharacterById(characterId: Int): CharacterEntity? = characterDao.getCharacterById(characterId)
 
     override suspend fun getPagingKeysById(id: Long): PagingKeys? = pagingKeysDao.getPagingKeysById(id)
 

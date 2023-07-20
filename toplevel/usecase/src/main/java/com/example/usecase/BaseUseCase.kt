@@ -1,6 +1,5 @@
 package com.example.usecase
 
-import com.example.resources.Error
 import com.example.resources.Result
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +25,7 @@ interface UseCaseRemote<Input, Output> {
         input: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         success: (Output) -> Unit,
-        error: (error: Error) -> Unit = {}
+        error: (error: Throwable) -> Unit = {}
     ) {
         CoroutineScope(dispatcher).apply {
             val job = async { run(input) }
@@ -45,13 +44,14 @@ interface UseCaseLocal<Input, Output> {
 
     operator fun invoke(
         input: Input,
+        coroutineScope: CoroutineScope? = null,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         success: (Output) -> Unit,
         error: (error: Error) -> Unit = {}
     ) {
-        CoroutineScope(dispatcher).apply {
-            val job = async { run(input) }
-            launch {
+        coroutineScope?.let { scope ->
+            val job = scope.async(dispatcher) { run(input) }
+            scope.launch {
                 job.await().catch { error(it) }.collectLatest { output -> success(output) }
             }
         }

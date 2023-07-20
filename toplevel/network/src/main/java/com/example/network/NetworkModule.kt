@@ -38,7 +38,7 @@ object NetworkModule {
     @Singleton
     fun provideService(client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://rickandmortyapi.com/api/")// why buildconfig from this module does not appear?
+            .baseUrl("https://rickandmortyapi.com")// why buildconfig from this module does not appear?
             .client(client)
             .addConverterFactory(
                 GsonConverterFactory.create()

@@ -37,22 +37,20 @@ class FeedRemoteMediator @Inject constructor(
                 Uri.parse(nextKey).getQueryParameter(PAGE_PARAMETER)?.toInt()
             }
         }
-       return handleCacheSystem(page)
+        return handleCacheSystem(page ?: 1) //test ?: 1
     }
 
-    private suspend fun handleCacheSystem(page: Int?): MediatorResult {
-        return try {
-
-        val response = page?.let { remoteDataSource.getAllCharacters(it).getOrNull() }
-            ?.also { response ->
+    private suspend fun handleCacheSystem(page: Int): MediatorResult =
+        remoteDataSource.getAllCharacters(page).fold(
+            ifLeft = { error -> return@fold MediatorResult.Error(error) },
+            ifRight = {response ->
                 insertPagingKeys(response)
                 insertCharacters(response)
+                return@fold MediatorResult.Success(endOfPaginationReached = response.results?.isEmpty() == true)
             }
-            MediatorResult.Success(endOfPaginationReached = response?.results?.isEmpty() == true)
-        } catch (e: Exception) {
-            MediatorResult.Error(e)
-        }
-    }
+        )
+
+
 
     private suspend fun insertPagingKeys(response: FeedCharacterDto) = with(response) {
         results?.filterNotNull()?.mapNotNull { character ->

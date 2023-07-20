@@ -12,7 +12,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.favorites_presentation.heroFavoritesScreen.navigateToHeroFavoritesScreen
-import com.example.heroes_presentation.heroListScreen.navigateToHeroListScreen
+import com.example.heroes_presentation.feed_screen.navigateToHeroListScreen
 import com.example.udemycourseapp.ui.Route.rickMortyFavoritesScreenRoute
 import com.example.udemycourseapp.ui.Route.rickMortyFeedScreenRoute
 import com.example.udemycourseapp.navigation.RickMortiTopLevelDestination

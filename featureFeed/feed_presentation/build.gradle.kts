@@ -24,6 +24,7 @@ kapt {
 dependencies {
     implementation(project(":toplevel:navigationlogic"))
     implementation(project(":featureFeed:feed_domain"))
+    implementation(project(":toplevel:resources"))
     libs.bundles.apply {
         implementation(compose)
         implementation(hilt)
@@ -32,6 +33,9 @@ dependencies {
     }
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.paging)
+    implementation(libs.androidx.paging.common)
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
 }

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.example.favorites_presentation.heroFavoritesScreen.favoritesGraph
-import com.example.heroes_presentation.heroListScreen.feedGraph
+import com.example.heroes_presentation.feed_screen.feedGraph
 import com.example.navigationlogic.NavigationCommand
 import com.example.udemycourseapp.ui.MarvelAppState
 import com.example.udemycourseapp.ui.RickMortyAppFeature

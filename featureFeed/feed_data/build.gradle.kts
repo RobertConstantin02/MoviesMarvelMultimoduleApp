@@ -22,6 +22,7 @@ dependencies {
     api(project(":featureFeed:feed_domain"))
     implementation(project(":toplevel:resources"))
     implementation(project(":toplevel:database"))
+    implementation(project(":toplevel:network"))
     libs.bundles.apply {
         implementation(hilt)
         implementation(network)
