@@ -14,18 +14,28 @@ dependencyResolutionManagement {
 }
 rootProject.name = "UdemyCourseApp"
 include ':app'
-include ':featureFeed'
-include ':featureFeed:feed_data'
-include ':featureFeed:feed_domain'
-include ':featureFeed:feed_presentation'
 include ':toplevel'
 include ':toplevel:designsystem'
 include ':toplevel:navigationlogic'
-include ':featureFavorites'
-include ':featureFavorites:favorites_data'
-include ':featureFavorites:favorites_domain'
-include ':featureFavorites:favorites_presentation'
 include ':toplevel:resources'
-include ':toplevel:database'
-include ':toplevel:network'
-include ':toplevel:usecase'
+////////////////////////////////
+
+include ':data'
+include ':data:remote'
+include ':data:api'
+include ':data:database'
+include ':data:data_mapper'
+include ':data:paging'
+include ':data:data_repository'
+
+include ':domain'
+include ':domain:domain_model'
+include ':domain:domain_repository'
+include ':domain:usecase'
+
+include ':presentation'
+include ':presentation:presentation_mapper'
+include ':presentation:presentation_model'
+include ':presentation:feature_feed'
+
+include ':presentation:common'

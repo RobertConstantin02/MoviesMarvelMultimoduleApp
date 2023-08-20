@@ -11,11 +11,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.example.favorites_presentation.heroFavoritesScreen.navigateToHeroFavoritesScreen
-import com.example.heroes_presentation.heroListScreen.navigateToHeroListScreen
+import com.example.feature_feed.navigateToHeroListScreen
+import com.example.udemycourseapp.navigation.RickMortiTopLevelDestination
 import com.example.udemycourseapp.ui.Route.rickMortyFavoritesScreenRoute
 import com.example.udemycourseapp.ui.Route.rickMortyFeedScreenRoute
-import com.example.udemycourseapp.navigation.RickMortiTopLevelDestination
 
 
 @Composable
@@ -69,7 +68,7 @@ class MarvelAppState(
                 RickMortiTopLevelDestination.RICK_MORTY_FEED ->
                     navController.navigateToHeroListScreen(navOptions, rickMortyFeedScreenRoute)
                 RickMortiTopLevelDestination.FAVORITES ->
-                    navController.navigateToHeroFavoritesScreen(navOptions, rickMortyFavoritesScreenRoute)
+                    navController.navigateToHeroListScreen(navOptions, rickMortyFeedScreenRoute) // TODO: fix
             }
         }
     }

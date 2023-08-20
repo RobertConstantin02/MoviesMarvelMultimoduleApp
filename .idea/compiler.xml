@@ -5,6 +5,8 @@
       <module name="UdemyCourseApp.heroes.heroes_data" target="17" />
       <module name="UdemyCourseApp.heroes.heroes_domain" target="17" />
       <module name="UdemyCourseApp.heroes.heroes_presentation" target="17" />
+      <module name="UdemyCourseApp.toplevel.network" target="17" />
+      <module name="UdemyCourseApp.toplevel.usecase" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

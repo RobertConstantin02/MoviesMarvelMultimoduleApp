@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Buttons Text-->
+    <string name="save">Save</string>
+    <string name="unsaved">Unsaved</string>
+    <!-- Error Messages-->
+    <string name="list_try_again">Ups!!! Something when wrong while fetching data</string>
+    <!-- Loading Messages-->
+    <string name="character_list_loading">Characters are loading</string>
+
+</resources>

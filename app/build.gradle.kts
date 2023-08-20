@@ -40,12 +40,22 @@ android {
 dependencies {
     implementation(project(":toplevel:navigationlogic"))
     implementation(project(":toplevel:designsystem"))
-    implementation(project(":featureFeed:feed_data"))
-    implementation(project(":featureFeed:feed_domain"))
-    implementation(project(":featureFeed:feed_presentation"))
-    implementation(project(":featureFavorites:favorites_data"))
-    implementation(project(":featureFavorites:favorites_domain"))
-    implementation(project(":featureFavorites:favorites_presentation"))
+    implementation(project(":toplevel:resources"))
+
+    implementation(project(":data:remote"))
+    implementation(project(":data:api"))
+    implementation(project(":data:database"))
+    implementation(project(":data:data_mapper"))
+    implementation(project(":data:paging"))
+    implementation(project(":data:data_repository"))
+
+    implementation(project(":domain:domain_model"))
+    implementation(project(":domain:domain_repository"))
+    implementation(project(":domain:usecase"))
+
+    implementation(project(":presentation:presentation_mapper"))
+    implementation(project(":presentation:presentation_model"))
+    implementation(project(":presentation:feature_feed"))
 
     libs.bundles.apply {
         implementation(compose)

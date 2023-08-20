@@ -1,0 +1,20 @@
+package com.example.di.database
+
+import android.content.Context
+import com.example.database.RickMortyDatabase
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+//@Module
+//@InstallIn(SingletonComponent::class)
+//object DbModule {
+//    @Provides
+//    @Singleton
+//    fun provideRickMortyDatabase(
+//        @ApplicationContext context: Context,
+//    ): RickMortyDatabase = RickMortyDatabase.create(context)
+//}
