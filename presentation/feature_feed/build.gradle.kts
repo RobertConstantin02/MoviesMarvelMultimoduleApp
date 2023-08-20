@@ -27,6 +27,7 @@ dependencies {
     implementation(project(":toplevel:resources"))
     implementation(project(":presentation:presentation_model"))
     implementation(project(":presentation:presentation_mapper"))
+    implementation(project(":presentation:common"))
     implementation(project(":domain:domain_model"))
     implementation(project(":domain:usecase"))
 

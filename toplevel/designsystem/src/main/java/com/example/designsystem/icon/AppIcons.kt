@@ -17,6 +17,9 @@ object AppIcons {
     val heroesListBottomIconBorder = Icons.Outlined.List
     val favoriteBottomIconFilled = Icons.Rounded.Favorite
     val favoriteBottomIconOutlined = Icons.Filled.Favorite
+    /**Button Icons**/
+    val saveToggleButtonFilled = Icons.Rounded.Favorite
+    val saveToggleButtonBorder = Icons.Rounded.Favorite
 }
 
 /**

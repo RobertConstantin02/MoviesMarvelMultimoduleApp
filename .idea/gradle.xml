@@ -23,6 +23,7 @@
             <option value="$PROJECT_DIR$/domain/domain_repository" />
             <option value="$PROJECT_DIR$/domain/usecase" />
             <option value="$PROJECT_DIR$/presentation" />
+            <option value="$PROJECT_DIR$/presentation/common" />
             <option value="$PROJECT_DIR$/presentation/feature_feed" />
             <option value="$PROJECT_DIR$/presentation/presentation_mapper" />
             <option value="$PROJECT_DIR$/presentation/presentation_model" />
