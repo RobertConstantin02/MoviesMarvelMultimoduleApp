@@ -11,21 +11,25 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/featureFavorites" />
-            <option value="$PROJECT_DIR$/featureFavorites/favorites_data" />
-            <option value="$PROJECT_DIR$/featureFavorites/favorites_domain" />
-            <option value="$PROJECT_DIR$/featureFavorites/favorites_presentation" />
-            <option value="$PROJECT_DIR$/featureFeed" />
-            <option value="$PROJECT_DIR$/featureFeed/feed_data" />
-            <option value="$PROJECT_DIR$/featureFeed/feed_domain" />
-            <option value="$PROJECT_DIR$/featureFeed/feed_presentation" />
+            <option value="$PROJECT_DIR$/data" />
+            <option value="$PROJECT_DIR$/data/api" />
+            <option value="$PROJECT_DIR$/data/data_mapper" />
+            <option value="$PROJECT_DIR$/data/data_repository" />
+            <option value="$PROJECT_DIR$/data/database" />
+            <option value="$PROJECT_DIR$/data/paging" />
+            <option value="$PROJECT_DIR$/data/remote" />
+            <option value="$PROJECT_DIR$/domain" />
+            <option value="$PROJECT_DIR$/domain/domain_model" />
+            <option value="$PROJECT_DIR$/domain/domain_repository" />
+            <option value="$PROJECT_DIR$/domain/usecase" />
+            <option value="$PROJECT_DIR$/presentation" />
+            <option value="$PROJECT_DIR$/presentation/feature_feed" />
+            <option value="$PROJECT_DIR$/presentation/presentation_mapper" />
+            <option value="$PROJECT_DIR$/presentation/presentation_model" />
             <option value="$PROJECT_DIR$/toplevel" />
-            <option value="$PROJECT_DIR$/toplevel/database" />
             <option value="$PROJECT_DIR$/toplevel/designsystem" />
             <option value="$PROJECT_DIR$/toplevel/navigationlogic" />
-            <option value="$PROJECT_DIR$/toplevel/network" />
             <option value="$PROJECT_DIR$/toplevel/resources" />
-            <option value="$PROJECT_DIR$/toplevel/usecase" />
           </set>
         </option>
       </GradleProjectSettings>
