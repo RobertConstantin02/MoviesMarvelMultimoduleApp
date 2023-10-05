@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":toplevel:resources"))
     implementation(project(":domain:domain_model"))
     implementation(libs.bundles.hilt)
+    implementation(libs.bundles.arrow)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.paging)
 }

@@ -39,3 +39,4 @@ include ':presentation:presentation_model'
 include ':presentation:feature_feed'
 
 include ':presentation:common'
+include ':data:preferences'

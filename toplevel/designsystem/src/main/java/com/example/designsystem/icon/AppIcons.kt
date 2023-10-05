@@ -28,4 +28,9 @@ object AppIcons {
 sealed class Icon {
     data class ImageVectorIcon(val imageVector: ImageVector): Icon()
     data class DrawableResourceIcon(@DrawableRes val id: Int): Icon()
+
+//    class ImageUrl(url: String?) {
+//
+//        val value = if (url.isNullOrEmpty()) null else PATH_IMAGE.plus(url)
+//    }
 }

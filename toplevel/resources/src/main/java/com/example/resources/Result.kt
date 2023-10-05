@@ -34,6 +34,14 @@ sealed class RemoteError: Throwable() {
     data class Unknown(override val message: String? = null): RemoteError()
 }
 
+sealed class DataBaseError: Exception() {
+    object EmptyResult: DataBaseError()
+    object ItemNotFound: DataBaseError()
+    object InsertionError: DataBaseError()
+    object DeletionError: DataBaseError()
+}
+
+
 fun Exception.toError(): RemoteError =
     when(this) {
         is IOException -> RemoteError.Connectivity

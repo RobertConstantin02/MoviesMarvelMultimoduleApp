@@ -20,13 +20,14 @@ kapt {
 dependencies {
 
 //    api(project(":featureFeed:feed_domain"))
-//    implementation(project(":toplevel:resources"))
+    implementation(project(":toplevel:resources"))
 //    implementation(project(":toplevel:database"))
 //    implementation(project(":toplevel:network"))
     libs.bundles.apply {
         implementation(hilt)
         implementation(coroutines)
         implementation(cache)
+        implementation(arrow)
     }
     implementation(libs.gson)
     kapt(libs.hilt.compiler)

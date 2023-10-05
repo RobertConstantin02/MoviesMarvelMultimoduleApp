@@ -1,8 +1,9 @@
 package com.example.remote.character.datasource
 
+import com.example.api.model.character.CharacterDto
 import com.example.api.model.character.FeedCharacterDto
 import com.example.api.network.RickAndMortyService
-import com.example.remote.character.util.apiCall
+import com.example.remote.util.apiCall
 import com.example.resources.Result
 import javax.inject.Inject
 
@@ -12,4 +13,10 @@ class CharacterRemoteDataSource @Inject constructor(
 
     override suspend fun getAllCharacters(page: Int): Result<FeedCharacterDto> =
         apiCall { remoteService.getAllCharacters(page) }
+
+    override suspend fun getCharacterById(characterId: Int): Result<CharacterDto> =
+        apiCall { remoteService.getCharacter(characterId) }
+
+    override suspend fun getCharactersByIds(characterIds: List<Int>): Result<List<CharacterDto>?> =
+        apiCall { remoteService.getCharactersByIds(characterIds) }
 }

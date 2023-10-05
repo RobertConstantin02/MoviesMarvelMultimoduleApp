@@ -23,10 +23,4 @@ object CharacterApiModule {
         @Binds
         fun bindsRemoteCharactersDataSource(implementation: CharacterRemoteDataSource): ICharacterRemoteDataSource
     }
-
-    @Provides
-    @Singleton
-    fun provideRickMortyService(retrofit: Retrofit): RickAndMortyService =
-        retrofit.create(RickAndMortyService::class.java)
-
 }

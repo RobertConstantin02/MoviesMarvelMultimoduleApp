@@ -17,6 +17,7 @@
             <option value="$PROJECT_DIR$/data/data_repository" />
             <option value="$PROJECT_DIR$/data/database" />
             <option value="$PROJECT_DIR$/data/paging" />
+            <option value="$PROJECT_DIR$/data/preferences" />
             <option value="$PROJECT_DIR$/data/remote" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain/domain_model" />
