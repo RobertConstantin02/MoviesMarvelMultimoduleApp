@@ -6,7 +6,7 @@ import com.example.api.model.location.OriginDto
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.LocationEntity
 import com.example.database.entities.OriginEntity
-import com.example.domain_model.character.ICharacterBOBo
+import com.example.domain_model.character.CharacterBo
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
 import com.example.domain_model.common.ImageUrlBo
@@ -36,7 +36,8 @@ object DtoToCharacterEntityMapper {
 
 object EntityToCharacterBoMapper {
 
-    fun CharacterEntity.toCharacterBo() = ICharacterBOBo(id, ImageUrlBo(image), name, isFavorite)
+    fun CharacterEntity.toCharacterBo() =
+        CharacterBo(id, location.toLocationBo()?.locationId ,ImageUrlBo(image), name, isFavorite)
 
     fun CharacterEntity.toCharacterDetailBo() = CharacterDetailBo(
         id,

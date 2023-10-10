@@ -30,6 +30,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     @QLocationRepository private val locationRepository: ILocationRepository,
     @QEpisodesRepository private val episodesRepository: IEpisodeRepository,
 ) : IGetCharacterDetailsUseCase {
+
     override suspend fun run(input: Params): Flow<Result<CharacterPresentationScreenBO>> {
 
 

@@ -35,7 +35,7 @@ import com.example.presentation_model.CharacterVo
 @Composable
 fun FeedCardItem(
     item: () -> CharacterVo,
-    onItemClick: (itemId: Int)-> Unit,
+    onItemClick: (itemId: Int, locationId: Int?)-> Unit,
     onToggleSave: (Boolean) -> Unit,
     modifier: Modifier
 ) {
@@ -50,7 +50,7 @@ fun FeedCardItem(
                 shape = RoundedCornerShape(dimens.spaceMedium),
                 spotColor = MaterialTheme.colorScheme.onSurface
             )
-            .clickable { onItemClick(item().id) },
+            .clickable { onItemClick(item().id, item().locationId) },
         shape = RoundedCornerShape(dimens.spaceSmall),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primary
@@ -88,7 +88,7 @@ fun FeedCardItem(
                 Row(modifier = modifier.fillMaxWidth()) {
                     Text(
                         modifier = modifier.weight(0.5f),
-                        text = item().name,
+                        text = item().name.orEmpty(),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Start,
                         maxLines = 2,

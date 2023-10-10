@@ -7,6 +7,4 @@ data class LocationBo(
     val name: String?
 ) {
     val locationId =  Uri.parse(url).lastPathSegment?.toInt()
-
-
 }

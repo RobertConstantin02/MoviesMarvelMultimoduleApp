@@ -14,6 +14,6 @@ object Route {
 
 enum class RickMortyAppFeature(override val route: String): Feature {
     RICK_MORTY_FEED(rickMortyFeedScreenRoute),
-    RICK_MORTY_FEED_DETAILS(rickMortyFeedScreenDetailsRoute),
+    //RICK_MORTY_FEED_DETAILS(rickMortyFeedScreenDetailsRoute),
     FAVORITES(rickMortyFavoritesScreenRoute)
 }

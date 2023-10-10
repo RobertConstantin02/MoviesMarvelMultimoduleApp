@@ -21,12 +21,8 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-
-
     implementation(project(":toplevel:designsystem"))
     implementation(project(":presentation:presentation_model"))
-
-
     libs.bundles.apply {
         implementation(compose)
     }

@@ -35,7 +35,7 @@ class LocationRepository @Inject constructor(
                     }
                 }
             ) { extendedLocationEntity ->
-                extendedLocationEntity.toExtendedLocationBo().right()
+                emit(extendedLocationEntity.toExtendedLocationBo().right())
             }
         }
 

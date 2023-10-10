@@ -26,7 +26,7 @@ import com.example.presentation_model.CharacterVo
 @Composable
 fun HeroListScreen(
     viewModel: FeedViewModel = hiltViewModel(),
-    onItemClick: (itemId: Int) -> Unit
+    onItemClick: (itemId: Int, locationId: Int?) -> Unit
 ) {
 
     val lazyPagingItems: LazyPagingItems<CharacterVo> =
@@ -51,7 +51,7 @@ fun HeroListScreen(
 @Composable
 fun FeedScreenContent(
     items: () -> LazyPagingItems<CharacterVo>,
-    onItemClick: (itemId: Int) -> Unit,
+    onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onToggleSave: (Boolean) -> Unit,
     addToFavorites: (CharacterVo) -> Unit, ///???
     onRefresh: () -> Unit,
@@ -82,7 +82,7 @@ fun FeedScreenContent(
 private fun FeedScreenSuccessContent(
     state: () -> LazyGridState,
     items: () -> LazyPagingItems<CharacterVo>,
-    onItemClick: (itemId: Int) -> Unit,
+    onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onToggleSave: (Boolean) -> Unit,
     modifier: Modifier,
 ) {

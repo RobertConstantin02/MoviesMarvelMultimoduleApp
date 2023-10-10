@@ -5,8 +5,16 @@
     <string name="save">Save</string>
     <string name="unsaved">Unsaved</string>
     <!-- Error Messages-->
-    <string name="list_try_again">Ups!!! Something when wrong while fetching data</string>
+    <string name="list_try_again">Ups!!! Something when wrong while fetching characters</string>
+    <string name="detail_try_again">Ups!!! Something when wrong while fetching character details</string>
     <!-- Loading Messages-->
     <string name="character_list_loading">Characters are loading</string>
+    <string name="character_detail_loading">Characters detail loading</string>
+    <!-- Transition -->
+    <string name="transitionLabel">transition</string>
+    <string name="background_transition_label">bgColorTransition</string>
+    <string name="rounded_corners_label">cardRoundedCorners</string>
+    <!-- Iamage Content Description -->
+    <string name="character_detail_image">character detail image</string>
 
 </resources>

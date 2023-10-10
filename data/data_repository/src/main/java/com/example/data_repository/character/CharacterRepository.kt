@@ -14,7 +14,7 @@ import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterDetailBo
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterNeighborBo
 import com.example.data_mapper.toCharacterNeighborBo
 import com.example.database.detasource.character.ICharacterLocalDatasource
-import com.example.domain_model.character.ICharacterBOBo
+import com.example.domain_model.character.CharacterBo
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
 import com.example.domain_repository.character.ICharacterRepository
@@ -38,7 +38,7 @@ class CharacterRepository @Inject constructor(
 ) : ICharacterRepository {
 
     @OptIn(ExperimentalPagingApi::class, ExperimentalCoroutinesApi::class)
-    override fun getAllCharacters(): Flow<PagingData<ICharacterBOBo>> =
+    override fun getAllCharacters(): Flow<PagingData<CharacterBo>> =
         Pager(
             config = PagingConfig(10),
             remoteMediator = FeedRemoteMediator(localDatabaseDatasource, remoteDataSource),
