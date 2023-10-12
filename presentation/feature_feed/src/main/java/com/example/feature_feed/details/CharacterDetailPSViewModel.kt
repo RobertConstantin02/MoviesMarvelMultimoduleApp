@@ -11,7 +11,7 @@ import com.example.resources.DataSourceError
 import com.example.resources.RemoteError
 import com.example.resources.UiText
 import com.example.usecase.character.IGetCharacterDetailsUseCase
-import com.example.usecase.character.Params
+import com.example.usecase.character.DetailParams
 import com.example.usecase.di.GetCharacterDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +35,7 @@ class DetailViewModel @Inject constructor(
         val locationId = savedStateHandle.get<String>(LOCATION_ID)
         // TODO: some character from list have null locartionId or characterId 
         getCharacterDetails.invoke(
-            Params(characterId?.toInt() ?: 0, locationId?.toInt() ?: 0), //2, 20
+            DetailParams(characterId?.toInt() ?: 0, locationId?.toInt() ?: 0), //2, 20
             Dispatchers.IO,
             viewModelScope,
             error = ::onError,
@@ -96,6 +96,7 @@ class DetailViewModel @Inject constructor(
             is DataBaseError.DeletionError -> getLocalDbErrorMessage(R.string.local_db_deletion_error)
             is DataBaseError.EmptyResult -> getLocalDbErrorMessage(R.string.local_db_empty_result)
             is DataBaseError.ItemNotFound -> getLocalDbErrorMessage(R.string.local_db_item_not_found)
+            is DataBaseError.UpdateError -> getLocalDbErrorMessage(R.string.local_db_item_not_found) //refactor
         }
 
     private fun getLocalDbErrorMessage(resourcesMessage: Int) = CharacterDetailPSState.Error(

@@ -115,4 +115,11 @@ class CharacterRepository @Inject constructor(
             }
 
         }
+
+    override suspend fun updateCharacterIsFavorite(
+        isFavorite: Boolean,
+        characterId: Int
+    ) {
+        localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId)
+    }
 }

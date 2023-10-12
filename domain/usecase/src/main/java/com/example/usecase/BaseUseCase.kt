@@ -21,16 +21,6 @@ interface UseCaseRemote<Input, Output> {
 
     suspend fun run(input: Input): Flow<Result<Output>>
 
-    //maybe with abstract class
-    //var job: Deferred<Flow<Result<Output>>>?
-
-    /**
-     * In the context of coroutines and the Dispatchers.Unconfined dispatcher, the "caller's thread"
-     * refers to the thread from which the coroutine was invoked.
-     * When a coroutine is launched with Dispatchers.Unconfined, it starts executing in the same
-     * thread as the code that called the coroutine. This means that the coroutine runs on the thread
-     * that initiated its execution.
-     */
     operator fun invoke(
         input: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
@@ -38,29 +28,16 @@ interface UseCaseRemote<Input, Output> {
         success: (Output) -> Unit,
         error: (error: DataSourceError) -> Unit = {}
     ) {
-        //viewModelScope
         coroutineScope?.let { scope ->
             val job = scope.async(dispatcher) { run(input) }
             scope.launch(Dispatchers.Main) {
                 //try catch here out
-                job?.await().also { flow ->
-                    flow?.catch { e ->
-                        Log.d("-----> error1", "called")
-                        error(e)
-                    }?.collectLatest {
+                job.await().also { flow ->
+                    flow.catch { e -> error(e)
+                    }.collectLatest {
                         it.fold(
-                            ifLeft = { e ->
-                                Log.d("-----> error2", "called")
-
-                                error(e)
-                            },
-                            ifRight = { output ->
-                                Log.d(
-                                    "-----> output",
-                                    (output as CharacterPresentationScreenBO).toString()
-                                )
-                                success(output)
-                            }
+                            ifLeft = { e -> error(e) },
+                            ifRight = { output -> success(output) }
                         )
                     }
                 }
@@ -69,7 +46,30 @@ interface UseCaseRemote<Input, Output> {
     }
 
     interface Input
-    interface Output
+    interface OutPut
+}
+
+interface UseCaseNoOutput<Input> {
+    suspend fun run(input: Input)
+    operator fun invoke(
+        input: Input,
+        coroutineScope: CoroutineScope? = null,
+        dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
+        success: () -> Unit = {},
+        error: (error: Error) -> Unit = {}
+    ) {
+        coroutineScope?.let { scope ->
+            val job = scope.async(dispatcher) { run(input) }
+            scope.launch {
+                try {
+                    job.await()
+                    success()
+                }catch (e: Exception) { error(e) }
+            }
+        }
+    }
+
+    interface Input
 }
 
 interface UseCaseLocal<Input, Output> {

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import com.example.feature_favorites.favoritesGraph
 import com.example.feature_feed.feedGraph
 import com.example.feature_feed.mainFeedDetailsScreen
 import com.example.navigationlogic.NavigationCommand
@@ -47,14 +48,14 @@ fun RickMortyNavHost(
                 mainFeedDetailsScreen(NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))
             }
         )
-//        favoritesGraph(
-//            command = NavigationCommand.GoToMain(RickMortyAppFeature.FAVORITES),
-//            onCharacterClick = {
-//
-//            },
-//            nestedGraphs = {
-//
-//            }
-//        )
+        favoritesGraph(
+            command = NavigationCommand.GoToMain(RickMortyAppFeature.FAVORITES),
+            onItemClick = { characterId, locationId ->
+
+            },
+            nestedGraphs = {
+
+            }
+        )
     }
 }

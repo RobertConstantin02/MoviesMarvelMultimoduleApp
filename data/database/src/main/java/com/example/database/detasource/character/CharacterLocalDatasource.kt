@@ -31,7 +31,6 @@ class CharacterLocalDatasource @Inject constructor(
             if (isNullOrEmpty()) DataBaseError.EmptyResult.left() else this.right()
         }
 
-
     override suspend fun getPagingKeysById(id: Long): PagingKeys? = pagingKeysDao.getPagingKeysById(id)
 
     override suspend fun insertPagingKeys(keys: List<PagingKeys>) = pagingKeysDao.insertAll(keys)
@@ -44,5 +43,12 @@ class CharacterLocalDatasource @Inject constructor(
     override suspend fun insertCharacter(character: CharacterEntity) =
         if (characterDao.insertCharacter(character) != -1L) Unit.right()
         else DataBaseError.InsertionError.left()
+
+    override suspend fun updateCharacterIsFavorite(
+        isFavorite: Boolean,
+        characterId: Int
+    ) {
+        characterDao.updateCharacterIsFavorite(isFavorite, characterId)
+    }
 
 }

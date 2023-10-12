@@ -20,7 +20,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.common.R
 import com.example.common.component.CircularLoadingBar
 import com.example.common.component.ErrorScreen
-import com.example.common.component.FeedCardItem
+import com.example.common.component.CharacterCard
 import com.example.common.util.ListExtensions.gridItems
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
@@ -38,12 +38,7 @@ fun HeroListScreen(
     FeedScreenContent(
         items = { lazyPagingItems },
         onItemClick = onItemClick,
-        onToggleSave = {
-
-        },
-        addToFavorites = {
-
-        },
+        onToggleSave = { isFavorite, characterId -> viewModel.updateCharacter(isFavorite, characterId) },
         onRefresh = { /*TODO*/ },
         modifier = Modifier
     )
@@ -54,12 +49,11 @@ fun HeroListScreen(
 fun FeedScreenContent(
     items: () -> LazyPagingItems<CharacterVo>,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
-    onToggleSave: (Boolean) -> Unit,
-    addToFavorites: (CharacterVo) -> Unit, ///???
+    onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier,
 ) {
-    val contetext = LocalContext.current
+    val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val showScrollToTopButton = remember {
         derivedStateOf {
@@ -70,7 +64,7 @@ fun FeedScreenContent(
     when (items().loadState.mediator?.refresh) {
         is LoadState.Loading -> CircularLoadingBar(stringResource(id = R.string.character_list_loading))
         is LoadState.Error -> ErrorScreen(
-            UiText.StringResources(R.string.list_try_again).asString(contetext)
+            UiText.StringResources(R.string.list_try_again).asString(context)
         ) { onRefresh() }
 
         else -> FeedScreenSuccessContent(
@@ -88,7 +82,7 @@ private fun FeedScreenSuccessContent(
     state: () -> LazyGridState,
     items: () -> LazyPagingItems<CharacterVo>,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
-    onToggleSave: (Boolean) -> Unit,
+    onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
     modifier: Modifier,
 ) {
     LazyVerticalGrid(
@@ -100,7 +94,7 @@ private fun FeedScreenSuccessContent(
             it.id
         }, itemContent = { character ->
             character?.let {
-                FeedCardItem(
+                CharacterCard(
                     item = { it },
                     onItemClick = onItemClick,
                     onToggleSave = onToggleSave,

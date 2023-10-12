@@ -43,6 +43,7 @@ sealed class DataBaseError: Exception(), DataSourceError {
     object ItemNotFound: DataBaseError()
     object InsertionError: DataBaseError()
     object DeletionError: DataBaseError()
+    object UpdateError: DataBaseError()
 }
 
 
