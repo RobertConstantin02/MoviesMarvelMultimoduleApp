@@ -27,12 +27,24 @@ import java.io.IOException
 //        }
 //}
 
+//sealed interface makes that when it comes to check for errors remote and dataBase errors, only those two types
+//can be. So taht in onError function from Details then we wont have
+sealed interface DataSourceError
+
 typealias Result <T> = Either<Throwable, T>
-sealed class RemoteError: Throwable() {
+sealed class RemoteError: Throwable(), DataSourceError {
     object Connectivity: RemoteError()
     data class Server(val codeError: Int? = null): RemoteError()
     data class Unknown(override val message: String? = null): RemoteError()
 }
+
+sealed class DataBaseError: Exception(), DataSourceError {
+    object EmptyResult: DataBaseError()
+    object ItemNotFound: DataBaseError()
+    object InsertionError: DataBaseError()
+    object DeletionError: DataBaseError()
+}
+
 
 fun Exception.toError(): RemoteError =
     when(this) {

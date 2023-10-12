@@ -12,17 +12,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.example.common.R
 import com.example.designsystem.theme.LocalSpacing
 
 @Composable
-fun ErrorScreen(messageResource: Int, retry: () -> Unit) {
+fun ErrorScreen(message: String, retry: () -> Unit) {
     val dimens = LocalSpacing.current
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Text(
-            text = stringResource(id = messageResource),
+            text = message,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge,
@@ -34,7 +35,7 @@ fun ErrorScreen(messageResource: Int, retry: () -> Unit) {
                 .padding(dimens.spaceMedium)
         ) {
             Text(
-                text = stringResource(id = messageResource),
+                text = stringResource(R.string.retry),
                 style = MaterialTheme.typography.titleMedium
             )
         }

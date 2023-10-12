@@ -22,7 +22,7 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-
+    implementation(project(":toplevel:designsystem"))
     implementation(project(":toplevel:navigationlogic"))
     implementation(project(":toplevel:resources"))
     implementation(project(":presentation:presentation_model"))

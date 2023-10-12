@@ -10,17 +10,14 @@ import androidx.room.PrimaryKey
 data class CharacterEntity(
     @PrimaryKey
     val id: Int,
-    val image: String?,
-    val gender: String?,
-    val species: String?,
-    val created: String?,
-    val origin: OriginEntity?,
     val name: String?,
-    val location: LocationEntity?,
-    val episode: List<String?>?,
-    val type: String?,
-    val url: String?,
     val status: String?,
+    val specimen: String?,
+    val location: LocationEntity?,
+    val origin: OriginEntity?,
+    val gender: String?,
+    val image: String?,
+    val episodes: List<String?>?,
     @ColumnInfo("is_Favorite")
     val isFavorite: Boolean = false
 )
@@ -31,4 +28,5 @@ data class OriginEntity(
 
 data class LocationEntity(
     val name: String?,
+    val url: String?
 )

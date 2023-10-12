@@ -1,6 +1,6 @@
 package com.example.di
 
-import com.example.heroes_data.db.detasource.ICharacterLocalDatasource
+import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.paging.FeedRemoteMediator
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import dagger.Module

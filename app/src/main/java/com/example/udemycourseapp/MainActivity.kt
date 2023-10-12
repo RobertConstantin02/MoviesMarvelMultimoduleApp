@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import com.example.designsystem.theme.UdemyCourseAppTheme
-import com.example.udemycourseapp.ui.MarvelAndMoviesApp
+import com.example.udemycourseapp.ui.RickAndMortyApp
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             UdemyCourseAppTheme {
-                MarvelAndMoviesApp(windowSizeClass = calculateWindowSizeClass(activity = this))
+                RickAndMortyApp(windowSizeClass = calculateWindowSizeClass(activity = this))
             }
         }
     }

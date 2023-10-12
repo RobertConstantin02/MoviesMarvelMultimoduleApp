@@ -27,7 +27,7 @@ fun MarvelNavigationRail(
                 selected = itemSelected,
                 onClick = { onNavigate(destination) },
                 icon = {
-                    MarvelNavigationIconSelector(
+                    RickAndMortyIconSelector(
                         itemSelected = itemSelected,
                         destination = destination
                     )

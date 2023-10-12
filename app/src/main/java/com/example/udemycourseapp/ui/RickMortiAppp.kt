@@ -18,7 +18,7 @@ import com.example.udemycourseapp.navigation.component.MarvelNavigationRail
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MarvelAndMoviesApp(
+fun RickAndMortyApp(
     windowSizeClass: WindowSizeClass,
     appState: MarvelAppState = rememberAppState(
         windowSize = windowSizeClass

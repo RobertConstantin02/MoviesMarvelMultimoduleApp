@@ -1,9 +1,16 @@
 package com.example.usecase
 
+import android.util.Log
+import androidx.lifecycle.LifecycleOwner
+import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
+import com.example.resources.DataSourceError
+import com.example.resources.RemoteError
 import com.example.resources.Result
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -12,7 +19,10 @@ import kotlinx.coroutines.launch
 
 interface UseCaseRemote<Input, Output> {
 
-    suspend fun run(input: Input):  Flow<Result<Output>>
+    suspend fun run(input: Input): Flow<Result<Output>>
+
+    //maybe with abstract class
+    //var job: Deferred<Flow<Result<Output>>>?
 
     /**
      * In the context of coroutines and the Dispatchers.Unconfined dispatcher, the "caller's thread"
@@ -24,18 +34,42 @@ interface UseCaseRemote<Input, Output> {
     operator fun invoke(
         input: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
+        coroutineScope: CoroutineScope? = null,
         success: (Output) -> Unit,
-        error: (error: Throwable) -> Unit = {}
+        error: (error: DataSourceError) -> Unit = {}
     ) {
-        CoroutineScope(dispatcher).apply {
-            val job = async { run(input) }
-            launch {
-                job.await().catch { e -> error(e) }.collectLatest {
-                    it.fold(ifLeft = { e -> error(e) }, ifRight = { output -> success(output) })
+        //viewModelScope
+        coroutineScope?.let { scope ->
+            val job = scope.async(dispatcher) { run(input) }
+            scope.launch(Dispatchers.Main) {
+                //try catch here out
+                job?.await().also { flow ->
+                    flow?.catch { e ->
+                        Log.d("-----> error1", "called")
+                        error(e)
+                    }?.collectLatest {
+                        it.fold(
+                            ifLeft = { e ->
+                                Log.d("-----> error2", "called")
+
+                                error(e)
+                            },
+                            ifRight = { output ->
+                                Log.d(
+                                    "-----> output",
+                                    (output as CharacterPresentationScreenBO).toString()
+                                )
+                                success(output)
+                            }
+                        )
+                    }
                 }
             }
         }
     }
+
+    interface Input
+    interface Output
 }
 
 interface UseCaseLocal<Input, Output> {

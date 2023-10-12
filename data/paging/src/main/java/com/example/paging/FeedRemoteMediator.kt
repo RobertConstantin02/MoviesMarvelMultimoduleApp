@@ -7,10 +7,10 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.example.api.model.character.FeedCharacterDto
 import com.example.api.network.PAGE_PARAMETER
-import com.example.data_mapper.DtoToEntityCharacterMapper.toCharactersEntity
+import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
-import com.example.heroes_data.db.detasource.ICharacterLocalDatasource
+import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import javax.inject.Inject
 
@@ -30,11 +30,12 @@ class FeedRemoteMediator @Inject constructor(
             LoadType.REFRESH -> 1
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
             LoadType.APPEND -> {
-                val nextKey =
-                    getPagingKeysForLastItem(state)?.nextKey ?: return MediatorResult.Success(
-                        endOfPaginationReached = true
+                val remoteKeys = getPagingKeysForLastItem(state)
+                val nextPage = remoteKeys?.nextKey
+                    ?: return MediatorResult.Success(
+                        endOfPaginationReached = remoteKeys != null
                     )
-                Uri.parse(nextKey).getQueryParameter(PAGE_PARAMETER)?.toInt()
+                Uri.parse(nextPage).getQueryParameter(PAGE_PARAMETER)?.toInt()
             }
         }
         return handleCacheSystem(page ?: 1) //test ?: 1
@@ -63,12 +64,20 @@ class FeedRemoteMediator @Inject constructor(
     private suspend fun insertCharacters(response: FeedCharacterDto) = with(response) {
         results?.filterNotNull()?.filter { it.id != null }?.map { characterResponse ->
             // TODO: Check -1 and transient from dto if works or not. If not create variable oppening brackets
-            localDataSource.getCharacterById(characterResponse.id ?: -1)?.let { characterEntity ->
+            // TODO: check ?let or just .let
+
+            localDataSource.getCharacterById(characterResponse.id ?: -1).fold(
+                ifLeft = { characterResponse }
+            ) { characterEntity ->
                 characterResponse.copy(isFavorite = characterEntity.isFavorite)
-            } ?: characterResponse
+            }
+//
+//            localDataSource.getCharacterById(characterResponse.id ?: -1)?.let { characterEntity ->
+//                characterResponse.copy(isFavorite = characterEntity.isFavorite)
+//            } ?: characterResponse
         }.let { characters ->
             if (characters?.isNotEmpty() == true) {
-                localDataSource.insertCharacters(characters.toCharactersEntity())
+                localDataSource.insertCharacters(characters.map { it.toCharacterEntity() })
             }
         }
     }

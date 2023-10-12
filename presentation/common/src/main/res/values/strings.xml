@@ -4,9 +4,46 @@
     <!-- Buttons Text-->
     <string name="save">Save</string>
     <string name="unsaved">Unsaved</string>
+    <string name="retry">Retry</string>
+    <!-- Content Description -->
+    <string name="icon_location_content_description">Location Icon</string>
+    <string name="button_expand_content_description">Expand Button</string>
     <!-- Error Messages-->
-    <string name="list_try_again">Ups!!! Something when wrong while fetching data</string>
+    <string name="list_try_again">Ups!!! Something when wrong while fetching characters</string>
+    <string name="detail_try_again">Ups!!! Something when wrong while fetching character details</string>
     <!-- Loading Messages-->
     <string name="character_list_loading">Characters are loading</string>
+    <string name="character_detail_loading">Characters detail loading</string>
+    <!-- Transition -->
+    <string name="transitionLabel">transition</string>
+    <string name="background_transition_label">bgColorTransition</string>
+    <string name="rounded_corners_label">cardRoundedCorners</string>
+    <!-- Image Content Description -->
+    <string name="character_detail_image">character detail image</string>
+    <!-- Details Texts -->
+    <string name="character_name">Name</string>
+    <string name="character_status">Status</string>
+    <string name="character_gender">Gender</string>
+
+    <string name="character_specimen">Specimen:</string>
+    <string name="character_origin">Origin:</string>
+    <string name="location_name">Location:</string>
+    <string name="location_type">Location type:</string>
+    <string name="location_dimension">Dimension:</string>
+
+    <string name="episodes_row_title">Related episodes</string>
+    <string name="neighbor_row_title">Neighbors</string>
+
+    <string name="detail_unknown">Unknown</string>
+
+    <!-- Error messages -->
+    <string name="remote_connectivity_error">Ups! Something went wrong with your connection</string>
+    <string name="remote_server_error">Server error happened - %s</string>
+    <string name="remote_unknown_error">Unknown error happened - %s</string>
+
+    <string name="local_db_empty_result">No data gathered</string>
+    <string name="local_db_item_not_found">Item not found</string>
+    <string name="local_db_insertion_error">Data could not be saved properly</string>
+    <string name="local_db_deletion_error">Data could have not been deleted properly</string>
 
 </resources>

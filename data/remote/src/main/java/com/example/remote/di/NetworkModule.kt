@@ -1,6 +1,7 @@
 package com.example.remote.di
 
 
+import com.example.api.network.RickAndMortyService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,6 +46,11 @@ object NetworkModule {
             )
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideRickMortyService(retrofit: Retrofit): RickAndMortyService =
+        retrofit.create(RickAndMortyService::class.java)
 
 //    @Provides
 //    fun provideRickMortyEndPoint(

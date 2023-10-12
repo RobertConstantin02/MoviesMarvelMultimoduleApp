@@ -1,12 +1,13 @@
 package com.example.presentation_mapper
 
-import com.example.domain_model.CharacterFeedBo
+import com.example.domain_model.character.CharacterBo
 import com.example.presentation_model.CharacterVo
 
-fun CharacterFeedBo.toUI() =
+fun CharacterBo.toCharacterVo() =
     CharacterVo(
         id ?: -1,
-        image ?: "", // create value object like WamImage
+        locationId,
+        image.value.orEmpty(),
         name ?: "",
         isFavorite ?: false
     )

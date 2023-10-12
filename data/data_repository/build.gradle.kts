@@ -19,9 +19,12 @@ kapt {
 }
 dependencies {
 
+    implementation(project(":toplevel:resources"))
+
     implementation(project(":data:api"))
     implementation(project(":data:remote"))
     implementation(project(":data:database"))
+    implementation(project(":data:preferences"))
     implementation(project(":data:paging"))
     implementation(project(":data:data_mapper"))
 
@@ -32,6 +35,7 @@ dependencies {
     libs.bundles.apply {
         implementation(hilt)
         implementation(coroutines)
+        implementation(arrow)
     }
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.paging)

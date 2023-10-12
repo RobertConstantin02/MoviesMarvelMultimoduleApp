@@ -5,9 +5,22 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.feature_feed.details.DetailPresentationScreen
+import com.example.feature_feed.list.HeroListScreen
 import com.example.navigationlogic.Command
 import com.example.navigationlogic.Feature
 
+fun NavGraphBuilder.mainFeedDetailsScreen(
+    command: Command,
+    onBackClick: () -> Unit = {}
+) {
+    composable(
+        route = command.getRoute(),
+        arguments = command.args
+    ) {
+        DetailPresentationScreen() //if I have a tollBar or something we can apply onBack
+    }
+}
 
 fun NavController.navigateToHeroListScreen(
     navOptions: NavOptions? = null,
@@ -17,19 +30,19 @@ fun NavController.navigateToHeroListScreen(
 }
 
 fun NavGraphBuilder.feedGraph(
-    command: Command<Feature>,
+    command: Command,
     nestedGraphs: NavGraphBuilder.() -> Unit,
-    onCharacterClick: (heroId: String) -> Unit
+    onItemClick: (heroId: Int, locationId: Int?) -> Unit
 ) {
     navigation(
-        startDestination = command.route,
+        startDestination = command.getRoute(),
         route = command.feature.route
     ) {
         composable(
-            route = command.route,
+            route = command.getRoute(),
             arguments = command.args
         ) {
-            HeroListScreen()
+            HeroListScreen(onItemClick = onItemClick)
         }
         nestedGraphs()
     }
