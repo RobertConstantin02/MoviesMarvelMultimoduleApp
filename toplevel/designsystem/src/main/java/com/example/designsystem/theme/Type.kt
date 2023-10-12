@@ -18,6 +18,7 @@ val notoSansFont = FontFamily(
 
 val Typography = Typography(
     titleMedium = setTextStyle(24.sp, FontWeight(700), 28.sp),
+    titleSmall = setTextStyle(24.sp, FontWeight(700), 20.sp),
     bodyLarge = setTextStyle(12.sp, FontWeight(400), 16.sp),
     bodySmall = setTextStyle(8.sp, FontWeight(700), 12.sp)
 )

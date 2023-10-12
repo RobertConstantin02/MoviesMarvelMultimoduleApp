@@ -10,9 +10,9 @@ sealed class CharacterDetailPSState {
 }
 
 
-sealed class CharacterDetailPSError {
-    data class ServerError(val message: UiText): CharacterDetailPSError()
-    data class ConnectivityError(val message: UiText): CharacterDetailPSError()
-    data class DataBasError(val message: UiText): CharacterDetailPSError()
-    data class UnknownError(val message: UiText): CharacterDetailPSError()
+sealed class CharacterDetailPSError(open val message: UiText) {
+    data class ServerError(override val message: UiText): CharacterDetailPSError(message)
+    data class ConnectivityError(override val message: UiText): CharacterDetailPSError(message)
+    data class DataBasError(override val message: UiText): CharacterDetailPSError(message)
+    data class UnknownError(override val message: UiText): CharacterDetailPSError(message)
 }

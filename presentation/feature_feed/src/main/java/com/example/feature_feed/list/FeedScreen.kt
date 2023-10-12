@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,6 +23,7 @@ import com.example.common.component.ErrorScreen
 import com.example.common.component.FeedCardItem
 import com.example.common.util.ListExtensions.gridItems
 import com.example.presentation_model.CharacterVo
+import com.example.resources.UiText
 
 @Composable
 fun HeroListScreen(
@@ -57,7 +59,7 @@ fun FeedScreenContent(
     onRefresh: () -> Unit,
     modifier: Modifier,
 ) {
-
+    val contetext = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val showScrollToTopButton = remember {
         derivedStateOf {
@@ -67,7 +69,10 @@ fun FeedScreenContent(
 
     when (items().loadState.mediator?.refresh) {
         is LoadState.Loading -> CircularLoadingBar(stringResource(id = R.string.character_list_loading))
-        is LoadState.Error -> ErrorScreen(R.string.list_try_again) { onRefresh() }
+        is LoadState.Error -> ErrorScreen(
+            UiText.StringResources(R.string.list_try_again).asString(contetext)
+        ) { onRefresh() }
+
         else -> FeedScreenSuccessContent(
             modifier = modifier,
             state = { lazyGridState },
@@ -86,7 +91,6 @@ private fun FeedScreenSuccessContent(
     onToggleSave: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
-
     LazyVerticalGrid(
         modifier = modifier.fillMaxWidth(),
         columns = GridCells.Adaptive(150.dp),

@@ -1,12 +1,10 @@
 package com.example.feature_feed.details
 
-import android.util.Log
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.common.R
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
-import com.example.feature_feed.R
 import com.example.presentation_mapper.BoToVoCharacterPresentationMapper.toCharacterPresentationScreenVO
 import com.example.resources.DataBaseError
 import com.example.resources.DataSourceError
@@ -35,6 +33,7 @@ class DetailViewModel @Inject constructor(
     fun getCharacterDetails() {
         val characterId = savedStateHandle.get<String>(CHARACTER_ID)
         val locationId = savedStateHandle.get<String>(LOCATION_ID)
+        // TODO: some character from list have null locartionId or characterId 
         getCharacterDetails.invoke(
             Params(characterId?.toInt() ?: 0, locationId?.toInt() ?: 0), //2, 20
             Dispatchers.IO,
@@ -52,7 +51,6 @@ class DetailViewModel @Inject constructor(
                     CharacterDetailPSState.Success(event.characterPresentationScreen)
                 }
             }
-
             is CharacterDetailPSEvent.Error -> { _characterDetailState.update { event.error } }
         }
     }
