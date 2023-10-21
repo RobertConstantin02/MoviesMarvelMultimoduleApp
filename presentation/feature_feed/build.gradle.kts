@@ -36,6 +36,7 @@ dependencies {
         implementation(hilt)
         implementation(coroutines)
         implementation(lifecycle)
+        implementation(arrow)
     }
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)

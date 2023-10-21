@@ -15,7 +15,7 @@ import com.example.udemycourseapp.util.RickMortyNavigationBarColorDefaults
 import com.example.udemycourseapp.util.isTopLevelDestinationInHierarchy
 
 @Composable
-fun MarvelBottomBar(
+fun RickAndMortyBottomBar(
     destinations: List<RickMortiTopLevelDestination>,
     currentDestination: NavDestination?,
     onNavigate: (destination: RickMortiTopLevelDestination) -> Unit,

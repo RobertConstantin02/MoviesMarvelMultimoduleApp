@@ -22,6 +22,7 @@ kapt {
 }
 dependencies {
     implementation(project(":toplevel:designsystem"))
+    implementation(project(":toplevel:resources"))
     implementation(project(":presentation:presentation_model"))
     libs.bundles.apply {
         implementation(compose)

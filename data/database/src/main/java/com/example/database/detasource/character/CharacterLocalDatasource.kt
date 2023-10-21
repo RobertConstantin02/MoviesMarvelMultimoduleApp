@@ -9,6 +9,9 @@ import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import com.example.resources.DataBaseError
 import com.example.resources.Result
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
 
 // TODO: Refactor with database error
@@ -50,5 +53,10 @@ class CharacterLocalDatasource @Inject constructor(
     ) {
         characterDao.updateCharacterIsFavorite(isFavorite, characterId)
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getFavoriteCharacters(offset: Int): Flow<List<CharacterEntity>> =
+        characterDao.getFavoriteCharacters(offset)
+
 
 }

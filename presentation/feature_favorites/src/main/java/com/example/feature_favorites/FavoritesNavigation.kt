@@ -7,14 +7,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.navigationlogic.Command
 
-
-fun NavController.navigateToFavoritesScreen(
-    navOptions: NavOptions? = null,
-    heroListScreenRoute: String
-) {
-    this.navigate(heroListScreenRoute, navOptions)
-}
-
 fun NavGraphBuilder.favoritesGraph(
     command: Command,
     nestedGraphs: NavGraphBuilder.() -> Unit,

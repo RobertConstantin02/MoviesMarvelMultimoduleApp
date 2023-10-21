@@ -9,7 +9,7 @@ import javax.inject.Inject
 class UpdateCharacterIsFavoriteUseCase @Inject constructor(
     @QCharacterRepository private val repository: ICharacterRepository
 ):  IUpdateCharacterIsFavoriteUseCase {
-    override suspend fun run(input: UpdateParams) {
+    override suspend fun run(input: UpdateParams) =
         repository.updateCharacterIsFavorite(input.isFavorite, input.characterId)
-    }
+
 }

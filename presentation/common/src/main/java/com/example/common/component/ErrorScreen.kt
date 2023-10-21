@@ -16,7 +16,7 @@ import com.example.common.R
 import com.example.designsystem.theme.LocalSpacing
 
 @Composable
-fun ErrorScreen(message: String, retry: () -> Unit) {
+fun ErrorScreen(message: String, retry: () -> Unit = {}) {
     val dimens = LocalSpacing.current
     Column(
         modifier = Modifier.fillMaxSize(),

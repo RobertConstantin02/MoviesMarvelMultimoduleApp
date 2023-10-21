@@ -13,4 +13,5 @@ interface ICharacterRepository {
     fun getCharacter(characterId: Int): Flow<Result<CharacterDetailBo>>
     fun getCharactersByIds(charactersIds: List<Int>): Flow<Result<List<CharacterNeighborBo>>>
     suspend fun updateCharacterIsFavorite(isFavorite: Boolean, characterId: Int)
+    fun getFavoriteCharacters(page: Int, offset: Int): Flow<List<CharacterBo>>
 }
