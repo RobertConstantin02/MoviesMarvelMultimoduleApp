@@ -1,5 +1,6 @@
 package com.example.feature_favorites.paginator
 
+import android.util.Log
 import arrow.fx.coroutines.Resource
 import com.example.resources.DataSourceError
 import com.example.resources.Result
@@ -58,6 +59,7 @@ class Paginator<Key, Item>(
         onLoad(true)
 
         (onRequest(currentPage).collectLatest { newItems ->
+            Log.d("-----> collectNewItems", newItems.toString())
             onSuccess(newItems)
 //            pageResult.fold(
 //                ifLeft = { onError(it) }

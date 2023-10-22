@@ -14,6 +14,6 @@ sealed class FavoritesScreenState {
         ) : FavoritesScreenState()
     data class Success(
         val favoriteCharacters: List<CharacterVo> = emptyList(),
-        val endReached: Boolean = false
+        //val endReached: Boolean = false
     ) : FavoritesScreenState()
 }

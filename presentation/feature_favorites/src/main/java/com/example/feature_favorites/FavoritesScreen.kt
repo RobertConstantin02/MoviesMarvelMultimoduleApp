@@ -1,10 +1,13 @@
 package com.example.feature_favorites
 
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -31,7 +34,7 @@ fun FavoritesScreen(
     FavoritesScreenContent(
         favoritesState = { favoritesState },
         onItemClick = onItemClick,
-        onToggleSave = { isFavorite, characterId -> viewModel.updateCharacter(isFavorite, characterId) },
+        onToggleSave = { isFavorite, characterId, itemIndex -> viewModel.updateCharacter(isFavorite, characterId, itemIndex) },
         onLoadMoreCharacters = { viewModel.loadNextCharacters()  } ,
         emptyListMessage = R.string.empty_favorite_list,
         modifier = Modifier
@@ -42,7 +45,7 @@ fun FavoritesScreen(
 fun FavoritesScreenContent(
     favoritesState: () -> FavoritesScreenState,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
-    onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
+    onToggleSave: (isFavorite: Boolean, characterId: Int, itemIndex: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
     emptyListMessage: Int? = null,
     modifier: Modifier,
@@ -63,7 +66,7 @@ fun FavoritesScreenContent(
             FavoritesScreenListSuccessContent(
                 state = { lazyGridState },
                 items = {state.favoriteCharacters},
-                endReached = state.endReached,
+                //endReached = state.endReached,
                 onItemClick = onItemClick,
                 onToggleSave = onToggleSave,
                 onLoadMoreCharacters = onLoadMoreCharacters,
@@ -77,23 +80,46 @@ fun FavoritesScreenContent(
 private fun FavoritesScreenListSuccessContent(
     state: () -> LazyListState,
     items: () -> List<CharacterVo>,
-    endReached: Boolean = false,
+    //endReached: Boolean = false,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
-    onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
+    onToggleSave: (isFavorite: Boolean, characterId: Int, itemIndex: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
     modifier: Modifier,
 ) {
     LazyColumn(state = state()) {
         with(items()) {
-            items(this.size) { index ->
-                val character = this@with[index]
-                if ((index > this@with.size - 1) && !endReached) {
+//            items(this.size) { index ->
+//
+//                Log.d("-----> index", index.toString())
+//                Log.d("-----> index2", state().firstVisibleItemIndex.toString())
+//                Log.d("-----> currentSize", (this@with.size - 1).toString())
+//                Log.d("-----> enReached", endReached.toString())
+//                val character = this@with[index]
+//                if ((index == this@with.size - 1) && !endReached) {
+//                    onLoadMoreCharacters()
+//                }
+//                CharacterCard(
+//                    item = { character },
+//                    onItemClick = onItemClick,
+//                    onToggleSave = { isFavorite, characterId -> onToggleSave(isFavorite, characterId, index) },
+//                    modifier = modifier
+//                )
+//            }
+            items(this) {
+
+                Log.d("-----> index", state().layoutInfo.visibleItemsInfo.lastOrNull()?.index.toString())
+                Log.d("-----> total", (state().layoutInfo.totalItemsCount -1).toString())
+                //Log.d("-----> enReached", endReached.toString())
+                val index = state().layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                val total = state().layoutInfo.totalItemsCount -1
+                //val character = this@with[index]
+                if ((index == total)) {
                     onLoadMoreCharacters()
                 }
                 CharacterCard(
-                    item = { character },
+                    item = { it },
                     onItemClick = onItemClick,
-                    onToggleSave = onToggleSave,
+                    onToggleSave = { isFavorite, characterId -> onToggleSave(isFavorite, characterId, (index ?: 0) -1 ) },
                     modifier = modifier
                 )
             }

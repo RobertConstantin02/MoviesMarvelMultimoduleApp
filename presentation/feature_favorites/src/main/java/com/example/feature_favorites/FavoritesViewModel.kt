@@ -1,5 +1,6 @@
 package com.example.feature_favorites
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.common.R
@@ -31,62 +32,8 @@ class FavoritesViewModel @Inject constructor(
         MutableStateFlow<FavoritesScreenState>(FavoritesScreenState.Loading)
     val favoritesState = _favoritesState.asStateFlow()
 
-    private val initialPage = 0
-
-    //var favoritesState: StateFlow<PagingData<CharacterVo>> = getCharactersFav()
-
-//    fun getFavorites() {
-//        getFavoriteCharacters.invoke(
-//            Unit,
-//            viewModelScope,
-//            Dispatchers.IO,
-//            success = { newData ->
-//                _favoritesState.value = newData.map { it.toCharacterVo() }
-//            },
-//            error = {
-//
-//            }
-//        )
-//    }
-
-//    fun getCharactersFav() = getFavoriteCharacters.invoke(
-//        Unit,
-//        Dispatchers.IO,
-//    ).map { pagingData ->
-//        pagingData.fold(
-//            ifLeft = { PagingData.empty() }
-//        ) { pagingData ->
-//            pagingData.map { character -> character.toCharacterVo() }
-//        }
-//    }.cachedIn(viewModelScope).stateIn(
-//        scope = viewModelScope,
-//        started = SharingStarted.WhileSubscribed(5_000),
-//        initialValue = PagingData.empty()
-//    )
-//
-//    fun onEvent(event: FavoritesScreenEvent) {
-//        when(event) {
-//            is FavoritesScreenEvent.ListFound -> {
-//                (_favoritesState.value as? FavoritesScreenState.Success)?.let { successState ->
-//
-//                }
-//            }
-//            is FavoritesScreenEvent.Error -> {
-//
-//            }
-//        }
-//    }
-
-    fun updateCharacter(isFavorite: Boolean, characterId: Int) {
-        updateCharacterIsFavorite.invoke(
-            UpdateParams(isFavorite, characterId),
-            viewModelScope,
-            Dispatchers.IO
-        )
-//        _favoritesState.value = _favoritesState.value.filter {
-//            it.id != characterId
-//        }
-    }
+    private var initialPage = 0
+    private var currentCharacterList = mutableListOf<CharacterVo>()
 
     private val pagination = Paginator(
         initialKey = initialPage,
@@ -99,50 +46,47 @@ class FavoritesViewModel @Inject constructor(
                 Dispatchers.IO
             )
         },
-        getNextKey = { initialPage + 1 },
+        getNextKey = {
+            initialPage ++
+            Log.d("-----> currentPage", (initialPage ++).toString())
+        },
         onSuccess = { newCharacters ->
-            _favoritesState.update {
-                FavoritesScreenState.Success()
-            }
-
-
-            onSuccess(newCharacters.map { it.toCharacterVo() })
+            onSuccess(newCharacters.map { it.toCharacterVo() }.filter {
+                it !in currentCharacterList
+            })
         },
         onError = { error -> }
     )
 
+    fun updateCharacter(isFavorite: Boolean, characterId: Int, itemIndex: Int) {
+        updateCharacterIsFavorite.invoke(
+            UpdateParams(isFavorite, characterId),
+            viewModelScope,
+            Dispatchers.IO
+        )
+        currentCharacterList.removeAt(itemIndex)
+    }
+
     private fun onSuccess(newCharacters: List<CharacterVo>) {
-        (_favoritesState.value as? FavoritesScreenState.Success)?.let { successState ->
-            if ((successState.favoriteCharacters + newCharacters).isEmpty()) {
-                _favoritesState.update {
-                    FavoritesScreenState.Empty(UiText.StringResources(R.string.empty_favorite_list))
-                }
-            } else {
-                _favoritesState.update {
-                    FavoritesScreenState.Success(
-                        successState.favoriteCharacters + newCharacters,
-                        newCharacters.isEmpty()
-                    )
-                }
+        //(_favoritesState.value as? FavoritesScreenState.Success)?.let { successState ->
+        //Log.d("-----> newCharacters", newCharacters.toString())
+        if ((currentCharacterList + newCharacters).isEmpty()) {
+            _favoritesState.update {
+                FavoritesScreenState.Empty(UiText.StringResources(R.string.empty_favorite_list))
             }
+        } else {
+            _favoritesState.update {
+                FavoritesScreenState.Success(
+                    currentCharacterList + newCharacters,
+                    //newCharacters.isEmpty()
+                )
+            }
+            currentCharacterList.addAll(newCharacters)
         }
+        //}
     }
 
     fun loadNextCharacters() {
         viewModelScope.launch { pagination.loadNextData() }
     }
-
-//    private fun onError(error: DataBaseError) {
-//        val errorEvent =
-//        onEvent(CharacterDetailPSEvent.Error(errorEvent))
-//    }
-
-//    private fun checkLocalDbError(error: DataBaseError) =
-//        when(error) {
-//            is DataBaseError.EmptyResult -> getLocalDbErrorMessage(R.string.local_db_empty_result)
-//            else -> {
-//                getLocalDbErrorMessage(R.string.local_db_empty_result)
-//            }
-//        }
-
 }
