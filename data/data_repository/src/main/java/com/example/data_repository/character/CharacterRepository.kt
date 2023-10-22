@@ -1,5 +1,6 @@
 package com.example.data_repository.character
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -140,10 +141,15 @@ class CharacterRepository @Inject constructor(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<List<CharacterBo>> =
-        localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest {characters ->
+    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<List<CharacterBo>> {
+        Log.d("-----> finalOffset", (page * offset).toString())
+        Log.d("-----> finalPage", (page).toString())
+        Log.d("-----> soloOffset", offset.toString())
+        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest { characters ->
             characters.map { character -> character.toCharacterBo() }
         }
+    }
+
 //        localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).flatMapLatest { result ->
 //            flow {
 //                result.fold(

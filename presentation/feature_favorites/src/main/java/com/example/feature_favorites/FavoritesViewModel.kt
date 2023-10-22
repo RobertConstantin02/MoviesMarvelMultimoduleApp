@@ -1,6 +1,9 @@
 package com.example.feature_favorites
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.common.R
@@ -16,6 +19,7 @@ import com.example.usecase.di.GetFavoriteCharacters
 import com.example.usecase.di.UpdateCharacterIsFavorite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -32,28 +36,36 @@ class FavoritesViewModel @Inject constructor(
         MutableStateFlow<FavoritesScreenState>(FavoritesScreenState.Loading)
     val favoritesState = _favoritesState.asStateFlow()
 
-    private var initialPage = 0
+    private var job: Job? = null
+
+    private var currentPage = -1
     private var currentCharacterList = mutableListOf<CharacterVo>()
+    var canPaginate by mutableStateOf(true)
 
     private val pagination = Paginator(
-        initialKey = initialPage,
-        onLoad = {
-            _favoritesState.update { FavoritesScreenState.Loading }
+        initialKey = currentPage,
+        onLoading = {
+            if (currentPage == 0) _favoritesState.update { FavoritesScreenState.Loading }
+            //else _favoritesState.update { FavoritesScreenState.Paging }
         },
         onRequest = { nextPage ->
+            Log.d("-----> nextPage", nextPage.toString())
             getFavoriteCharacters.invoke(
-                FavoritesParams(nextPage),
+                FavoritesParams(currentPage),
                 Dispatchers.IO
             )
         },
         getNextKey = {
-            initialPage ++
-            Log.d("-----> currentPage", (initialPage ++).toString())
+            currentPage ++
+            Log.d("-----> currentPage", (currentPage).toString())
         },
         onSuccess = { newCharacters ->
+            canPaginate = newCharacters.size == 10
+            // TODO: remove this shit of filtering
             onSuccess(newCharacters.map { it.toCharacterVo() }.filter {
                 it !in currentCharacterList
             })
+            //no init paging
         },
         onError = { error -> }
     )
@@ -82,11 +94,13 @@ class FavoritesViewModel @Inject constructor(
                 )
             }
             currentCharacterList.addAll(newCharacters)
+            //_favoritesState.update { FavoritesScreenState.Idle }
         }
         //}
     }
 
     fun loadNextCharacters() {
-        viewModelScope.launch { pagination.loadNextData() }
+        job?.cancel()
+        job = viewModelScope.launch { pagination.loadNextData() }
     }
 }

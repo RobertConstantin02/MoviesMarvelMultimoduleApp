@@ -6,7 +6,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,15 +30,35 @@ fun FavoritesScreen(
 ) {
 
     val favoritesState by
-        viewModel.favoritesState.collectAsStateWithLifecycle()
+    viewModel.favoritesState.collectAsStateWithLifecycle()
 
-    viewModel.loadNextCharacters()
+    //viewModel.loadNextCharacters()
+    val lazyColumnListState = rememberLazyListState()
+    val shouldStartPaginate = remember {
+        derivedStateOf {
+            viewModel.canPaginate && (lazyColumnListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                ?: 0) >= (lazyColumnListState.layoutInfo.totalItemsCount - 1)
+        }
+    }
+    LaunchedEffect(key1 = shouldStartPaginate.value) {
+        Log.d("-----> sohuldStarPagin", shouldStartPaginate.value.toString())
+        if (shouldStartPaginate.value ) //ye sinitPaginAgain //if im scrolling and I reached las item in the list
+            viewModel.loadNextCharacters()
+    }
+
 
     FavoritesScreenContent(
+        lazyColumState = { lazyColumnListState },
         favoritesState = { favoritesState },
         onItemClick = onItemClick,
-        onToggleSave = { isFavorite, characterId, itemIndex -> viewModel.updateCharacter(isFavorite, characterId, itemIndex) },
-        onLoadMoreCharacters = { viewModel.loadNextCharacters()  } ,
+        onToggleSave = { isFavorite, characterId, itemIndex ->
+            viewModel.updateCharacter(
+                isFavorite,
+                characterId,
+                itemIndex
+            )
+        },
+        onLoadMoreCharacters = { viewModel.loadNextCharacters() },
         emptyListMessage = R.string.empty_favorite_list,
         modifier = Modifier
     )
@@ -43,6 +66,7 @@ fun FavoritesScreen(
 
 @Composable
 fun FavoritesScreenContent(
+    lazyColumState: () -> LazyListState,
     favoritesState: () -> FavoritesScreenState,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onToggleSave: (isFavorite: Boolean, characterId: Int, itemIndex: Int) -> Unit,
@@ -50,22 +74,24 @@ fun FavoritesScreenContent(
     emptyListMessage: Int? = null,
     modifier: Modifier,
 ) {
-    val lazyGridState = rememberLazyListState()
+
     val context = LocalContext.current
-    when(val state = favoritesState()) {
+    when (val state = favoritesState()) {
         is FavoritesScreenState.Loading -> {
             CircularLoadingBar(stringResource(id = R.string.character_list_loading))
         }
+
         is FavoritesScreenState.Error -> {}
         is FavoritesScreenState.Empty -> { //only we will call emptyy from the view model in thawt case. Good idea to maybe apply for feed
             emptyListMessage?.let {
                 EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
             }
         }
+
         is FavoritesScreenState.Success -> {
             FavoritesScreenListSuccessContent(
-                state = { lazyGridState },
-                items = {state.favoriteCharacters},
+                lazyColumState = lazyColumState,
+                items = { state.favoriteCharacters },
                 //endReached = state.endReached,
                 onItemClick = onItemClick,
                 onToggleSave = onToggleSave,
@@ -78,7 +104,7 @@ fun FavoritesScreenContent(
 
 @Composable
 private fun FavoritesScreenListSuccessContent(
-    state: () -> LazyListState,
+    lazyColumState: () -> LazyListState,
     items: () -> List<CharacterVo>,
     //endReached: Boolean = false,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
@@ -86,43 +112,50 @@ private fun FavoritesScreenListSuccessContent(
     onLoadMoreCharacters: () -> Unit,
     modifier: Modifier,
 ) {
-    LazyColumn(state = state()) {
+
+    LazyColumn(state = lazyColumState()) {
         with(items()) {
-//            items(this.size) { index ->
-//
+            items(this.size) { index ->
+
 //                Log.d("-----> index", index.toString())
 //                Log.d("-----> index2", state().firstVisibleItemIndex.toString())
 //                Log.d("-----> currentSize", (this@with.size - 1).toString())
 //                Log.d("-----> enReached", endReached.toString())
-//                val character = this@with[index]
+                val character = this@with[index]
 //                if ((index == this@with.size - 1) && !endReached) {
 //                    onLoadMoreCharacters()
 //                }
-//                CharacterCard(
-//                    item = { character },
-//                    onItemClick = onItemClick,
-//                    onToggleSave = { isFavorite, characterId -> onToggleSave(isFavorite, characterId, index) },
-//                    modifier = modifier
-//                )
-//            }
-            items(this) {
-
-                Log.d("-----> index", state().layoutInfo.visibleItemsInfo.lastOrNull()?.index.toString())
-                Log.d("-----> total", (state().layoutInfo.totalItemsCount -1).toString())
-                //Log.d("-----> enReached", endReached.toString())
-                val index = state().layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                val total = state().layoutInfo.totalItemsCount -1
-                //val character = this@with[index]
-                if ((index == total)) {
-                    onLoadMoreCharacters()
-                }
                 CharacterCard(
-                    item = { it },
+                    item = { character },
                     onItemClick = onItemClick,
-                    onToggleSave = { isFavorite, characterId -> onToggleSave(isFavorite, characterId, (index ?: 0) -1 ) },
+                    onToggleSave = { isFavorite, characterId -> onToggleSave(isFavorite, characterId, index) },
                     modifier = modifier
                 )
             }
+//            items(this) {
+//
+////                Log.d("-----> index", state().layoutInfo.visibleItemsInfo.lastOrNull()?.index.toString())
+////                Log.d("-----> total", (state().layoutInfo.totalItemsCount -1).toString())
+////                //Log.d("-----> enReached", endReached.toString())
+////                val index = state().layoutInfo.visibleItemsInfo.lastOrNull()?.index
+////                val total = state().layoutInfo.totalItemsCount -1
+////                //val character = this@with[index]
+////                if ((index == total)) {
+////                    onLoadMoreCharacters()
+////                }
+//                CharacterCard(
+//                    item = { it },
+//                    onItemClick = onItemClick,
+//                    onToggleSave = { isFavorite, characterId ->
+//                        onToggleSave(
+//                            isFavorite,
+//                            characterId,
+//                            (index ?: 0) - 1
+//                        )
+//                    },
+//                    modifier = modifier
+//                )
+//            }
         }
     }
 }

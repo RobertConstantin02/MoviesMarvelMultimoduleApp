@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 sealed class FavoritesScreenState {
     object Loading: FavoritesScreenState()
+//    object Paging: FavoritesScreenState()
     data class Error(val dataBaseError: DataBaseError) : FavoritesScreenState()
     data class Empty(
         val message: UiText

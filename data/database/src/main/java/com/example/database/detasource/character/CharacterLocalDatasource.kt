@@ -1,5 +1,6 @@
 package com.example.database.detasource.character
 
+import android.util.Log
 import androidx.paging.PagingSource
 import arrow.core.left
 import arrow.core.right
@@ -19,7 +20,7 @@ import javax.inject.Inject
 class CharacterLocalDatasource @Inject constructor(
     private val characterDao: ICharacterDao,
     private val pagingKeysDao: IPagingKeysDao,
-): ICharacterLocalDatasource {
+) : ICharacterLocalDatasource {
 
     override fun getAllCharacters(): PagingSource<Int, CharacterEntity> =
         characterDao.getAllCharacters()
@@ -34,7 +35,8 @@ class CharacterLocalDatasource @Inject constructor(
             if (isNullOrEmpty()) DataBaseError.EmptyResult.left() else this.right()
         }
 
-    override suspend fun getPagingKeysById(id: Long): PagingKeys? = pagingKeysDao.getPagingKeysById(id)
+    override suspend fun getPagingKeysById(id: Long): PagingKeys? =
+        pagingKeysDao.getPagingKeysById(id)
 
     override suspend fun insertPagingKeys(keys: List<PagingKeys>) = pagingKeysDao.insertAll(keys)
 
@@ -43,6 +45,7 @@ class CharacterLocalDatasource @Inject constructor(
             if (this.size == characters.size) Unit.right()
             else DataBaseError.InsertionError.left()
         }
+
     override suspend fun insertCharacter(character: CharacterEntity) =
         if (characterDao.insertCharacter(character) != -1L) Unit.right()
         else DataBaseError.InsertionError.left()
@@ -55,8 +58,10 @@ class CharacterLocalDatasource @Inject constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getFavoriteCharacters(offset: Int): Flow<List<CharacterEntity>> =
-        characterDao.getFavoriteCharacters(offset)
+    override fun getFavoriteCharacters(offset: Int): Flow<List<CharacterEntity>> {
+        Log.d("-----> offset", offset.toString())
+        return characterDao.getFavoriteCharacters(offset)
+    }
 
 
 }
