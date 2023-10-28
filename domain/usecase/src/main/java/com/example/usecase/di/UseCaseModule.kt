@@ -3,7 +3,11 @@ package com.example.usecase.di
 import com.example.usecase.character.implementation.GetAllCharactersUseCase
 import com.example.usecase.character.IGetAllCharactersUseCase
 import com.example.usecase.character.IGetCharacterDetailsUseCase
+import com.example.usecase.character.IGetFavoriteCharactersUseCase
+import com.example.usecase.character.IUpdateCharacterIsFavoriteUseCase
 import com.example.usecase.character.implementation.GetCharacterDetailsUseCaseUseCase
+import com.example.usecase.character.implementation.GetFavoriteCharactersUseCaseUseCase
+import com.example.usecase.character.implementation.UpdateCharacterIsFavoriteUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,6 +22,14 @@ annotation class GetCharacters
 @Retention(AnnotationRetention.BINARY)
 @Qualifier
 annotation class GetCharacterDetails
+
+@Retention(AnnotationRetention.BINARY)
+@Qualifier
+annotation class UpdateCharacterIsFavorite
+
+@Retention(AnnotationRetention.BINARY)
+@Qualifier
+annotation class GetFavoriteCharacters
 
 @Module(includes = [UseCaseModule.Declarations::class])
 @InstallIn(SingletonComponent::class)
@@ -39,5 +51,15 @@ object UseCaseModule {
         @Singleton
         @Binds
         fun bindGetCharacterDetailsUseCase(implementation: GetCharacterDetailsUseCaseUseCase): IGetCharacterDetailsUseCase
+
+        @UpdateCharacterIsFavorite
+        @Singleton
+        @Binds
+        fun bindUpdateCharacterIsFavorite(implementation: UpdateCharacterIsFavoriteUseCase): IUpdateCharacterIsFavoriteUseCase
+
+        @GetFavoriteCharacters
+        @Singleton
+        @Binds
+        fun bindGetFavoriteCharacters(implementation: GetFavoriteCharactersUseCaseUseCase): IGetFavoriteCharactersUseCase
     }
 }

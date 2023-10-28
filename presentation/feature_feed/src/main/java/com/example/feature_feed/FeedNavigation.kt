@@ -18,15 +18,8 @@ fun NavGraphBuilder.mainFeedDetailsScreen(
         route = command.getRoute(),
         arguments = command.args
     ) {
-        DetailPresentationScreen() //if I have a tollBar or something we can apply onBack
+        DetailPresentationScreen()
     }
-}
-
-fun NavController.navigateToHeroListScreen(
-    navOptions: NavOptions? = null,
-    heroListScreenRoute: String
-) {
-    this.navigate(heroListScreenRoute, navOptions)
 }
 
 fun NavGraphBuilder.feedGraph(

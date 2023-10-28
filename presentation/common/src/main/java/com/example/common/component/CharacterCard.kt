@@ -33,10 +33,10 @@ import com.example.designsystem.theme.LocalSpacing
 import com.example.presentation_model.CharacterVo
 
 @Composable
-fun FeedCardItem(
+fun CharacterCard(
     item: () -> CharacterVo,
     onItemClick: (itemId: Int, locationId: Int?)-> Unit,
-    onToggleSave: (Boolean) -> Unit,
+    onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
     modifier: Modifier
 ) {
     val dimens = LocalSpacing.current
@@ -96,7 +96,7 @@ fun FeedCardItem(
                     )
                     SaveCharacterButton(
                         isSaved = item().isFavorite,
-                        onClick = onToggleSave
+                        onClick = { onToggleSave(it, item().id) }
                     )
                 }
             }

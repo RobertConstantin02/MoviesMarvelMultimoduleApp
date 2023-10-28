@@ -15,16 +15,16 @@ import com.example.udemycourseapp.util.RickMortyNavigationBarColorDefaults
 import com.example.udemycourseapp.util.isTopLevelDestinationInHierarchy
 
 @Composable
-fun MarvelBottomBar(
+fun RickAndMortyBottomBar(
     destinations: List<RickMortiTopLevelDestination>,
     currentDestination: NavDestination?,
     onNavigate: (destination: RickMortiTopLevelDestination) -> Unit,
     modifier: Modifier = Modifier,
 ){
-    MarvelNavigationBar(modifier = modifier) {
+    RickAndMortyNavigationBar(modifier = modifier) {
         destinations.forEach { destination ->
             val itemSelected = currentDestination.isTopLevelDestinationInHierarchy(destination)
-            MarvelNavigationBarItem(
+            RickAndMortyNavigationBarItem(
                 selected = itemSelected,
                 onClick = { onNavigate(destination) },
                 icon = {
@@ -40,7 +40,7 @@ fun MarvelBottomBar(
 }
 
 @Composable
-fun MarvelNavigationBar(
+fun RickAndMortyNavigationBar(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
@@ -54,7 +54,7 @@ fun MarvelNavigationBar(
 }
 
 @Composable
-fun RowScope.MarvelNavigationBarItem(
+fun RowScope.RickAndMortyNavigationBarItem(
     selected: Boolean,
     onClick: () -> Unit,
     icon: @Composable () -> Unit,

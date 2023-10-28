@@ -1,6 +1,11 @@
 package com.example.resources
 
 import arrow.core.Either
+import arrow.core.right
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -43,6 +48,7 @@ sealed class DataBaseError: Exception(), DataSourceError {
     object ItemNotFound: DataBaseError()
     object InsertionError: DataBaseError()
     object DeletionError: DataBaseError()
+    object UpdateError: DataBaseError()
 }
 
 
@@ -52,6 +58,15 @@ fun Exception.toError(): RemoteError =
         is HttpException -> RemoteError.Server(code())
         else -> RemoteError.Unknown(message.orEmpty())
     }
+
+//fun <T> Flow<T>.asResult(): Flow<Result<T>> {
+//    return this
+//        .map<T, Result<T>> {
+//            it.right()
+//        }
+//        .onStart { emit(T) }
+//        .catch { emit(T) }
+//}
 
 
 

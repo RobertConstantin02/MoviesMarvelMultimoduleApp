@@ -56,6 +56,7 @@ dependencies {
     implementation(project(":presentation:presentation_mapper"))
     implementation(project(":presentation:presentation_model"))
     implementation(project(":presentation:feature_feed"))
+    implementation(project(":presentation:feature_favorites"))
     implementation(project(":presentation:common"))
 
     libs.bundles.apply {

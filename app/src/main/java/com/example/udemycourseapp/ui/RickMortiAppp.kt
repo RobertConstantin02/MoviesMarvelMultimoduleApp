@@ -12,15 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.designsystem.component.AppBackGround
 import com.example.designsystem.component.AppContent
-import com.example.udemycourseapp.navigation.component.MarvelBottomBar
+import com.example.udemycourseapp.navigation.component.RickAndMortyBottomBar
 import com.example.udemycourseapp.navigation.RickMortyNavHost
-import com.example.udemycourseapp.navigation.component.MarvelNavigationRail
+import com.example.udemycourseapp.navigation.component.RickAndMortyNavigationRail
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RickAndMortyApp(
     windowSizeClass: WindowSizeClass,
-    appState: MarvelAppState = rememberAppState(
+    appState: RickAndMortyAppState = rememberAppState(
         windowSize = windowSizeClass
     )
 ) {
@@ -31,7 +31,7 @@ fun RickAndMortyApp(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 if (appState.shouldShowBottomBar) {
-                    MarvelBottomBar(
+                    RickAndMortyBottomBar(
                         appState.rickMortiTopLevelDestinations,
                         appState.currentDestination,
                         onNavigate = appState::navigateToTopLevelDestination
@@ -41,7 +41,7 @@ fun RickAndMortyApp(
         ) {
             AppContent(paddingValues = it) {
                 if (appState.shouldShowNavRail) {
-                    MarvelNavigationRail(
+                    RickAndMortyNavigationRail(
                         appState.rickMortiTopLevelDestinations,
                         appState.currentDestination,
                         onNavigate = appState::navigateToTopLevelDestination

@@ -11,22 +11,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.example.feature_feed.navigateToHeroListScreen
 import com.example.udemycourseapp.navigation.RickMortiTopLevelDestination
 import com.example.udemycourseapp.ui.Route.rickMortyFavoritesScreenRoute
 import com.example.udemycourseapp.ui.Route.rickMortyFeedScreenRoute
+import com.example.udemycourseapp.util.navigateToScreen
 
 
 @Composable
 fun rememberAppState(
     windowSize: WindowSizeClass? = null,
     navController: NavHostController = rememberNavController(),
-): MarvelAppState = remember(navController, windowSize) {
-    MarvelAppState(navController, windowSize)
+): RickAndMortyAppState = remember(navController, windowSize) {
+    RickAndMortyAppState(navController, windowSize)
 }
 
 @Stable
-class MarvelAppState(
+class RickAndMortyAppState(
     val navController: NavHostController,
     private val windowSize: WindowSizeClass?,
 ) {
@@ -50,7 +50,7 @@ class MarvelAppState(
     val rickMortiTopLevelDestinations: List<RickMortiTopLevelDestination> = RickMortiTopLevelDestination.values().asList()
 
 
-    fun navigateToTopLevelDestination(nextRickMortiTopLevelDestination: RickMortiTopLevelDestination) { //here can go an interface and when ou use it you will have to pass your implementation.
+    fun navigateToTopLevelDestination(nextRickAndMortyTopLevelDestination: RickMortiTopLevelDestination) { //here can go an interface and when ou use it you will have to pass your implementation.
         navOptions {
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
@@ -62,13 +62,14 @@ class MarvelAppState(
             // reselecting the same item
             launchSingleTop = true
             // Restore state when reselecting a previously selected item
-            restoreState = true
+            if (nextRickAndMortyTopLevelDestination.route == rickMortyFeedScreenRoute)
+                restoreState = true
         }.also { navOptions ->
-            when (nextRickMortiTopLevelDestination) {
+            when (nextRickAndMortyTopLevelDestination) {
                 RickMortiTopLevelDestination.RICK_MORTY_FEED ->
-                    navController.navigateToHeroListScreen(navOptions, rickMortyFeedScreenRoute)
+                    navController.navigateToScreen(rickMortyFeedScreenRoute, navOptions)
                 RickMortiTopLevelDestination.FAVORITES ->
-                    navController.navigateToHeroListScreen(navOptions, rickMortyFeedScreenRoute) // TODO: fix
+                    navController.navigateToScreen(rickMortyFavoritesScreenRoute, navOptions)
             }
         }
     }

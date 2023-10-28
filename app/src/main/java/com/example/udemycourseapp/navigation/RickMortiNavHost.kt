@@ -4,10 +4,11 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import com.example.feature_favorites.favoritesGraph
 import com.example.feature_feed.feedGraph
 import com.example.feature_feed.mainFeedDetailsScreen
 import com.example.navigationlogic.NavigationCommand
-import com.example.udemycourseapp.ui.MarvelAppState
+import com.example.udemycourseapp.ui.RickAndMortyAppState
 import com.example.udemycourseapp.ui.RickMortyAppFeature
 
 private const val FEED_DETAILS = "feedDetail"
@@ -26,7 +27,7 @@ class GoToFeedDetails(
 
 @Composable
 fun RickMortyNavHost(
-    appState: MarvelAppState,
+    appState: RickAndMortyAppState,
     modifier: Modifier = Modifier,
     startDestination: String = RickMortyAppFeature.RICK_MORTY_FEED.route
 ) {
@@ -47,14 +48,14 @@ fun RickMortyNavHost(
                 mainFeedDetailsScreen(NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))
             }
         )
-//        favoritesGraph(
-//            command = NavigationCommand.GoToMain(RickMortyAppFeature.FAVORITES),
-//            onCharacterClick = {
-//
-//            },
-//            nestedGraphs = {
-//
-//            }
-//        )
+        favoritesGraph(
+            command = NavigationCommand.GoToMain(RickMortyAppFeature.FAVORITES),
+            onItemClick = { characterId, locationId ->
+
+            },
+            nestedGraphs = {
+
+            }
+        )
     }
 }

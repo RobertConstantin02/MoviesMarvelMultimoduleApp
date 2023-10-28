@@ -1,8 +1,8 @@
 package com.example.usecase.character
 
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
-import com.example.usecase.UseCaseRemote
+import com.example.usecase.UseCase
 
-interface IGetCharacterDetailsUseCase:  UseCaseRemote<Params, CharacterPresentationScreenBO>
+interface IGetCharacterDetailsUseCase:  UseCase<DetailParams, CharacterPresentationScreenBO>
 
-data class Params(val characterId: Int, val locationId: Int)
+data class DetailParams(val characterId: Int, val locationId: Int)

@@ -1,5 +1,6 @@
 package com.example.data_repository.character
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -25,6 +26,7 @@ import com.example.resources.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
@@ -115,4 +117,48 @@ class CharacterRepository @Inject constructor(
             }
 
         }
+
+    override suspend fun updateCharacterIsFavorite(
+        isFavorite: Boolean,
+        characterId: Int
+    ) = localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId)
+
+
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    override fun getFavoriteCharacters(): Flow<PagingData<CharacterBo>> {
+//        return Pager(
+//            config = PagingConfig(
+//                pageSize = 10,
+//                enablePlaceholders = false,
+//                initialLoadSize = 10
+//            ),
+//        ) {
+//            FavoritesPagingSource(localDatabaseDatasource)
+//        }.flow.mapLatest { pagingData ->
+//            pagingData.map { character -> character.toCharacterBo() }
+//        }
+//    }
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<List<CharacterBo>> {
+        Log.d("-----> finalOffset", (page * offset).toString())
+        Log.d("-----> finalPage", (page).toString())
+        Log.d("-----> soloOffset", offset.toString())
+        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest { characters ->
+            characters.map { character -> character.toCharacterBo() }
+        }
+    }
+
+//        localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).flatMapLatest { result ->
+//            flow {
+//                result.fold(
+//                    ifLeft = { it.left() }
+//                ) { characters ->
+//                    characters.map {
+//                        it.toCharacterBo().right()
+//                    }
+//                }
+//            }
+//        }
 }

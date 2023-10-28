@@ -17,7 +17,7 @@ import com.example.domain_repository.episode.IEpisodeRepository
 import com.example.domain_repository.location.ILocationRepository
 import com.example.resources.Result
 import com.example.usecase.character.IGetCharacterDetailsUseCase
-import com.example.usecase.character.Params
+import com.example.usecase.character.DetailParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collect
@@ -31,7 +31,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     @QEpisodesRepository private val episodesRepository: IEpisodeRepository,
 ) : IGetCharacterDetailsUseCase {
 
-    override suspend fun run(input: Params): Flow<Result<CharacterPresentationScreenBO>> {
+    override suspend fun run(input: DetailParams): Flow<Result<CharacterPresentationScreenBO>> {
 
 
         return combine(
