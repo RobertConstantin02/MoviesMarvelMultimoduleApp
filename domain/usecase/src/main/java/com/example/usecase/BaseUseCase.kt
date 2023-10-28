@@ -1,7 +1,5 @@
 package com.example.usecase
 
-import arrow.core.left
-import arrow.core.right
 import com.example.resources.DataSourceError
 import com.example.resources.Result
 import kotlinx.coroutines.CoroutineDispatcher
@@ -12,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 interface UseCase<Input, Output> {
@@ -31,15 +28,14 @@ interface UseCase<Input, Output> {
             scope.launch(Dispatchers.Main) {
                 try {
                     job.await().also { flow ->
-                        flow.catch { e -> error(e)
-                        }.collectLatest {
+                        flow.catch { e -> error(e) }.collectLatest {
                             it.fold(
                                 ifLeft = { e -> error(e) },
                                 ifRight = { output -> success(output) }
                             )
                         }
                     }
-                }catch (e: Exception) { error(e) }
+                } catch (e: Exception) { error(e) }
             }
         }
     }

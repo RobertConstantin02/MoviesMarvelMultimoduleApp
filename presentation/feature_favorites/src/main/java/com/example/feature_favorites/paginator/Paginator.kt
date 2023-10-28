@@ -3,6 +3,7 @@ package com.example.feature_favorites.paginator
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.takeWhile
 
 class Paginator<Key, Item>(
     private val initialKey: Key,
@@ -14,26 +15,28 @@ class Paginator<Key, Item>(
 ) : IPaginator {
 
     private var currentPage = initialKey
+    private var stopCollecting: Boolean = false
 
     override suspend fun loadNextData() {
+        if (stopCollecting) stopCollecting = false
         onLoading()
-            Log.d("-----> pagin currentPage", currentPage.toString())
-        (onRequest(getNextKey()).collectLatest { newItems ->
-            Log.d("-----> collectNewItems", newItems.toString())
-
-            onSuccess(newItems)
-//            pageResult.fold(
-//                ifLeft = { onError(it) }
-//            ) { newItems ->
-//                onSuccess(newItems)
-//            }
-
-            //onLoad(false)
-        })
+        (onRequest(getNextKey()).takeWhile { !stopCollecting }
+            .collectLatest { newItems ->
+                Log.d("-----> items", newItems.toString())
+                onSuccess(newItems)
+            })
     }
 
-    override fun reset() {
-        currentPage = initialKey //0 by default from state
-    }
+    override fun reset() { currentPage = initialKey }
+
+    fun stopCollection() { stopCollecting = true }
+
+}
+
+sealed class PaginationState {
+
+    object Idle : PaginationState()
+    object Loading : PaginationState()
+    object PaginationEnd : PaginationState()
 
 }
