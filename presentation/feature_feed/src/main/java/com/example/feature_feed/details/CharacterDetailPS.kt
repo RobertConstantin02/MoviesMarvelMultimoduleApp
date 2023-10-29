@@ -120,6 +120,8 @@ fun DetailSuccess(
             }
             item {
                 EpisodesDetailFooter(episodes = { characterDetail().episodes })
+            }
+            item {
                 NeighborDetailFooter(neighbors = { characterDetail().neighbors })
             }
         }

@@ -1,6 +1,7 @@
 package com.example.feature_favorites
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,8 +24,7 @@ import com.example.common.R
 import com.example.common.component.CharacterCard
 import com.example.common.component.CircularLoadingBar
 import com.example.common.component.EmptyScreen
-import com.example.common.component.ScrollUpButton
-import com.example.feature_favorites.paginator.PaginationState
+import com.example.feature_favorites.paginator.Paginator
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
 
@@ -65,7 +65,7 @@ fun FavoritesScreen(
     FavoritesScreenContent(
         lazyColumState = { lazyColumnListState },
         favoritesState = { favoritesState },
-        paginationState = { paginationState },
+        pagingState = { paginationState },
         onItemClick = onItemClick,
         onToggleSave = { isFavorite, characterId ->
             viewModel.updateCharacter(
@@ -83,7 +83,7 @@ fun FavoritesScreen(
 fun FavoritesScreenContent(
     lazyColumState: () -> LazyListState,
     favoritesState: () -> FavoritesScreenState,
-    paginationState: () -> PaginationState,
+    pagingState: () -> Paginator.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
@@ -108,7 +108,7 @@ fun FavoritesScreenContent(
             FavoritesScreenListSuccessContent(
                 lazyColumState = lazyColumState,
                 items = { state.favoriteCharacters },
-                paginationState = paginationState,
+                pagingState = pagingState,
                 onItemClick = onItemClick,
                 onToggleSave = onToggleSave,
                 onLoadMoreCharacters = onLoadMoreCharacters,
@@ -122,7 +122,7 @@ fun FavoritesScreenContent(
 private fun FavoritesScreenListSuccessContent(
     lazyColumState: () -> LazyListState,
     items: () -> List<CharacterVo>,
-    paginationState: () -> PaginationState,
+    pagingState: () -> Paginator.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
@@ -147,30 +147,20 @@ private fun FavoritesScreenListSuccessContent(
                         modifier = modifier
                     )
                 }
-//                item {
-//                    when (paginationState()) {
-//                        is PaginationState.Idle -> {}
-//                        is PaginationState.Loading -> {
-//                            CircularLoadingBar(stringResource(id = R.string.character_list_loading))
-//                        }
-//
-//                        is PaginationState.PaginationEnd -> {
-//
-//                        }
-//                    }
-//                }
             }
         }
-        when (paginationState()) {
-            is PaginationState.Idle -> {}
-            is PaginationState.Loading -> {
-                CircularProgressIndicator(modifier = modifier.align(Alignment.BottomCenter), color = MaterialTheme.colorScheme.tertiary)
+        when (pagingState()) {
+            is Paginator.State.Idle -> {}
+            is Paginator.State.Loading -> {
+                CircularProgressIndicator(
+                    modifier = modifier.align(Alignment.BottomCenter),
+                    color = MaterialTheme.colorScheme.tertiary
+                )
             }
 
-            is PaginationState.PaginationEnd -> {
-                ScrollUpButton {
-                   // lazyColumState().animateScrollToItem(0)
-                }
+            is Paginator.State.End -> {
+                // TODO: Custom toast with builder
+                Toast.makeText(LocalContext.current, "End of content", Toast.LENGTH_SHORT).show()
             }
         }
 

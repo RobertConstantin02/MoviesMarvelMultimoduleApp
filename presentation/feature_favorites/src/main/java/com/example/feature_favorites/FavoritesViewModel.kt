@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.common.R
-import com.example.feature_favorites.paginator.PaginationState
 import com.example.feature_favorites.paginator.Paginator
 import com.example.presentation_mapper.toCharacterVo
 import com.example.presentation_model.CharacterVo
@@ -38,8 +37,8 @@ class FavoritesViewModel @Inject constructor(
         MutableStateFlow<FavoritesScreenState>(FavoritesScreenState.Loading)
     val favoritesState = _favoritesState.asStateFlow()
 
-    private val _paginationState = MutableStateFlow<PaginationState>(PaginationState.Idle)
-    val paginationState = _paginationState.asStateFlow()
+    private val _State = MutableStateFlow<Paginator.State>(Paginator.State.Idle)
+    val paginationState = _State.asStateFlow()
 
     private var currentPage = -1
     private var currentCharacterList = mutableListOf<CharacterVo>()
@@ -49,15 +48,15 @@ class FavoritesViewModel @Inject constructor(
         initialKey = currentPage,
         onLoading = {
             if (currentPage == -1) _favoritesState.update { FavoritesScreenState.Loading }
-            else _paginationState.update { PaginationState.Loading }
+            else _State.update { Paginator.State.Loading }
         },
         onRequest = { nextPage ->
-            getFavoriteCharacters.invoke(FavoritesParams(currentPage), Dispatchers.IO)
+            getFavoriteCharacters.invoke(FavoritesParams(nextPage), Dispatchers.IO)
         },
         getNextKey = { currentPage++ },
         onSuccess = { newCharacters ->
             canPaginate = newCharacters.size == 10
-            if(!canPaginate) _paginationState.update { PaginationState.PaginationEnd }
+            if(!canPaginate) _State.update { Paginator.State.End }
             onSuccess(newCharacters.map { it.toCharacterVo() })
         },
         onError = { error -> }
@@ -95,7 +94,7 @@ class FavoritesViewModel @Inject constructor(
     private fun simulateLoading() {
         viewModelScope.launch {
             delay(LOADING_SIMULATION)
-            _paginationState.update { PaginationState.Idle }
+            _State.update { Paginator.State.Idle }
         }
     }
 }

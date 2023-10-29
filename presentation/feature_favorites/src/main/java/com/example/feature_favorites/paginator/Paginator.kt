@@ -1,6 +1,5 @@
 package com.example.feature_favorites.paginator
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.takeWhile
@@ -11,7 +10,7 @@ class Paginator<Key, Item>(
     private inline val onRequest: suspend (nextPage: Key) -> Flow<List<Item>>,
     private inline val getNextKey: () -> Key,
     private inline val onSuccess: (items: List<Item>) -> Unit,
-    private inline val onError: suspend (error: Throwable) -> Unit = {} //suspend because we are using channel which is a suspend function as well
+    private inline val onError: suspend (error: Throwable) -> Unit = {}
 ) : IPaginator {
 
     private var currentPage = initialKey
@@ -21,22 +20,20 @@ class Paginator<Key, Item>(
         if (stopCollecting) stopCollecting = false
         onLoading()
         (onRequest(getNextKey()).takeWhile { !stopCollecting }
-            .collectLatest { newItems ->
-                Log.d("-----> items", newItems.toString())
-                onSuccess(newItems)
-            })
+            .collectLatest { newItems -> onSuccess(newItems) })
     }
 
     override fun reset() { currentPage = initialKey }
 
     fun stopCollection() { stopCollecting = true }
 
+    sealed class State {
+
+        object Idle : State()
+        object Loading : State()
+        object End : State()
+
+    }
+
 }
 
-sealed class PaginationState {
-
-    object Idle : PaginationState()
-    object Loading : PaginationState()
-    object PaginationEnd : PaginationState()
-
-}
