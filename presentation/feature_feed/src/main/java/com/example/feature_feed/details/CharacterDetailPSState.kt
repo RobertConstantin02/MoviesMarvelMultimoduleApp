@@ -5,14 +5,14 @@ import com.example.resources.UiText
 
 sealed class CharacterDetailPSState {
     object Loading : CharacterDetailPSState()
-    data class Error(val characterDetailPSError: CharacterDetailPSError) : CharacterDetailPSState()
+    data class Error(val characterDetailError: CharacterDetailError) : CharacterDetailPSState()
     data class Success(val characterDetail: CharacterPresentationScreenVO) : CharacterDetailPSState()
 }
 
 
-sealed class CharacterDetailPSError(open val message: UiText) {
-    data class ServerError(override val message: UiText): CharacterDetailPSError(message)
-    data class ConnectivityError(override val message: UiText): CharacterDetailPSError(message)
-    data class DataBasError(override val message: UiText): CharacterDetailPSError(message)
-    data class UnknownError(override val message: UiText): CharacterDetailPSError(message)
+sealed class CharacterDetailError(open val message: UiText) {
+    data class ServerError(override val message: UiText): CharacterDetailError(message)
+    data class ConnectivityError(override val message: UiText): CharacterDetailError(message)
+    data class DataBasError(override val message: UiText): CharacterDetailError(message)
+    data class UnknownError(override val message: UiText): CharacterDetailError(message)
 }

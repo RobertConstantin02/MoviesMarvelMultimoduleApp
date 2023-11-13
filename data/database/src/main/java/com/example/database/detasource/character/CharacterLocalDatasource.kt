@@ -53,9 +53,8 @@ class CharacterLocalDatasource @Inject constructor(
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
-    ) {
-        characterDao.updateCharacterIsFavorite(isFavorite, characterId)
-    }
+    ) = characterDao.updateCharacterIsFavorite(isFavorite, characterId)
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getFavoriteCharacters(offset: Int): Flow<List<CharacterEntity>> {

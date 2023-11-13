@@ -38,7 +38,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -74,7 +73,7 @@ fun DetailPresentationScreen(
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val characterDetailState by viewModel.characterDetailState.collectAsStateWithLifecycle()
-    viewModel.getCharacterDetails()
+    viewModel.onEvent(CharacterDetailPSEvent.OnGetCharacterDetails)
     DetailPresentationScreenContent(characterDetail = { characterDetailState })
 }
 
@@ -91,7 +90,7 @@ fun DetailPresentationScreenContent(
             DetailSuccess(characterDetail = { state.characterDetail })
 
         is CharacterDetailPSState.Error ->
-            ErrorScreen(state.characterDetailPSError.message.asString(context)) {
+            ErrorScreen(state.characterDetailError.message.asString(context)) {
                 // TODO: retry and ask data again
             }
     }
@@ -133,7 +132,7 @@ fun DetailHeader(
     characterDetail: () -> CharacterPresentationScreenVO
 ) {
     val dimens = LocalSpacing.current
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
@@ -183,7 +182,7 @@ fun DetailBody(
         if (expanded) dimens.spaceSmall else dimens.spaceMedium
     }
 
-    Spacer(modifier = Modifier.height(dimens.spaceMedium))
+    //Spacer(modifier = Modifier.height(dimens.spaceMedium))
 
     DetailBodyContent(
         characterDetail = characterDetail,
@@ -313,13 +312,14 @@ private fun DetailRowContent(nameResource: Int, value: () -> String?) {
 internal fun EpisodesDetailFooter(episodes: () -> List<EpisodeVO>?) {
     val dimens = LocalSpacing.current
     val state = rememberLazyListState()
+    var visible by remember { mutableStateOf(episodes()?.isNotEmpty() == true) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = dimens.spaceMedium),
         verticalArrangement = Arrangement.SpaceAround
     ) {
-        TextAnimation(isVisible = episodes()?.isNotEmpty() == true) {
+        TextAnimation(isVisible = visible) {
             Text(
                 text = stringResource(id = R.string.episodes_row_title),
                 style = MaterialTheme.typography.titleLarge,
@@ -359,7 +359,7 @@ internal fun NeighborDetailFooter(
         TextAnimation(isVisible = neighbors()?.isNotEmpty() == true) {
             Text(
                 text = stringResource(id = R.string.neighbor_row_title),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleSmall,
             )
         }
         Spacer(modifier = Modifier.height(dimens.spaceMedium))

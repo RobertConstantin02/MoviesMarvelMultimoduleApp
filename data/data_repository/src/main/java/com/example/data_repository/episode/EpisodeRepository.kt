@@ -23,9 +23,7 @@ class EpisodeRepository @Inject constructor(
         local.getEpisodes(episodesIds).fold(
             ifLeft = {
                 remote.getEpisodesByIds(episodesIds).fold(
-                    ifLeft = {
-                        it.left()
-                    }
+                    ifLeft = { it.left() }
                 ) { episodesResult ->
                     episodesResult?.filterNotNull()?.let { episodes ->
                         if (episodes.isNotEmpty()) {
@@ -38,16 +36,14 @@ class EpisodeRepository @Inject constructor(
                     }
                 }
             }
-        ) {
-                episodesEntity -> emit(episodesEntity.toEpisodesBo().right())
+        ) { episodesEntity ->
+            emit(episodesEntity.toEpisodesBo().right())
         }
     }
 
     private suspend fun getLocalEpisodes(episodesIds: List<Int>) =
         local.getEpisodes(episodesIds).fold(
             ifLeft = { it.left() }
-        ) { episodesEntity ->
-            episodesEntity.toEpisodesBo().right()
-        }
+        ) { episodesEntity -> episodesEntity.toEpisodesBo().right() }
 
 }

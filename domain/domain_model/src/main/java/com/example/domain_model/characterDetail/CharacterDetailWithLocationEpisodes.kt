@@ -13,5 +13,5 @@ data class CharacterPresentationScreenBO(
 
 data class CharacterWithLocation(
     val characterMainDetail: Pair<CharacterDetailBo?, List<String?>?>, //character and apisodesIds urls
-    val extendedLocation: Pair<ExtendedLocationBo?, List<String>?>, //extendedLocation with residentsIds urls
+    val extendedLocation: Pair<ExtendedLocationBo?, List<String?>?>, //extendedLocation with residentsIds urls
 )

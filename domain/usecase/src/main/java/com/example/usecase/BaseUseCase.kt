@@ -1,5 +1,6 @@
 package com.example.usecase
 
+import arrow.core.left
 import com.example.resources.DataSourceError
 import com.example.resources.Result
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,9 +40,6 @@ interface UseCase<Input, Output> {
             }
         }
     }
-
-    interface Input
-    interface OutPut
 }
 
 interface UseCaseNoOutput<Input> {
@@ -88,16 +86,12 @@ interface UseCaseLocal<Input, Output> {
             }
         }
     }
-
-    interface Input
-    interface Output
 }
 
-interface PagingUseCase<Input, Output> {
+interface FlowUseCase<Input, Output> {
     fun run(input: Input): Flow<Output>
     operator fun invoke(
         params: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
-    ) = run(params).catch { emit(it as Output) }.flowOn(dispatcher)
-
+    ) = run(params).catch { emit(it.left() as Output) }.flowOn(dispatcher)
 }

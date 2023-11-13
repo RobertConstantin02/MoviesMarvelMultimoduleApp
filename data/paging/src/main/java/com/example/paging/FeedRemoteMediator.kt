@@ -38,13 +38,13 @@ class FeedRemoteMediator @Inject constructor(
                 Uri.parse(nextPage).getQueryParameter(PAGE_PARAMETER)?.toInt()
             }
         }
-        return handleCacheSystem(page ?: 1) //test ?: 1
+        return handleCacheSystem(page ?: 1)
     }
 
     private suspend fun handleCacheSystem(page: Int): MediatorResult =
         remoteDataSource.getAllCharacters(page).fold(
             ifLeft = { error -> return@fold MediatorResult.Error(error) },
-            ifRight = {response ->
+            ifRight = { response ->
                 insertPagingKeys(response)
                 insertCharacters(response)
                 return@fold MediatorResult.Success(endOfPaginationReached = response.results?.isEmpty() == true)
@@ -63,18 +63,11 @@ class FeedRemoteMediator @Inject constructor(
 
     private suspend fun insertCharacters(response: FeedCharacterDto) = with(response) {
         results?.filterNotNull()?.filter { it.id != null }?.map { characterResponse ->
-            // TODO: Check -1 and transient from dto if works or not. If not create variable oppening brackets
-            // TODO: check ?let or just .let
-
             localDataSource.getCharacterById(characterResponse.id ?: -1).fold(
                 ifLeft = { characterResponse }
             ) { characterEntity ->
                 characterResponse.copy(isFavorite = characterEntity.isFavorite)
             }
-//
-//            localDataSource.getCharacterById(characterResponse.id ?: -1)?.let { characterEntity ->
-//                characterResponse.copy(isFavorite = characterEntity.isFavorite)
-//            } ?: characterResponse
         }.let { characters ->
             if (characters?.isNotEmpty() == true) {
                 localDataSource.insertCharacters(characters.map { it.toCharacterEntity() })

@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 
 data class CharacterDto(
     @field:SerializedName("id")
-    val id: Int,
+    val id: Int?,
     @field:SerializedName("name")
     val name: String?,
     @field:SerializedName("status")

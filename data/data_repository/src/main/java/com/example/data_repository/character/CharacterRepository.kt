@@ -142,9 +142,6 @@ class CharacterRepository @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getFavoriteCharacters(page: Int, offset: Int): Flow<List<CharacterBo>> {
-        Log.d("-----> finalOffset", (page * offset).toString())
-        Log.d("-----> finalPage", (page).toString())
-        Log.d("-----> soloOffset", offset.toString())
         return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest { characters ->
             characters.map { character -> character.toCharacterBo() }
         }

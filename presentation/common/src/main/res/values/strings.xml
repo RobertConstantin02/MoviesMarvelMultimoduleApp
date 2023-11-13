@@ -34,7 +34,7 @@
     <string name="detail_unknown">Unknown</string>
 
     <!-- Error Messages-->
-    <string name="list_try_again">Ups!!! Something when wrong while fetching characters</string>
+    <string name="list_try_again">Ups!!! Something when wrong while fetching characters. Error: %s</string>
     <string name="detail_try_again">Ups!!! Something when wrong while fetching character details</string>
 
     <string name="remote_connectivity_error">Ups! Something went wrong with your connection</string>

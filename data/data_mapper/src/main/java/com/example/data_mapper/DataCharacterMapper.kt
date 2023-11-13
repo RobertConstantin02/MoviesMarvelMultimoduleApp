@@ -74,5 +74,5 @@ object DtoToCharacterDetailBoMapper {
     private fun LocationDto?.toLocationBo() = this?.let { LocationBo(url, name) }
 }
 
-fun CharacterDto.toCharacterNeighborBo() = CharacterNeighborBo(id, ImageUrlBo(image))
+fun CharacterDto.toCharacterNeighborBo() =  CharacterNeighborBo(id ?: -1, ImageUrlBo(image))
 

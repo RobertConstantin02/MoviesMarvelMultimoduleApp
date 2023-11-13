@@ -1,7 +1,6 @@
 package com.example.usecase.character.implementation
 
 import android.net.Uri
-import android.util.Log
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
@@ -17,7 +16,6 @@ import com.example.domain_repository.episode.IEpisodeRepository
 import com.example.domain_repository.location.ILocationRepository
 import com.example.resources.Result
 import com.example.usecase.character.IGetCharacterDetailsUseCase
-import com.example.usecase.character.DetailParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collect
@@ -31,8 +29,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     @QEpisodesRepository private val episodesRepository: IEpisodeRepository,
 ) : IGetCharacterDetailsUseCase {
 
-    override suspend fun run(input: DetailParams): Flow<Result<CharacterPresentationScreenBO>> {
-
+    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Result<CharacterPresentationScreenBO>> {
 
         return combine(
             characterRepository.getCharacter(input.characterId),
@@ -44,8 +41,6 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
                 locationResult.fold(
                     ifLeft = { it.left() }
                 ) { location ->
-                    Log.d("-----> character", character.toString())
-                    Log.d("-----> location", location.toString())
                     CharacterWithLocation(
                         Pair(character, character.episodes),
                         Pair(location, location.residents)
@@ -53,14 +48,9 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
                 }
             }
         }.transform { characterWithLocation ->
-            Log.d("-----> transform", "called")
             characterWithLocation.fold(
-                ifLeft = {
-                    emit(it.left())
-                },
-                ifRight = {
-                    combineResidentsAndEpisodes(it)
-                }
+                ifLeft = { emit(it.left()) },
+                ifRight = { combineResidentsAndEpisodes(it) }
             )
         }
     }
@@ -73,7 +63,6 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
             characterRepository.getCharactersByIds(getIds(character.second)),
             episodesRepository.getEpisodes(getIds(location.second))
         ) { residentsResult, episodesResult ->
-            Log.d("-----> combineResidentsAndEpisodes", "called")
             handleResidentEpisodeTransformation(
                 characterWithLocation,
                 residentsResult,
@@ -93,7 +82,6 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
             episodesResult.fold(
                 ifLeft = { emit(it.left()) }
             ) { episodes ->
-                Log.d("-----> handleResidentEpisodeTransformation", "called")
                 emit(
                     CharacterPresentationScreenBO(
                         characterWithLocation.characterMainDetail.first,

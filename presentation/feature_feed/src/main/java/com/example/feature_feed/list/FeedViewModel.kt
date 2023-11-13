@@ -14,13 +14,13 @@ import com.example.usecase.di.GetCharacters
 import com.example.usecase.di.UpdateCharacterIsFavorite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
+const val FLOW_STOP_TIME_OUT = 5_000L
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     @GetCharacters private val getAllCharacters: IGetAllCharactersUseCase,
@@ -31,16 +31,11 @@ class FeedViewModel @Inject constructor(
         getAllCharacters.invoke(
             Unit,
             Dispatchers.IO
-        ).map {pagingData ->
+        ).map { pagingData ->
             pagingData.map { character -> character.toCharacterVo()}
-//            pagingData.fold(
-//                ifLeft = { PagingData.empty() }
-//            ) { pagingData ->
-//                pagingData.map { character -> character.toCharacterVo() }
-//            }
         }.cachedIn(viewModelScope).stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.WhileSubscribed(FLOW_STOP_TIME_OUT),
             initialValue = PagingData.empty()
         )
 
