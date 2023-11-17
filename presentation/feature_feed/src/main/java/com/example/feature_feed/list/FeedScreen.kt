@@ -83,7 +83,7 @@ fun CharacterScreenListContent(
         }
     }
 }
-//
+
 @Composable
 private fun CharacterScreenListSuccessContent(
     state: () -> LazyGridState,

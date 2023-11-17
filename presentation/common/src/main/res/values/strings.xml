@@ -5,9 +5,12 @@
     <string name="save">Save</string>
     <string name="unsaved">Unsaved</string>
     <string name="retry">Retry</string>
+    <string name="remove_character">Remove character</string>
+    <string name="cancel">Cancel</string>
     <!-- Content Description -->
     <string name="icon_location_content_description">Location Icon</string>
     <string name="button_expand_content_description">Expand Button</string>
+    <string name="remove_alert_dialog_description">Remove Icon</string>
     <!-- Loading Messages-->
     <string name="character_list_loading">Characters are loading</string>
     <string name="character_detail_loading">Characters detail loading</string>
@@ -45,7 +48,11 @@
     <string name="local_db_item_not_found">Item not found</string>
     <string name="local_db_insertion_error">Data could not be saved properly</string>
     <string name="local_db_deletion_error">Data could have not been deleted properly</string>
-    <!-- Other Messages -->
+
+    <!-- Dialog Texts -->
+    <string name="dialog_remove_character"> Are you sure to remove this character? </string>
+    <!-- Info Messages -->
     <string name="empty_favorite_list">You do not have favorites yet..</string>
+    <string name="end_of_pagination">End of content</string>
 
 </resources>

@@ -1,18 +1,21 @@
 package com.example.feature_favorites
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +27,7 @@ import com.example.common.R
 import com.example.common.component.CharacterCard
 import com.example.common.component.CircularLoadingBar
 import com.example.common.component.EmptyScreen
+import com.example.common.component.RemoveAlertDialog
 import com.example.feature_favorites.paginator.Paginator
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
@@ -39,35 +43,24 @@ fun FavoritesScreen(
 
     val paginationState by viewModel.paginationState.collectAsStateWithLifecycle()
 
-    val lazyColumnListState = rememberLazyListState()
+    val lazyColumnState = rememberLazyListState()
     val shouldStartPaginate = remember {
         derivedStateOf {
-            Log.d(
-                "-----> currentItem",
-                (lazyColumnListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                    ?: 0).toString()
-            )
-            Log.d(
-                "-----> totalListItem",
-                (lazyColumnListState.layoutInfo.totalItemsCount - 1).toString()
-            )
-            viewModel.canPaginate && (lazyColumnListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                ?: 0) >= (lazyColumnListState.layoutInfo.totalItemsCount - 1)
+            viewModel.canPaginate && (lazyColumnState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                ?: 0) >= (lazyColumnState.layoutInfo.totalItemsCount - 1)
         }
     }
+
     LaunchedEffect(key1 = shouldStartPaginate.value) {
-        Log.d("-----> sohuldStarPagin", shouldStartPaginate.value.toString())
-        if (shouldStartPaginate.value) //ye sinitPaginAgain //if im scrolling and I reached las item in the list
-            viewModel.loadNextCharacters()
+        if (shouldStartPaginate.value) viewModel.loadNextCharacters()
     }
 
-
     FavoritesScreenContent(
-        lazyColumState = { lazyColumnListState },
+        lazyColumState = { lazyColumnState },
         favoritesState = { favoritesState },
         pagingState = { paginationState },
         onItemClick = onItemClick,
-        onToggleSave = { isFavorite, characterId ->
+        onRemoveCharacter = { isFavorite, characterId ->
             viewModel.updateCharacter(
                 isFavorite,
                 characterId,
@@ -85,7 +78,7 @@ fun FavoritesScreenContent(
     favoritesState: () -> FavoritesScreenState,
     pagingState: () -> Paginator.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
-    onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
+    onRemoveCharacter: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
     emptyListMessage: Int? = null,
     modifier: Modifier,
@@ -98,7 +91,7 @@ fun FavoritesScreenContent(
         }
 
         is FavoritesScreenState.Error -> {}
-        is FavoritesScreenState.Empty -> { //only we will call emptyy from the view model in thawt case. Good idea to maybe apply for feed
+        is FavoritesScreenState.Empty -> {
             emptyListMessage?.let {
                 EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
             }
@@ -110,7 +103,7 @@ fun FavoritesScreenContent(
                 items = { state.favoriteCharacters },
                 pagingState = pagingState,
                 onItemClick = onItemClick,
-                onToggleSave = onToggleSave,
+                onRemoveCharacter = onRemoveCharacter,
                 onLoadMoreCharacters = onLoadMoreCharacters,
                 modifier = modifier,
             )
@@ -124,10 +117,13 @@ private fun FavoritesScreenListSuccessContent(
     items: () -> List<CharacterVo>,
     pagingState: () -> Paginator.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
-    onToggleSave: (isFavorite: Boolean, characterId: Int) -> Unit,
+    onRemoveCharacter: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
     modifier: Modifier,
 ) {
+    // TODO: find difference between doing with by and =
+    val openAlertDialog = remember { mutableStateOf(false) }
+    val characterIdToRemove = remember { mutableStateOf(-1) }
 
     Box(modifier = modifier.fillMaxSize()) {
 
@@ -138,32 +134,70 @@ private fun FavoritesScreenListSuccessContent(
                     CharacterCard(
                         item = { character },
                         onItemClick = onItemClick,
-                        onToggleSave = { isFavorite, characterId ->
-                            onToggleSave(
-                                isFavorite,
-                                characterId
-                            )
+                        onToggleSave = { _, characterId ->
+                            openAlertDialog.value = true
+                            characterIdToRemove.value = characterId
                         },
                         modifier = modifier
                     )
                 }
             }
         }
-        when (pagingState()) {
-            is Paginator.State.Idle -> {}
-            is Paginator.State.Loading -> {
-                CircularProgressIndicator(
-                    modifier = modifier.align(Alignment.BottomCenter),
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
 
-            is Paginator.State.End -> {
-                // TODO: Custom toast with builder
-                Toast.makeText(LocalContext.current, "End of content", Toast.LENGTH_SHORT).show()
-            }
-        }
+        HandleScreenState(pagingState = { pagingState() }, boxScope = this)
 
+        OpenAlertDialog(
+            openAlertDialog = { openAlertDialog.value },
+            closeOpenAlertDialog = { openAlertDialog.value = false },
+            characterId = { characterIdToRemove.value },
+            confirmAction = onRemoveCharacter
+        )
     }
-
 }
+
+@Composable
+fun HandleScreenState(
+    pagingState: () -> Paginator.State,
+    boxScope: BoxScope,
+    modifier: Modifier = Modifier
+) = with(boxScope) {
+    when (pagingState()) {
+        is Paginator.State.Idle -> {}
+        is Paginator.State.Loading ->
+            CircularProgressIndicator(
+                modifier = modifier.align(Alignment.BottomCenter),
+                color = MaterialTheme.colorScheme.tertiary
+            )
+
+        is Paginator.State.End ->
+            // TODO: Custom toast with builder
+            Toast.makeText(
+                LocalContext.current,
+                stringResource(id = R.string.end_of_pagination),
+                Toast.LENGTH_SHORT
+            ).show()
+    }
+}
+
+@Composable
+fun OpenAlertDialog(
+    openAlertDialog: () -> Boolean,
+    closeOpenAlertDialog: () -> Unit,
+    characterId: () -> Int,
+    confirmAction: (isFavorite: Boolean, characterId: Int) -> Unit,
+) {
+    if (openAlertDialog()) {
+        RemoveAlertDialog(
+            onDismissRequest = { closeOpenAlertDialog() },
+            onConfirmation = {
+                closeOpenAlertDialog()
+                confirmAction(false, characterId())
+            },
+            dialogTitle = R.string.dialog_remove_character,
+            confirmationText = R.string.remove_character,
+            dennyText = R.string.cancel,
+            icon = Icons.Outlined.Delete
+        )
+    }
+}
+

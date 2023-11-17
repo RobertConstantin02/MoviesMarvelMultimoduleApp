@@ -1,4 +1,4 @@
-package com.example.feature_feed.details
+package com.example.common.screen.details
 
 import com.example.presentation_model.CharacterPresentationScreenVO
 

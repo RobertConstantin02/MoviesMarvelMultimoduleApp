@@ -37,26 +37,27 @@ class FavoritesViewModel @Inject constructor(
         MutableStateFlow<FavoritesScreenState>(FavoritesScreenState.Loading)
     val favoritesState = _favoritesState.asStateFlow()
 
-    private val _State = MutableStateFlow<Paginator.State>(Paginator.State.Idle)
-    val paginationState = _State.asStateFlow()
+    private val _paginationState = MutableStateFlow<Paginator.State>(Paginator.State.Idle)
+    val paginationState = _paginationState.asStateFlow()
 
-    private var currentPage = -1
+    private var currentPage = PAGE_INITIALIZATION
     private var currentCharacterList = mutableListOf<CharacterVo>()
     var canPaginate by mutableStateOf(true)
+        private set
 
     private val pagination = Paginator(
         initialKey = currentPage,
         onLoading = {
             if (currentPage == -1) _favoritesState.update { FavoritesScreenState.Loading }
-            else _State.update { Paginator.State.Loading }
+            else _paginationState.update { Paginator.State.Loading }
         },
         onRequest = { nextPage ->
             getFavoriteCharacters.invoke(FavoritesParams(nextPage), Dispatchers.IO)
         },
         getNextKey = { currentPage++ },
         onSuccess = { newCharacters ->
-            canPaginate = newCharacters.size == 10
-            if(!canPaginate) _State.update { Paginator.State.End }
+            canPaginate = newCharacters.size == PAGE_SIZE
+            if (!canPaginate && itemListHasPageSizeOrGrater()) _paginationState.update { Paginator.State.End }
             onSuccess(newCharacters.map { it.toCharacterVo() })
         },
         onError = { error -> }
@@ -87,14 +88,23 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    fun loadNextCharacters() { viewModelScope.launch {
-        pagination.loadNextData() }
+    fun loadNextCharacters() {
+        viewModelScope.launch { pagination.loadNextData() }
     }
+
+    private fun itemListHasPageSizeOrGrater() =
+        ((_favoritesState.value as? FavoritesScreenState.Success)?.favoriteCharacters?.size
+            ?: 0) >= PAGE_SIZE
 
     private fun simulateLoading() {
         viewModelScope.launch {
             delay(LOADING_SIMULATION)
-            _State.update { Paginator.State.Idle }
+            _paginationState.update { Paginator.State.Idle }
         }
+    }
+
+    companion object {
+        private const val PAGE_SIZE = 10
+        private const val PAGE_INITIALIZATION = -1
     }
 }

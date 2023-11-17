@@ -1,4 +1,4 @@
-package com.example.feature_feed.details
+package com.example.common.screen.details
 
 import android.annotation.SuppressLint
 import android.view.animation.OvershootInterpolator
@@ -312,7 +312,7 @@ private fun DetailRowContent(nameResource: Int, value: () -> String?) {
 internal fun EpisodesDetailFooter(episodes: () -> List<EpisodeVO>?) {
     val dimens = LocalSpacing.current
     val state = rememberLazyListState()
-    var visible by remember { mutableStateOf(episodes()?.isNotEmpty() == true) }
+    val visible by remember { mutableStateOf(episodes()?.isNotEmpty() == true) }
     Column(
         modifier = Modifier
             .fillMaxWidth()

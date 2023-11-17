@@ -1,26 +1,11 @@
 package com.example.feature_feed
 
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.feature_feed.details.DetailPresentationScreen
 import com.example.feature_feed.list.HeroListScreen
 import com.example.navigationlogic.Command
-import com.example.navigationlogic.Feature
 
-fun NavGraphBuilder.mainFeedDetailsScreen(
-    command: Command,
-    onBackClick: () -> Unit = {}
-) {
-    composable(
-        route = command.getRoute(),
-        arguments = command.args
-    ) {
-        DetailPresentationScreen()
-    }
-}
 
 fun NavGraphBuilder.feedGraph(
     command: Command,

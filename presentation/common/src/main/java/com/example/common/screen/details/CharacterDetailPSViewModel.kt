@@ -1,4 +1,4 @@
-package com.example.feature_feed.details
+package com.example.common.screen.details
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

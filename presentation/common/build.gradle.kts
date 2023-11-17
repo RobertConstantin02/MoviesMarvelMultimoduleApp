@@ -22,11 +22,23 @@ kapt {
 }
 dependencies {
     implementation(project(":toplevel:designsystem"))
+    implementation(project(":toplevel:navigationlogic"))
     implementation(project(":toplevel:resources"))
     implementation(project(":presentation:presentation_model"))
+    implementation(project(":presentation:presentation_mapper"))
+    implementation(project(":domain:domain_model"))
+    implementation(project(":domain:usecase"))
+
     libs.bundles.apply {
         implementation(compose)
+        implementation(hilt)
+        implementation(coroutines)
+        implementation(lifecycle)
+        implementation(arrow)
     }
-
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.paging.compose)
+    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.test)
 }
