@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
 interface UseCase<Input, Output> {
@@ -21,7 +22,7 @@ interface UseCase<Input, Output> {
         input: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         coroutineScope: CoroutineScope? = null,
-        success: (Output) -> Unit,
+        success: (Output) -> Unit = {},
         error: (error: DataSourceError) -> Unit = {} //review here and put something more gerneric because of the catch
     ) {
         coroutineScope?.let { scope ->

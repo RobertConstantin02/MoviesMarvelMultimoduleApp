@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -20,8 +21,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.common.R
 import com.example.common.component.CharacterCard
@@ -51,8 +55,10 @@ fun FavoritesScreen(
         }
     }
 
+    RememberLifeCycleEvent { viewModel.onEvent(FavoritesScreenEvent.OnCancellCollectData) }
+
     LaunchedEffect(key1 = shouldStartPaginate.value) {
-        if (shouldStartPaginate.value) viewModel.loadNextCharacters()
+        if (shouldStartPaginate.value) viewModel.onEvent(FavoritesScreenEvent.OnLoadData)
     }
 
     FavoritesScreenContent(
@@ -66,7 +72,7 @@ fun FavoritesScreen(
                 characterId,
             )
         },
-        onLoadMoreCharacters = { viewModel.loadNextCharacters() },
+        onLoadMoreCharacters = { viewModel.onEvent(FavoritesScreenEvent.OnLoadData) },
         emptyListMessage = R.string.empty_favorite_list,
         modifier = Modifier
     )
@@ -90,7 +96,11 @@ fun FavoritesScreenContent(
             CircularLoadingBar(stringResource(id = R.string.character_list_loading))
         }
 
-        is FavoritesScreenState.Error -> {}
+        is FavoritesScreenState.Error -> {
+            emptyListMessage?.let {
+                EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
+            }
+        }
         is FavoritesScreenState.Empty -> {
             emptyListMessage?.let {
                 EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
@@ -198,6 +208,29 @@ fun OpenAlertDialog(
             dennyText = R.string.cancel,
             icon = Icons.Outlined.Delete
         )
+    }
+}
+
+@Composable
+fun RememberLifeCycleEvent(
+    onStop: () -> Unit
+) {
+    with(LocalLifecycleOwner.current) {
+        val lifeCycleObserver = remember {
+            LifecycleEventObserver { _, event ->
+                when(event) {
+                    Lifecycle.Event.ON_STOP -> onStop() //this is needed because if we swtich scren again then collect from pagiantor will continue collecting
+                    else -> {}
+                }
+            }
+        }
+
+        DisposableEffect(this) {
+            this@with.lifecycle.addObserver(lifeCycleObserver)
+            onDispose {
+                this@with.lifecycle.removeObserver(lifeCycleObserver)
+            }
+        }
     }
 }
 

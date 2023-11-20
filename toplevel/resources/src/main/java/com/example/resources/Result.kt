@@ -1,11 +1,6 @@
 package com.example.resources
 
 import arrow.core.Either
-import arrow.core.right
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -43,12 +38,14 @@ sealed class RemoteError: Throwable(), DataSourceError {
     data class Unknown(override val message: String? = null): RemoteError()
 }
 
-sealed class DataBaseError: Exception(), DataSourceError {
-    object EmptyResult: DataBaseError()
-    object ItemNotFound: DataBaseError()
-    object InsertionError: DataBaseError()
-    object DeletionError: DataBaseError()
-    object UpdateError: DataBaseError()
+sealed class DataBase: Exception(), DataSourceError {
+    sealed class Error: DataBase() {
+        object Insertion: DataBase()
+        object Deletion: DataBase()
+        object Update: DataBase()
+        data class Reading(override val message: String?): DataBase()
+    }
+    object EmptyResult: DataBase()
 }
 
 

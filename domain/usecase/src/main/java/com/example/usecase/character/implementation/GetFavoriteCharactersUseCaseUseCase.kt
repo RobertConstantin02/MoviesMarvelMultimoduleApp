@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.domain_model.character.CharacterBo
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.domain_repository.di.QCharacterRepository
+import com.example.resources.Result
 import com.example.usecase.character.FavoritesParams
 import com.example.usecase.character.IGetFavoriteCharactersUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,7 +15,7 @@ import javax.inject.Inject
 class GetFavoriteCharactersUseCaseUseCase @Inject constructor(
     @QCharacterRepository private val repository: ICharacterRepository
 ) : IGetFavoriteCharactersUseCase {
-    override fun run(input: FavoritesParams): Flow<List<CharacterBo>> = with(input) {
+    override fun run(input: FavoritesParams): Flow<Result<List<CharacterBo>>> = with(input) {
         Log.d("-----> currentPage", page.toString())
         repository.getFavoriteCharacters(page, offset)
 //        repository.getFavoriteCharacters(page, offset).flatMapLatest { result ->

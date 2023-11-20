@@ -1,7 +1,10 @@
 package com.example.common.screen.details
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.view.animation.OvershootInterpolator
+import androidx.annotation.ColorRes
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.animateContentSize
@@ -47,10 +50,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -61,13 +66,17 @@ import com.example.common.component.CircularLoadingBar
 import com.example.common.component.ErrorScreen
 import com.example.common.component.ExpandButton
 import com.example.common.component.ExpandableContent
+import com.example.common.component.ImageFromUrlDraw
 import com.example.common.component.ImageFromUrlFullWidth
+import com.example.common.util.drawGradient
 import com.example.designsystem.icon.AppIcons
+import com.example.designsystem.theme.Dimensions
 import com.example.designsystem.theme.LocalSpacing
 import com.example.presentation_model.CharacterNeighborVO
 import com.example.presentation_model.CharacterPresentationScreenVO
 import com.example.presentation_model.EpisodeVO
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun DetailPresentationScreen(
     viewModel: DetailViewModel = hiltViewModel()
@@ -77,6 +86,7 @@ fun DetailPresentationScreen(
     DetailPresentationScreenContent(characterDetail = { characterDetailState })
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun DetailPresentationScreenContent(
     characterDetail: () -> CharacterDetailPSState
@@ -96,6 +106,7 @@ fun DetailPresentationScreenContent(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun DetailSuccess(
     characterDetail: () -> CharacterPresentationScreenVO
@@ -127,13 +138,16 @@ fun DetailSuccess(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun DetailHeader(
-    characterDetail: () -> CharacterPresentationScreenVO
+    characterDetail: () -> CharacterPresentationScreenVO,
+    modifier: Modifier = Modifier
 ) {
     val dimens = LocalSpacing.current
+
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .shadow(
                 elevation = dimens.spaceExtraSmall,
@@ -141,9 +155,35 @@ fun DetailHeader(
                 spotColor = MaterialTheme.colorScheme.primary
             )
     ) {
-        ImageFromUrlFullWidth(
+
+        ImageFromUrlDraw(
             url = { characterDetail().characterMainDetail?.image.orEmpty() },
+            draw = { drawGradient(listOf(0.5f to Color.Black.copy(alpha = 0F), 1F to Color.Black)) }
         )
+
+        Row(
+            modifier = modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 30.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            DetailRowContent(
+                R.string.character_name,
+                keyTextColor = MaterialTheme.colorScheme.inverseOnSurface,
+                valueTextColor = MaterialTheme.colorScheme.inverseOnSurface,
+                keyTextStyle = MaterialTheme.typography.bodyLarge,
+                valueTextStyle = MaterialTheme.typography.titleSmall
+            ) { characterDetail().characterMainDetail?.name }
+
+            DetailRowContent(
+                R.string.character_status,
+                keyTextColor = MaterialTheme.colorScheme.inverseOnSurface,
+                valueTextColor = MaterialTheme.colorScheme.inverseOnSurface,
+                keyTextStyle = MaterialTheme.typography.bodyLarge,
+                valueTextStyle = MaterialTheme.typography.titleSmall
+            ) { characterDetail().characterMainDetail?.status }
+        }
     }
 }
 
@@ -155,9 +195,7 @@ fun DetailBody(
     val dimens = LocalSpacing.current
     var expanded by remember { mutableStateOf(false) }
     val transitionState = remember {
-        MutableTransitionState(expanded).apply {
-            targetState = !expanded
-        }
+        MutableTransitionState(expanded).apply { targetState = !expanded }
     }
     val transition = updateTransition(
         targetState = transitionState,
@@ -185,6 +223,7 @@ fun DetailBody(
     //Spacer(modifier = Modifier.height(dimens.spaceMedium))
 
     DetailBodyContent(
+        dimens,
         characterDetail = characterDetail,
         isExpanded = { expanded },
         onExpandShrinkClick = { expanded = it },
@@ -195,6 +234,7 @@ fun DetailBody(
 
 @Composable
 fun DetailBodyContent(
+    dimens: Dimensions,
     characterDetail: () -> CharacterPresentationScreenVO,
     isExpanded: () -> Boolean,
     onExpandShrinkClick: (Boolean) -> Unit,
@@ -202,12 +242,7 @@ fun DetailBodyContent(
     cardBgColor: () -> Color,
 ) {
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = characterDetail().characterMainDetail?.name.orEmpty(),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Left
-        )
+    Column(modifier = Modifier.fillMaxWidth().padding(top = dimens.spaceMedium)) {
         LocationCard(
             characterDetail = { characterDetail() },
             isExpanded = { isExpanded() },
@@ -285,7 +320,14 @@ private fun CharacterDescriptionContent(
 }
 
 @Composable
-private fun DetailRowContent(nameResource: Int, value: () -> String?) {
+private fun DetailRowContent(
+    nameResource: Int,
+    keyTextStyle: TextStyle = MaterialTheme.typography.bodySmall,
+    valueTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    keyTextColor: Color = Color.Unspecified,
+    valueTextColor: Color = Color.Unspecified,
+    value: () -> String?
+) {
     val dimens = LocalSpacing.current
     Row(
         modifier = Modifier.padding(
@@ -297,13 +339,15 @@ private fun DetailRowContent(nameResource: Int, value: () -> String?) {
     ) {
         Text(
             text = stringResource(id = nameResource),
-            style = MaterialTheme.typography.bodyLarge,
+            style = keyTextStyle,
+            color = keyTextColor
         )
         Spacer(modifier = Modifier.width(dimens.spaceSmall))
         Text(
             text = value()?.ifEmpty { stringResource(id = R.string.detail_unknown) }
                 ?: stringResource(id = R.string.detail_unknown),
-            style = MaterialTheme.typography.bodySmall,
+            style = valueTextStyle,
+            color = valueTextColor
         )
     }
 }
@@ -359,7 +403,7 @@ internal fun NeighborDetailFooter(
         TextAnimation(isVisible = neighbors()?.isNotEmpty() == true) {
             Text(
                 text = stringResource(id = R.string.neighbor_row_title),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleLarge,
             )
         }
         Spacer(modifier = Modifier.height(dimens.spaceMedium))

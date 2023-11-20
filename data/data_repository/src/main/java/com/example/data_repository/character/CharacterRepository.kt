@@ -98,8 +98,10 @@ class CharacterRepository @Inject constructor(
     private suspend fun getLocalCharacters(charactersId: List<Int>) =
         localDatabaseDatasource.getCharactersByIds(charactersId).fold(
             ifLeft = { it.left() }
-        ) { charactersEntity -> charactersEntity.map {
-            it.toCharacterNeighborBo() }.right()
+        ) { charactersEntity ->
+            charactersEntity.map {
+                it.toCharacterNeighborBo()
+            }.right()
         }
 
     private suspend fun getApiCharacter(characterId: Int): Result<CharacterDetailBo> =
@@ -121,7 +123,7 @@ class CharacterRepository @Inject constructor(
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
-    ) = localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId)
+    ) = flow { emit(localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId)) }
 
 
 //    @OptIn(ExperimentalCoroutinesApi::class)
@@ -141,10 +143,16 @@ class CharacterRepository @Inject constructor(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<List<CharacterBo>> {
-        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest { characters ->
-            characters.map { character -> character.toCharacterBo() }
-        }
+    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<Result<List<CharacterBo>>> {
+//        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest { characters ->
+//            characters.map { character -> character.toCharacterBo() }
+//        }
+        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset)
+            .mapLatest { result ->
+                result.fold(ifLeft = {error -> error.left()}) { characters ->
+                    characters.map { it.toCharacterBo() }.right()
+                }
+            }
     }
 
 //        localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).flatMapLatest { result ->

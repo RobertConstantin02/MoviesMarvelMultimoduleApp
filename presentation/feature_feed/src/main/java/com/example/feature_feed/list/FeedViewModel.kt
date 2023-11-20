@@ -42,8 +42,8 @@ class FeedViewModel @Inject constructor(
     fun updateCharacter(isFavorite: Boolean, characterId: Int) {
         updateCharacterIsFavorite.invoke(
             UpdateParams(isFavorite, characterId),
-            viewModelScope,
-            Dispatchers.IO
+            Dispatchers.IO,
+            viewModelScope
         )
     }
 }

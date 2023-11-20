@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.common.R
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.presentation_mapper.BoToVoCharacterPresentationMapper.toCharacterPresentationScreenVO
-import com.example.resources.DataBaseError
+import com.example.resources.DataBase
 import com.example.resources.DataSourceError
 import com.example.resources.RemoteError
 import com.example.resources.UiText
@@ -63,7 +63,7 @@ class DetailViewModel @Inject constructor(
     private fun onError(error: DataSourceError) {
         val errorEvent = when (error) {
             is RemoteError -> checkRemoteError(error)
-            is DataBaseError -> checkLocalDbError(error)
+            is DataBase -> checkLocalDbError(error)
         }
         onEvent(CharacterDetailPSEvent.Error(errorEvent))
     }
@@ -89,20 +89,23 @@ class DetailViewModel @Inject constructor(
             )
         }
 
-    private fun checkLocalDbError(error: DataBaseError) =
+    private fun checkLocalDbError(error: DataBase) =
         when (error) {
-            is DataBaseError.InsertionError -> getLocalDbErrorMessage(R.string.local_db_insertion_error)
-            is DataBaseError.DeletionError -> getLocalDbErrorMessage(R.string.local_db_deletion_error)
-            is DataBaseError.EmptyResult -> getLocalDbErrorMessage(R.string.local_db_empty_result)
-            is DataBaseError.ItemNotFound -> getLocalDbErrorMessage(R.string.local_db_item_not_found)
-            is DataBaseError.UpdateError -> getLocalDbErrorMessage(R.string.local_db_item_not_found) //refactor
+            is DataBase.Error.Insertion -> getLocalDbErrorMessage(R.string.local_db_insertion_error)
+            is DataBase.Error.Deletion -> getLocalDbErrorMessage(R.string.local_db_deletion_error)
+            is DataBase.EmptyResult -> getLocalDbErrorMessage(R.string.local_db_empty_result)
+            is DataBase.EmptyResult -> getLocalDbErrorMessage(R.string.local_db_item_not_found)
+            is DataBase.Error.Update -> getLocalDbErrorMessage(R.string.local_db_item_not_found) //refactor
+            is DataBase.Error.Reading -> getLocalDbErrorMessage(R.string.local_db_read_error, error.message)
         }
 
-    private fun getLocalDbErrorMessage(resourcesMessage: Int) = CharacterDetailPSState.Error(
-        CharacterDetailError.DataBasError(
-            UiText.StringResources(resourcesMessage)
+    private fun getLocalDbErrorMessage(resourcesMessage: Int, dynamicError: String? = null) =
+        CharacterDetailPSState.Error(
+            CharacterDetailError.DataBasError(
+                dynamicError?.let { UiText.DynamicText(resourcesMessage, dynamicError) }
+                    ?: UiText.StringResources(resourcesMessage)
+            )
         )
-    )
 
     companion object {
         private const val CHARACTER_ID = "characterId"

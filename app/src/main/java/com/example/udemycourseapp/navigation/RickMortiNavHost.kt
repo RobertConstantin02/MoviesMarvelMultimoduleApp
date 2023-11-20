@@ -16,8 +16,7 @@ private const val FEED_DETAILS = "feedDetail"
 class GoToFeedDetails(
     private val characterId: Int,
     private val locationId: Int?,
-    ) :
-    NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED) {
+    ) : NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED) {
     override fun createRoute(): String {
         return super.createRoute().plus(
             "${Uri.encode(characterId.toString())}/${Uri.encode(locationId.toString())}"
@@ -48,14 +47,11 @@ fun RickMortyNavHost(
                 detailsScreen(NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))
             }
         )
+
         favoritesGraph(
             command = NavigationCommand.GoToMain(RickMortyAppFeature.FAVORITES),
             onItemClick = { itemId, locationId ->
-                appState.navController.navigate(
-                    GoToFeedDetails(
-                        itemId, locationId
-                    ).createRoute()
-                )
+                appState.navController.navigate(GoToFeedDetails(itemId, locationId).createRoute())
             },
             nestedGraphs = {
                 detailsScreen(NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))

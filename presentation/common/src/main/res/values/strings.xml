@@ -21,9 +21,9 @@
     <!-- Image Content Description -->
     <string name="character_detail_image">character detail image</string>
     <!-- Details Texts -->
-    <string name="character_name">Name</string>
-    <string name="character_status">Status</string>
-    <string name="character_gender">Gender</string>
+    <string name="character_name">Name:</string>
+    <string name="character_status">Status:</string>
+    <string name="character_gender">Gender:</string>
 
     <string name="character_specimen">Specimen:</string>
     <string name="character_origin">Origin:</string>
@@ -48,6 +48,10 @@
     <string name="local_db_item_not_found">Item not found</string>
     <string name="local_db_insertion_error">Data could not be saved properly</string>
     <string name="local_db_deletion_error">Data could have not been deleted properly</string>
+    <string name="local_db_update_error">Error while updating data</string>
+    <string name="local_db_unknown_error">Unknown error</string>
+    <string name="local_db_read_error">Error while reading local file. Error: %s</string>
+
 
     <!-- Dialog Texts -->
     <string name="dialog_remove_character"> Are you sure to remove this character? </string>

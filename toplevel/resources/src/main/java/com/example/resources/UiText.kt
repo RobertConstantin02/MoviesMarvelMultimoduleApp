@@ -9,7 +9,7 @@ sealed class UiText {
 
     fun asString(context: Context): String =
         when(this) {
-            is DynamicText -> String.format(Resources.getSystem().getString(id), message)
+            is DynamicText -> String.format(context.getString(id), message)
             is StringResources -> context.getString(id)
         }
 

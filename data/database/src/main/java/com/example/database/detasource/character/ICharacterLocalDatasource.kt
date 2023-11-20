@@ -14,6 +14,6 @@ interface ICharacterLocalDatasource {
     suspend fun insertPagingKeys(keys: List<PagingKeys>)
     suspend fun insertCharacters(characters : List<CharacterEntity>): Result<Unit>
     suspend fun insertCharacter(character: CharacterEntity): Result<Unit>
-    suspend fun updateCharacterIsFavorite(isFavorite: Boolean, characterId: Int)
-    fun getFavoriteCharacters(offset: Int):  Flow<List<CharacterEntity>>
+    suspend fun updateCharacterIsFavorite(isFavorite: Boolean, characterId: Int): Result<Unit>
+    fun getFavoriteCharacters(offset: Int):  Flow<Result<List<CharacterEntity>>>
 }
