@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="17">
+      <module name="UdemyCourseApp.api_interaction_helper.main" target="1.7" />
+      <module name="UdemyCourseApp.api_interaction_helper.test" target="1.7" />
       <module name="UdemyCourseApp.heroes.heroes_data" target="17" />
       <module name="UdemyCourseApp.heroes.heroes_domain" target="17" />
       <module name="UdemyCourseApp.heroes.heroes_presentation" target="17" />
