@@ -3,5 +3,5 @@ package com.example.core.implement
 import com.example.core.UnifiedError
 
 interface IApiErrorHandler {
-    operator fun invoke(throwable: Throwable): UnifiedError
+    operator fun invoke(t: Throwable): UnifiedError
 }

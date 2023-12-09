@@ -8,6 +8,8 @@ sealed class UnifiedError(
     sealed class Http(message: String) : UnifiedError(message = message) {
         data class Unauthorized(override val message: String) : Http(message = message)
         data class NotFound(override val message: String) : Http(message = message)
+        data class InternalError(override val message: String) : Http(message = message)
+        data class BadRequest(override val message: String) : Http(message = message)
     }
 
     sealed class Connectivity(message: String) : UnifiedError(message = message) {
