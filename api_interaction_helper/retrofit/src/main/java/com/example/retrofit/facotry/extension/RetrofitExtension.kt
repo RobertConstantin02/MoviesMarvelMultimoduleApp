@@ -2,6 +2,11 @@ package com.example.retrofit.facotry.extension
 
 import com.example.core.implement.Response
 
+/**
+ * If you need to switch to a different networking library or make changes to how you handle
+ * responses, you can do so more easily. You only need to update the extension function and the
+ * common response interface, keeping the rest of your code unchanged.
+ */
 internal fun <T> retrofit2.Response<T>.mapToCommonResponse(): Response<T> =
     object : Response<T> {
         override val isSuccessful: Boolean

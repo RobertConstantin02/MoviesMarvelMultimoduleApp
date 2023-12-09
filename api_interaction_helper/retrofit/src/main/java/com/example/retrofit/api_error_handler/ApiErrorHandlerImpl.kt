@@ -12,25 +12,16 @@ import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-class ApiErrorHandlerImpl(@ApplicationContext private val context: Context) : IApiErrorHandler {
+class ApiErrorHandlerImpl(
+    @ApplicationContext private val context: Context
+) : IApiErrorHandler {
     override fun invoke(throwable: Throwable): UnifiedError {
 
     }
 
     private fun HttpException.handleError(): UnifiedError {
-        val errorBody = response()?.errorBody()?.string()
-        val message = try {
-            if (!errorBody.isNullOrBlank()) {
-                moshi.fromJson<ApiError>(json = errorBody)?.message.orEmpty()
-            } else {
-                ""
-            }
-        } catch (e: JsonDataException) {
-            Timber.e("Error when parsing json $e")
-            ""
-        }.ifEmpty {
-            context.getString(R.string.label_something_went_wrong)
-        }
+        val message = response()?.errorBody()?.string() ?: message()
+
         return when (code()) {
             HttpURLConnection.HTTP_UNAUTHORIZED -> UnifiedError.Http.Unauthorized(message = message)
             HttpURLConnection.HTTP_NOT_FOUND -> UnifiedError.Http.NotFound(message = message)
