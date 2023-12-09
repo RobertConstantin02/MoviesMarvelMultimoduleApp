@@ -3,6 +3,8 @@ package com.example.retrofit.adapter
 import com.example.core.ApiResponse
 import com.example.core.implement.IApiErrorHandler
 import com.example.retrofit.facotry.extension.mapToCommonResponse
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.HttpException
@@ -10,6 +12,8 @@ import retrofit2.Response
 
 // TODO: I need at same time passing proxy and the handler which can be injected but proxy no.
 //If not I have to pass it in the factory....
+
+//Here we can use @AssistedInjection
 internal class CallResult<T>(
     proxy: Call<T>,
     private val apiErrorHandler: IApiErrorHandler

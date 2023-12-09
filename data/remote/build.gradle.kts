@@ -19,13 +19,11 @@ kapt {
 }
 dependencies {
 
-//    implementation(project(":data:di"))
     implementation(project(":data:api"))
     implementation(project(":toplevel:resources"))
-//    implementation(project(":data:apimodel"))
-//    implementation(project(":toplevel:resources"))
-//    implementation(project(":toplevel:database"))
-//    implementation(project(":toplevel:network"))
+    implementation(project(":toplevel:resources"))
+    implementation(project("::api_interaction_helper:retrofit"))
+
     libs.bundles.apply {
         implementation(hilt)
         implementation(network)

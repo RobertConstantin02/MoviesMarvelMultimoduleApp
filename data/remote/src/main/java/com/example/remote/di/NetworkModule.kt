@@ -2,6 +2,7 @@ package com.example.remote.di
 
 
 import com.example.api.network.RickAndMortyService
+import com.example.retrofit.facotry.CallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,13 +38,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideService(client: OkHttpClient): Retrofit {
+    fun provideService(client: OkHttpClient, callAdapterFactory: CallAdapterFactory): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://rickandmortyapi.com")// why buildconfig from this module does not appear?
             .client(client)
             .addConverterFactory(
                 GsonConverterFactory.create()
-            )
+            ).addCallAdapterFactory(callAdapterFactory)
             .build()
     }
 
