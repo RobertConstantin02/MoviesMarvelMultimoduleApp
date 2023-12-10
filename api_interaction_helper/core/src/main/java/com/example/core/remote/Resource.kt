@@ -13,10 +13,7 @@ class Resource<out T> private constructor(
         data class Success<out T>(val data: T): State<T>()
         object SuccessEmpty: State<Nothing>()
 
-        data class Error<out T>(
-            val errorMessage: String,
-            val data: T?
-        ): State<T>()
+        data class Error(val errorMessage: String, ): State<Nothing>()
     }
 
     companion object {
@@ -26,6 +23,6 @@ class Resource<out T> private constructor(
 
         fun successEmpty() = Resource(State.SuccessEmpty)
 
-        fun <T> error(errorMessage: String, data: T) = Resource(State.Error(errorMessage, data))
+        fun error(errorMessage: String) = Resource(State.Error(errorMessage))
     }
 }

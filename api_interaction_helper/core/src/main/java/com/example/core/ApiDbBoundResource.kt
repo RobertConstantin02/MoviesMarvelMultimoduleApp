@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.util.Objects
 
 inline fun <DB, API> apiDbBoundResource(
     crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<DB>>, //Flow<DbResponse<DB>>
@@ -23,7 +24,8 @@ inline fun <DB, API> apiDbBoundResource(
     crossinline makeNetworkRequest: suspend () -> ApiResponse<API>,
     crossinline processNetworkResponse: (response: ApiResponseSuccess<API>) -> Unit = { },
     crossinline saveResponseData: suspend (API) -> Unit = { },
-    crossinline onNetworkRequestFailed: (errorMessage: String) -> Unit = { _: String -> }
+    crossinline onNetworkRequestFailed: (errorMessage: String) -> Unit = { _: String -> },
+    crossinline mapApiToDb: (API) -> DB
 ) = flow<Resource<DB>> {
     emit(Resource.loading())
 
@@ -35,7 +37,7 @@ inline fun <DB, API> apiDbBoundResource(
                 fetchFromLocal().map { localData ->
                     when (localData) {
                         is DatabaseResponseSuccess -> emit(Resource.success(localData.data))
-                        is DatabaseResponseError -> emit(Resource.success(response.body)) //maybe a funciton to map. an other crossinline that maps
+                        is DatabaseResponseError -> emit(Resource.success(mapApiToDb(response.body)))
                         is DatabaseResponseEmpty -> Resource.successEmpty()
                     }
                 }
@@ -44,10 +46,10 @@ inline fun <DB, API> apiDbBoundResource(
 
             is ApiResponseError -> {
                 fetchFromLocal().map { localData ->
-                    when (localData) {
+                    when (val data = localData) {
                         is DatabaseResponseSuccess -> emit(Resource.success(localData.data))
-                        is DatabaseResponseError -> emit(Resource.error(localData.databaseUnifiedError.message))
-                        is DatabaseResponseEmpty -> emit(Resource.error(localData.databaseUnifiedError.message))
+                        is DatabaseResponseError -> emit(Resource.error(response.unifiedError.message))
+                        is DatabaseResponseEmpty -> Resource.successEmpty()
                     }
                 }
             }
@@ -55,7 +57,7 @@ inline fun <DB, API> apiDbBoundResource(
                 fetchFromLocal().map { localData ->
                     when (localData) {
                         is DatabaseResponseSuccess -> emit(Resource.success(localData.data))
-                        is DatabaseResponseError -> emit(Resource.error(localData.databaseUnifiedError.message))
+                        is DatabaseResponseError -> emit(Resource.error(localData.databaseUnifiedError))
                         is DatabaseResponseEmpty -> emit(Resource.error(localData.databaseUnifiedError.message))
                     }
                 }
