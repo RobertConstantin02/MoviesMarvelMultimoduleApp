@@ -1,4 +1,4 @@
-package com.example.core
+package com.example.core.remote
 
 sealed class UnifiedError(
     override val message: String

@@ -1,4 +1,4 @@
-package com.example.core
+package com.example.core.remote
 
 import com.example.core.implement.Response
 import java.net.HttpURLConnection.HTTP_NO_CONTENT
@@ -21,7 +21,7 @@ sealed class ApiResponse<T> {
     }
 }
 
-data class ApiResponseSuccess<T>(val body: T?) : ApiResponse<T>()
+data class ApiResponseSuccess<T>(val body: T) : ApiResponse<T>()
 class ApiResponseEmpty<T> : ApiResponse<T>()
 data class ApiResponseError<T>(val unifiedError: UnifiedError) : ApiResponse<T>()
 

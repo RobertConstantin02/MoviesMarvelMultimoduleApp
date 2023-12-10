@@ -1,6 +1,6 @@
 package com.example.retrofit.facotry
 
-import com.example.core.ApiResponse
+import com.example.core.remote.ApiResponse
 import com.example.core.implement.IApiErrorHandler
 import com.example.retrofit.adapter.ResultCallAdapter
 import retrofit2.CallAdapter

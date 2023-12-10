@@ -1,10 +1,8 @@
 package com.example.retrofit.adapter
 
-import com.example.core.ApiResponse
+import com.example.core.remote.ApiResponse
 import com.example.core.implement.IApiErrorHandler
 import com.example.retrofit.facotry.extension.mapToCommonResponse
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.HttpException

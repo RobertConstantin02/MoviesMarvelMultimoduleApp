@@ -56,6 +56,29 @@ fun Exception.toError(): RemoteError =
         else -> RemoteError.Unknown(message.orEmpty())
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //fun <T> Flow<T>.asResult(): Flow<Result<T>> {
 //    return this
 //        .map<T, Result<T>> {

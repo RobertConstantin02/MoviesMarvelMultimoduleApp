@@ -1,7 +1,7 @@
 package com.example.retrofit.api_error_handler
 
 import android.content.Context
-import com.example.core.UnifiedError
+import com.example.core.remote.UnifiedError
 import com.example.core.implement.IApiErrorHandler
 import com.example.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
