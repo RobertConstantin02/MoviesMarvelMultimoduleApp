@@ -35,8 +35,17 @@ class ApiErrorHandlerImpl(
     }
 
     private fun IOException.handleError(): UnifiedError =
+//        when (this) {
+//            is SocketTimeoutException -> UnifiedError.Connectivity.TimeOut(context.getString(R.string.error_time_out))
+//
+//            is ConnectException -> UnifiedError.Connectivity.NoConnection(context.getString(R.string.error_network_connection))
+//
+//            is UnknownHostException -> UnifiedError.Connectivity.HostUnreachable(context.getString(R.string.error_generic))
+//
+//            else -> UnifiedError.Generic(context.getString(R.string.error_generic))
+//        }
         when (this) {
-            is SocketTimeoutException -> UnifiedError.Connectivity.TimeOut(context.getString(R.string.error_time_out))
+            is SocketTimeoutException -> UnifiedError.Connectivity.TimeOut(R.string.error_time_out)
 
             is ConnectException -> UnifiedError.Connectivity.NoConnection(context.getString(R.string.error_network_connection))
 

@@ -13,7 +13,7 @@ class Resource<out T> private constructor(
         data class Success<out T>(val data: T): State<T>()
         object SuccessEmpty: State<Nothing>()
 
-        data class Error(val errorMessage: String, ): State<Nothing>()
+        data class Error(val errorMessage: String): State<Nothing>()
     }
 
     companion object {
