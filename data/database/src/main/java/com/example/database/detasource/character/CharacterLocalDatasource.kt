@@ -45,31 +45,53 @@ class CharacterLocalDatasource @Inject constructor(
         }
 
 
-    override suspend fun getCharactersByIds(characterIds: List<Int>): Result<List<CharacterEntity>> =
-        with(characterDao.getCharactersByIds(characterIds)) {
-            if (isNullOrEmpty()) DataBase.EmptyResult.left() else this.right()
+    override suspend fun getCharactersByIds(characterIds: List<Int>): Flow<DatabaseResponse<List<CharacterEntity>>> =
+        flow {
+            try {
+                with(characterDao.getCharactersByIds(characterIds)) {
+                    emit(DatabaseResponse.create(this))
+                }
+            } catch (e: SQLiteException) {
+                emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))
+            }
         }
+
 
     override suspend fun getPagingKeysById(id: Long): PagingKeys? =
         pagingKeysDao.getPagingKeysById(id)
 
     override suspend fun insertPagingKeys(keys: List<PagingKeys>) = pagingKeysDao.insertAll(keys)
 
-    override suspend fun insertCharacters(characters: List<CharacterEntity>): Result<Unit> =
-        with(characterDao.insertCharacters(*characters.toTypedArray())) {
-            if (this.size == characters.size) Unit.right()
-            else DataBase.Error.Insertion.left()
+    override suspend fun insertCharacters(characters: List<CharacterEntity>): DatabaseResponse<Unit> =
+        try {
+            with(characterDao.insertCharacters(*characters.toTypedArray())) {
+                if (this.size == characters.size) DatabaseResponse.create(Unit)
+                else DatabaseResponse.create(DatabaseUnifiedError.Insertion)
+            }
+        } catch (e: SQLiteException) {
+            DatabaseResponse.create(DatabaseUnifiedError.Reading)
         }
 
-    override suspend fun insertCharacter(character: CharacterEntity) =
-        if (characterDao.insertCharacter(character) != -1L) Unit.right()
-        else DataBase.Error.Insertion.left()
+
+    override suspend fun insertCharacter(character: CharacterEntity): DatabaseResponse<Unit> =
+        try {
+            if (characterDao.insertCharacter(character) != -1L) DatabaseResponse.create(Unit)
+            else DatabaseResponse.create(DatabaseUnifiedError.Insertion)
+        } catch (e: SQLiteException) {
+            DatabaseResponse.create(DatabaseUnifiedError.Reading)
+        }
+
 
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
-    ) = if (characterDao.updateCharacterIsFavorite(isFavorite, characterId) != -1) Unit.right()
-    else DataBase.Error.Update.left()
+    ) = try {
+        if (characterDao.updateCharacterIsFavorite(isFavorite, characterId) != -1)
+            DatabaseResponse.create(Unit)
+        else DatabaseResponse.create(DatabaseUnifiedError.Update)
+    } catch (e: SQLiteException) {
+        DatabaseResponse.create(DatabaseUnifiedError.Reading)
+    }
 
 
     @OptIn(ExperimentalCoroutinesApi::class)

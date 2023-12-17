@@ -20,6 +20,6 @@ class CharacterRemoteDataSource @Inject constructor(
     override suspend fun getCharacterById(characterId: Int): ApiResponse<CharacterDto> =
         remoteService.getCharacter(characterId)
 
-    override suspend fun getCharactersByIds(characterIds: List<Int>): Result<List<CharacterDto>?> =
-        apiCall { remoteService.getCharactersByIds(characterIds) }
+    override suspend fun getCharactersByIds(characterIds: List<Int>): ApiResponse<List<CharacterDto>?> =
+        remoteService.getCharactersByIds(characterIds)
 }

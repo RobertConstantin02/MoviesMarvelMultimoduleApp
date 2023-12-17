@@ -8,7 +8,11 @@ import androidx.paging.map
 import arrow.core.left
 import arrow.core.right
 import com.example.core.apiDbBoundResource
+import com.example.core.local.DatabaseResponse
+import com.example.core.local.DatabaseResponseEmpty
+import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseResponseSuccess
+import com.example.core.local.DatabaseUnifiedError
 import com.example.core.remote.Resource
 import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
@@ -50,30 +54,26 @@ class CharacterRepository @Inject constructor(
             pagingData.map { character -> character.toCharacterBo() }
         }
 
-    override fun getCharactersByIds(charactersIds: List<Int>): Flow<Result<List<CharacterNeighborBo>>> =
-        flow {
-            if (System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS) {
-                getApiCharactersByIds(charactersIds)
-                sharedPreferenceDataSource.saveCurrentTimeMs()
-            } else {
-                localDatabaseDatasource.getCharactersByIds(charactersIds).fold(
-                    ifLeft = { getApiCharactersByIds(charactersIds) }
-                ) { charactersEntity ->
-                    emit(charactersEntity.map { it.toCharacterNeighborBo() }.right())
-                }
-            }
-        }
+    override fun getCharactersByIds(charactersIds: List<Int>): Flow<Resource<List<CharacterNeighborBo>>> =
+       apiDbBoundResource(
+           fetchFromLocal = { localDatabaseDatasource.getCharactersByIds(charactersIds) },
+           shouldMakeNetworkRequest = { databaseResult ->
+               System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS
+           },
+           makeNetworkRequest = { remoteDataSource.getCharactersByIds(charactersIds) },
+           saveApiData = { characters ->
+               localDatabaseDatasource.insertCharacters(characters?.map { it.toCharacterEntity() } ?: emptyList())
+           },
+           mapApiToDomain = { characterDtoList ->
+               characterDtoList?.map { characterDto -> characterDto.toCharacterNeighborBo() } ?: emptyList()
 
-    // TODO: see if pagination is not fucked up after that insertion. Se also if we have to use flowOn
-//    override fun getCharacter(characterId: Int): Flow<Result<CharacterDetailBo>> = flow {
-//        if (System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS) {
-//            emit(getApiCharacter(characterId))
-//        } else {
-//            localDatabaseDatasource.getCharacterById(characterId).fold(
-//                ifLeft = { emit(getApiCharacter(characterId)) }
-//            ) { characterEntity -> emit(characterEntity.toCharacterDetailBo().right()) }
-//        }
-//    }
+           },
+           mapLocalToDomain = {characterEntityList ->
+               characterEntityList.map { characterEntity -> characterEntity.toCharacterNeighborBo() }
+           }
+       )
+
+
 
     override fun getCharacter(characterId: Int): Flow<Resource<CharacterDetailBo>> {
         return apiDbBoundResource(
@@ -91,57 +91,17 @@ class CharacterRepository @Inject constructor(
         )
     }
 
-
-    private suspend fun FlowCollector<Result<List<CharacterNeighborBo>>>.getApiCharactersByIds(
-        charactersIds: List<Int>
-    ) {
-        remoteDataSource.getCharactersByIds(charactersIds).fold(
-            ifLeft = { emit(it.left()) },
-        ) { charactersResult ->
-            charactersResult?.let { characters ->
-                if (characters.isNotEmpty()) {
-                    localDatabaseDatasource.insertCharacters(characters.map { it.toCharacterEntity() })
-                        .onRight {
-                            emit(getLocalCharacters(charactersIds).onLeft {
-                                emit(characters.map { it.toCharacterNeighborBo() }.right())
-                            })
-                        }.onLeft {
-                            emit(characters.map { it.toCharacterNeighborBo() }.right())
-                        }
-                }
-            }
-        }
-    }
-
-    private suspend fun getLocalCharacters(charactersId: List<Int>) =
-        localDatabaseDatasource.getCharactersByIds(charactersId).fold(
-            ifLeft = { it.left() }
-        ) { charactersEntity ->
-            charactersEntity.map {
-                it.toCharacterNeighborBo()
-            }.right()
-        }
-
-//    private suspend fun getApiCharacter(characterId: Int): Result<CharacterDetailBo> =
-//        remoteDataSource.getCharacterById(characterId).fold(
-//            ifLeft = { it.left() }
-//        ) { characterDto ->
-//            localDatabaseDatasource.insertCharacter(characterDto.toCharacterEntity()).fold(
-//                ifLeft = { characterDto.toCharacterDetailBo().right() }
-//            ) {
-//                localDatabaseDatasource.getCharacterById(characterId).fold(
-//                    ifLeft = { characterDto.toCharacterDetailBo().right() }
-//                ) {
-//                    it.toCharacterDetailBo().right()
-//                }
-//            }
-//
-//        }
-
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
-    ) = flow { emit(localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId)) }
+    ) = when(val localResponse = localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId)) {
+        is DatabaseResponseSuccess -> Resource.success(Unit)
+        is DatabaseResponseError -> Resource.error(
+            localResponse.databaseUnifiedError.messageResource,
+            null
+        )
+        is DatabaseResponseEmpty -> Resource.successEmpty(Unit)
+    }
 
 
 //    @OptIn(ExperimentalCoroutinesApi::class)

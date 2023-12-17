@@ -2,6 +2,9 @@ package com.example.data_repository.location
 
 import arrow.core.left
 import arrow.core.right
+import com.example.core.apiDbBoundResource
+import com.example.core.local.DatabaseResponseSuccess
+import com.example.core.remote.Resource
 import com.example.data_mapper.toExtendedLocationBo
 import com.example.data_mapper.toExtendedLocationEntity
 import com.example.data_repository.character.DAY_IN_MILLIS
@@ -22,51 +25,18 @@ class LocationRepository @Inject constructor(
     private val sharedPreferenceDataSource: ISharedPreferenceDataSource
 ) : ILocationRepository {
 
-    override fun getExtendedLocation(extendedLocationId: Int): Flow<Result<ExtendedLocationBo>> =
-        flow {
-            if (System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS) {
-                emit(getExtendedLocation(extendedLocationId))
-            }
-            local.getExtendedLocation(extendedLocationId).fold(
-                ifLeft = {
-                    emit(getExtendedLocation(extendedLocationId))
-                    //remove code
-//                    remote.getLocation(extendedLocationId).fold(
-//                        ifLeft = { it.left() }
-//                    ) { extendedLocationResult ->
-//                        local.insertExtendedLocation(extendedLocationResult.toExtendedLocationEntity())
-//                            .onRight {
-//                                emit(getLocalExtendedLocation(extendedLocationId).onLeft {
-//                                    emit(extendedLocationResult.toExtendedLocationBo().right())
-//                                })
-//                            }.onLeft { emit(extendedLocationResult.toExtendedLocationBo().right()) }
-//                    }
-                }
-            ) { extendedLocationEntity ->
-                emit(extendedLocationEntity.toExtendedLocationBo().right())
-            }
-        }
-
-    private suspend fun FlowCollector<Result<ExtendedLocationBo>>.getExtendedLocation(extendedLocationId: Int): Result<ExtendedLocationBo> =
-        remote.getLocation(extendedLocationId).fold(
-            ifLeft = { it.left() }
-        ) { extendedLocationResult ->
-            local.insertExtendedLocation(extendedLocationResult.toExtendedLocationEntity()).fold(
-                ifLeft = { extendedLocationResult.toExtendedLocationBo().right() }
-            ) {
-                local.getExtendedLocation(extendedLocationId).fold(
-                    ifLeft = { it.left() }
-                ) { extendedLocationEntity ->
-                    extendedLocationEntity.toExtendedLocationBo().right()
-                }
-            }
-        }
-
-    // TODO: Remove code
-    private suspend fun getLocalExtendedLocation(extendedLocationId: Int) =
-        local.getExtendedLocation(extendedLocationId).fold(
-            ifLeft = { it.left() }
-        ) { extendedLocationEntity ->
-            extendedLocationEntity.toExtendedLocationBo().right()
-        }
+    override fun getExtendedLocation(extendedLocationId: Int): Flow<Resource<ExtendedLocationBo>> =
+        apiDbBoundResource(
+            fetchFromLocal = { local.getExtendedLocation(extendedLocationId) },
+            shouldMakeNetworkRequest = { databaseResult ->
+                System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS
+                        && (databaseResult !is DatabaseResponseSuccess)
+            },
+            makeNetworkRequest = { remote.getLocation(extendedLocationId) },
+            saveApiData = { extendedLocationResult ->
+                local.insertExtendedLocation(extendedLocationResult.toExtendedLocationEntity())
+            },
+            mapApiToDomain = { extLocationDto -> extLocationDto.toExtendedLocationBo() },
+            mapLocalToDomain = { extLocationEntity -> extLocationEntity.toExtendedLocationBo() }
+        )
 }

@@ -8,5 +8,5 @@ import com.example.resources.Result
 interface ICharacterRemoteDataSource {
     suspend fun getAllCharacters(page: Int): Result<FeedCharacterDto>
     suspend fun getCharacterById(characterId: Int): ApiResponse<CharacterDto>
-    suspend fun getCharactersByIds(characterIds: List<Int>): Result<List<CharacterDto>?>
+    suspend fun getCharactersByIds(characterIds: List<Int>): ApiResponse<List<CharacterDto>?>
 }

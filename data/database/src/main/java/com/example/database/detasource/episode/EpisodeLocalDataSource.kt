@@ -1,24 +1,35 @@
 package com.example.database.detasource.episode
 
-import arrow.core.left
-import arrow.core.right
+import android.database.sqlite.SQLiteException
+import com.example.core.local.DatabaseResponse
+import com.example.core.local.DatabaseUnifiedError
 import com.example.database.dao.episode.IEpisodeDao
 import com.example.database.entities.EpisodeEntity
-import com.example.resources.DataBase
-import com.example.resources.Result
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class EpisodeLocalDataSource @Inject constructor(
     private val dao: IEpisodeDao
 ): IEpisodeLocalDataSource {
-    override suspend fun getEpisodes(episodesId: List<Int>): Result<List<EpisodeEntity>> =
-        with(dao.getEpisodes(episodesId)) {
-            if (isNullOrEmpty()) DataBase.EmptyResult.left() else this.right()
+    override suspend fun getEpisodes(episodesId: List<Int>): Flow<DatabaseResponse<List<EpisodeEntity>>> =
+        flow {
+            try {
+                with(dao.getEpisodes(episodesId)) { emit(DatabaseResponse.create(this)) }
+            }catch (e: SQLiteException) {
+                emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))
+            }
         }
 
-    override suspend fun insertEpisodes(episodes: List<EpisodeEntity>): Result<Unit> =
-        with(dao.insertEpisodes(*episodes.toTypedArray()) ) {
-            if (this.size == episodes.size) Unit.right()
-            else DataBase.Error.Insertion.left()
+
+    override suspend fun insertEpisodes(episodes: List<EpisodeEntity>): DatabaseResponse<Unit> =
+        try {
+            with(dao.insertEpisodes(*episodes.toTypedArray()) ) {
+                if (this.size == episodes.size) DatabaseResponse.create(Unit)
+                else DatabaseResponse.create(DatabaseUnifiedError.Insertion)
+            }
+        }catch (e: SQLiteException) {
+            DatabaseResponse.create(DatabaseUnifiedError.Reading)
         }
+
 }

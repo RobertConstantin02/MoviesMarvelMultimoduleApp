@@ -23,14 +23,14 @@ interface RickAndMortyService {
     suspend fun getAllCharacters(@Query(PAGE_PARAMETER) page: Int): Response<FeedCharacterDto>
 
     @GET(GET_CHARACTER)
-    suspend fun getCharacter(@Path(ID_PATH) characterId: Int): ApiResponse<CharacterDto> //
+    suspend fun getCharacter(@Path(ID_PATH) characterId: Int): ApiResponse<CharacterDto>
 
     @GET(GET_LOCATION)
-    suspend fun getLocation(@Path(ID_PATH) locationId: Int): Response<ExtendedLocationDto>
+    suspend fun getLocation(@Path(ID_PATH) locationId: Int): ApiResponse<ExtendedLocationDto>
 
     @GET(GET_EPISODES_BY_IDS)
-    suspend fun getEpisodesByIds(@Path(IDS_PATH) episodesId: List<Int>): Response<List<EpisodeDto?>?>
+    suspend fun getEpisodesByIds(@Path(IDS_PATH) episodesId: List<Int>): ApiResponse<List<EpisodeDto?>?>
 
     @GET(GET_CHARACTERS_BY_IDS)
-    suspend fun getCharactersByIds(@Path(IDS_PATH) episodesId: List<Int>): Response<List<CharacterDto>?>
+    suspend fun getCharactersByIds(@Path(IDS_PATH) episodesId: List<Int>): ApiResponse<List<CharacterDto>?>
 }
