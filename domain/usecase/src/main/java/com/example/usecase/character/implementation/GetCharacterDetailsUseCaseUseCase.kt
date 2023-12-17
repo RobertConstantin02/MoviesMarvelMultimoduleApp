@@ -4,6 +4,7 @@ import android.net.Uri
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.example.core.remote.Resource
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
@@ -29,24 +30,25 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     @QEpisodesRepository private val episodesRepository: IEpisodeRepository,
 ) : IGetCharacterDetailsUseCase {
 
-    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Result<CharacterPresentationScreenBO>> {
+    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Resource<CharacterPresentationScreenBO>> {
 
         return combine(
             characterRepository.getCharacter(input.characterId),
             locationRepository.getExtendedLocation(input.locationId)
         ) { characterResult, locationResult ->
-            characterResult.fold(
-                ifLeft = { it.left() },
-            ) { character ->
-                locationResult.fold(
-                    ifLeft = { it.left() }
-                ) { location ->
-                    CharacterWithLocation(
-                        Pair(character, character.episodes),
-                        Pair(location, location.residents)
-                    ).right()
-                }
-            }
+
+//            characterResult.fold(
+//                ifLeft = { it.left() },
+//            ) { character ->
+//                locationResult.fold(
+//                    ifLeft = { it.left() }
+//                ) { location ->
+//                    CharacterWithLocation(
+//                        Pair(character, character.episodes),
+//                        Pair(location, location.residents)
+//                    ).right()
+//                }
+//            }
         }.transform { characterWithLocation ->
             characterWithLocation.fold(
                 ifLeft = { emit(it.left()) },

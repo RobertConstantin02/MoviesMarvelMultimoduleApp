@@ -1,6 +1,7 @@
 package com.example.usecase
 
 import arrow.core.left
+import com.example.core.remote.Resource
 import com.example.resources.DataSourceError
 import com.example.resources.Result
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 
 interface UseCase<Input, Output> {
 
-    suspend fun run(input: Input): Flow<Result<Output>>
+    suspend fun run(input: Input): Flow<Resource<Output>>
 
     operator fun invoke(
         input: Input,

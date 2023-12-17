@@ -14,7 +14,17 @@ class Resource<out T> private constructor(
         data class SuccessEmpty<out T>(val data: T?): State<T>()
 
         data class Error<out T>(val apiError: String?, val localError: Int?, val data: T?): State<T>()
+
+        inline fun <R> fold(success: (T) -> R, error: (String?, Int?, T?) -> R, loading: (Unit) -> R, empty: (T) -> R): R =
+            when(this) {
+                is Error -> error(apiError, localError, data)
+                is Loading -> loading(Unit)
+                is Success -> TODO()
+                is SuccessEmpty -> TODO()
+            }
+
     }
+
 
     companion object {
         fun loading() = Resource(State.Loading)
