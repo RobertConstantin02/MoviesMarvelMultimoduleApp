@@ -11,9 +11,9 @@ class Resource<out T> private constructor(
     sealed class State<out T> {
         object Loading: State<Nothing>()
         data class Success<out T>(val data: T): State<T>()
-        object SuccessEmpty: State<Nothing>()
+        data class SuccessEmpty<out T>(val data: T?): State<T>()
 
-        data class Error(val errorMessage: String): State<Nothing>()
+        data class Error<out T>(val apiError: String?, val localError: Int?, val data: T?): State<T>()
     }
 
     companion object {
@@ -21,8 +21,16 @@ class Resource<out T> private constructor(
 
         fun <T> success(data: T) = Resource(State.Success(data))
 
-        fun successEmpty() = Resource(State.SuccessEmpty)
+        fun <T> successEmpty(data: T?) = Resource(State.SuccessEmpty(data)) //review at the end
 
-        fun error(errorMessage: String) = Resource(State.Error(errorMessage))
+        fun <T> error(
+            errorMessage: String,
+            data: T?
+        ) = Resource(State.Error(errorMessage, null, data))
+
+        fun <T> error(
+            errorResource: Int,
+            data: T?
+        ) = Resource(State.Error(null, errorResource, data))
     }
 }

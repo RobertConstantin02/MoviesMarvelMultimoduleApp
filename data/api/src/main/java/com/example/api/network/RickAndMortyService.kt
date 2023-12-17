@@ -9,6 +9,7 @@ import com.example.api.network.CharacterEndPoints.GET_CHARACTER
 import com.example.api.network.CharacterEndPoints.GET_CHARACTERS_BY_IDS
 import com.example.api.network.EpisodeEndPoints.GET_EPISODES_BY_IDS
 import com.example.api.network.LocationEndPoints.GET_LOCATION
+import com.example.core.remote.ApiResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -22,7 +23,7 @@ interface RickAndMortyService {
     suspend fun getAllCharacters(@Query(PAGE_PARAMETER) page: Int): Response<FeedCharacterDto>
 
     @GET(GET_CHARACTER)
-    suspend fun getCharacter(@Path(ID_PATH) characterId: Int): Response<CharacterDto>
+    suspend fun getCharacter(@Path(ID_PATH) characterId: Int): ApiResponse<CharacterDto> //
 
     @GET(GET_LOCATION)
     suspend fun getLocation(@Path(ID_PATH) locationId: Int): Response<ExtendedLocationDto>

@@ -4,6 +4,12 @@ import android.database.sqlite.SQLiteException
 import androidx.paging.PagingSource
 import arrow.core.left
 import arrow.core.right
+import com.example.core.local.DatabaseResponse
+import com.example.core.local.DatabaseResponseEmpty
+import com.example.core.local.DatabaseResponseError
+import com.example.core.local.DatabaseResponseSuccess
+import com.example.core.local.DatabaseUnifiedError
+import com.example.core.remote.Resource
 import com.example.database.dao.character.ICharacterDao
 import com.example.database.dao.IPagingKeysDao
 import com.example.database.entities.CharacterEntity
@@ -13,6 +19,7 @@ import com.example.resources.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
@@ -26,10 +33,17 @@ class CharacterLocalDatasource @Inject constructor(
     override fun getAllCharacters(): PagingSource<Int, CharacterEntity> =
         characterDao.getAllCharacters()
 
-    override suspend fun getCharacterById(characterId: Int): Result<CharacterEntity> =
-        with(characterDao.getCharacterById(characterId)) {
-            this?.right() ?: DataBase.EmptyResult.left()
+    override suspend fun getCharacterById(characterId: Int): Flow<DatabaseResponse<CharacterEntity>> =
+        flow {
+            try {
+                with(characterDao.getCharacterById(characterId)) {
+                    emit(DatabaseResponse.create(this))
+                }
+            } catch (e: SQLiteException) {
+                emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))
+            }
         }
+
 
     override suspend fun getCharactersByIds(characterIds: List<Int>): Result<List<CharacterEntity>> =
         with(characterDao.getCharactersByIds(characterIds)) {
@@ -55,7 +69,7 @@ class CharacterLocalDatasource @Inject constructor(
         isFavorite: Boolean,
         characterId: Int
     ) = if (characterDao.updateCharacterIsFavorite(isFavorite, characterId) != -1) Unit.right()
-        else DataBase.Error.Update.left()
+    else DataBase.Error.Update.left()
 
 
     @OptIn(ExperimentalCoroutinesApi::class)

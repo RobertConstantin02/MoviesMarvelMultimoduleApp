@@ -1,6 +1,5 @@
 package com.example.data_repository.character
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -8,6 +7,9 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import arrow.core.left
 import arrow.core.right
+import com.example.core.apiDbBoundResource
+import com.example.core.local.DatabaseResponseSuccess
+import com.example.core.remote.Resource
 import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterBo
@@ -26,7 +28,6 @@ import com.example.resources.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
@@ -64,15 +65,32 @@ class CharacterRepository @Inject constructor(
         }
 
     // TODO: see if pagination is not fucked up after that insertion. Se also if we have to use flowOn
-    override fun getCharacter(characterId: Int): Flow<Result<CharacterDetailBo>> = flow {
-        if (System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS) {
-            emit(getApiCharacter(characterId))
-        } else {
-            localDatabaseDatasource.getCharacterById(characterId).fold(
-                ifLeft = { emit(getApiCharacter(characterId)) }
-            ) { characterEntity -> emit(characterEntity.toCharacterDetailBo().right()) }
-        }
+//    override fun getCharacter(characterId: Int): Flow<Result<CharacterDetailBo>> = flow {
+//        if (System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS) {
+//            emit(getApiCharacter(characterId))
+//        } else {
+//            localDatabaseDatasource.getCharacterById(characterId).fold(
+//                ifLeft = { emit(getApiCharacter(characterId)) }
+//            ) { characterEntity -> emit(characterEntity.toCharacterDetailBo().right()) }
+//        }
+//    }
+
+    override fun getCharacter(characterId: Int): Flow<Resource<CharacterDetailBo>> {
+        return apiDbBoundResource(
+            fetchFromLocal = { localDatabaseDatasource.getCharacterById(characterId) },
+            shouldMakeNetworkRequest = { databaseResult ->
+                System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS
+                        && (databaseResult !is DatabaseResponseSuccess)
+            },
+            makeNetworkRequest = { remoteDataSource.getCharacterById(characterId) },
+            saveApiData = { characterDto ->
+                localDatabaseDatasource.insertCharacter(characterDto.toCharacterEntity())
+            },
+            mapApiToDomain = { characterDto -> characterDto.toCharacterDetailBo() },
+            mapLocalToDomain = { characterEntity -> characterEntity.toCharacterDetailBo() }
+        )
     }
+
 
     private suspend fun FlowCollector<Result<List<CharacterNeighborBo>>>.getApiCharactersByIds(
         charactersIds: List<Int>
@@ -104,21 +122,21 @@ class CharacterRepository @Inject constructor(
             }.right()
         }
 
-    private suspend fun getApiCharacter(characterId: Int): Result<CharacterDetailBo> =
-        remoteDataSource.getCharacterById(characterId).fold(
-            ifLeft = { it.left() }
-        ) { characterDto ->
-            localDatabaseDatasource.insertCharacter(characterDto.toCharacterEntity()).fold(
-                ifLeft = { characterDto.toCharacterDetailBo().right() }
-            ) {
-                localDatabaseDatasource.getCharacterById(characterId).fold(
-                    ifLeft = { characterDto.toCharacterDetailBo().right() }
-                ) {
-                    it.toCharacterDetailBo().right()
-                }
-            }
-
-        }
+//    private suspend fun getApiCharacter(characterId: Int): Result<CharacterDetailBo> =
+//        remoteDataSource.getCharacterById(characterId).fold(
+//            ifLeft = { it.left() }
+//        ) { characterDto ->
+//            localDatabaseDatasource.insertCharacter(characterDto.toCharacterEntity()).fold(
+//                ifLeft = { characterDto.toCharacterDetailBo().right() }
+//            ) {
+//                localDatabaseDatasource.getCharacterById(characterId).fold(
+//                    ifLeft = { characterDto.toCharacterDetailBo().right() }
+//                ) {
+//                    it.toCharacterDetailBo().right()
+//                }
+//            }
+//
+//        }
 
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
@@ -149,7 +167,7 @@ class CharacterRepository @Inject constructor(
 //        }
         return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset)
             .mapLatest { result ->
-                result.fold(ifLeft = {error -> error.left()}) { characters ->
+                result.fold(ifLeft = { error -> error.left() }) { characters ->
                     characters.map { it.toCharacterBo() }.right()
                 }
             }

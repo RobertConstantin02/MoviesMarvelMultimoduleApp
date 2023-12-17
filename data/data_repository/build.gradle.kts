@@ -32,6 +32,9 @@ dependencies {
     api(project(":domain:domain_model"))
     api(project(":domain:usecase"))
 
+    api(project(":api_interaction_helper:retrofit"))
+    api(project(":api_interaction_helper:core"))
+
     libs.bundles.apply {
         implementation(hilt)
         implementation(coroutines)

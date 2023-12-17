@@ -29,6 +29,9 @@ dependencies {
     implementation(project(":domain:domain_model"))
     implementation(project(":domain:usecase"))
 
+    api(project(":api_interaction_helper:retrofit"))
+    api(project(":api_interaction_helper:core"))
+
     libs.bundles.apply {
         implementation(compose)
         implementation(hilt)

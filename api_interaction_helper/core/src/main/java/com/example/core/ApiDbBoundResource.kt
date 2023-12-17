@@ -9,69 +9,86 @@ import com.example.core.remote.ApiResponseEmpty
 import com.example.core.remote.ApiResponseError
 import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.Resource
+import com.example.core.remote.UnifiedError
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import java.util.Objects
 
-inline fun <DB, API> apiDbBoundResource(
+inline fun <BO, DB, API> apiDbBoundResource(
     crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<DB>>, //Flow<DbResponse<DB>>
-    crossinline shouldMakeNetworkRequest: suspend () -> Boolean = { true },
+    crossinline shouldMakeNetworkRequest: suspend (DatabaseResponse<DB>) -> Boolean = { true },
     crossinline makeNetworkRequest: suspend () -> ApiResponse<API>,
     crossinline processNetworkResponse: (response: ApiResponseSuccess<API>) -> Unit = { },
-    crossinline saveResponseData: suspend (API) -> Unit = { },
-    crossinline onNetworkRequestFailed: (errorMessage: String) -> Unit = { _: String -> },
-    crossinline mapApiToDb: (API) -> DB
-) = flow<Resource<DB>> {
+    crossinline saveApiData: suspend (API) -> Unit = { },
+    crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
+    crossinline mapApiToDomain: (API) -> BO,
+    crossinline mapLocalToDomain: (DB) -> BO,
+) = flow<Resource<BO>> {
     emit(Resource.loading())
 
-    if (shouldMakeNetworkRequest()) {
+    val localData = fetchFromLocal().first()
+
+    if (shouldMakeNetworkRequest(localData)) { //here check if local response is different from success a part of the time cache system
         when (val response = makeNetworkRequest()) {
             is ApiResponseSuccess -> {
                 processNetworkResponse(response)
-                saveResponseData(response.body)
-                fetchFromLocal().map { localData ->
-                    when (localData) {
-                        is DatabaseResponseSuccess -> emit(Resource.success(localData.data))
-                        is DatabaseResponseError -> emit(Resource.success(mapApiToDb(response.body)))
-                        is DatabaseResponseEmpty -> Resource.successEmpty()
+                saveApiData(response.body)
+                fetchFromLocal().map { localResponse ->
+                    when (localResponse) {
+                        is DatabaseResponseSuccess -> emit(Resource.success(mapLocalToDomain(localResponse.data)))
+                        is DatabaseResponseError -> emit(Resource.success(mapApiToDomain(response.body)))
+                        is DatabaseResponseEmpty -> emit(Resource.success(mapApiToDomain(response.body)))
                     }
                 }
-
             }
 
             is ApiResponseError -> {
-                fetchFromLocal().map { localData ->
-                    when (val data = localData) {
-                        is DatabaseResponseSuccess -> emit(Resource.success(localData.data))
-                        is DatabaseResponseError -> emit(Resource.error(response.unifiedError.message))
-                        is DatabaseResponseEmpty -> Resource.successEmpty()
+                onNetworkRequestFailed(response.unifiedError)
+                fetchFromLocal().map { localResponse ->
+                    when (localResponse) {
+                        is DatabaseResponseSuccess -> emit(
+                            Resource.error(
+                                response.unifiedError.message,
+                                mapLocalToDomain(localResponse.data)
+                            )
+                        )
+
+                        is DatabaseResponseError -> emit(
+                            Resource.error(
+                                localResponse.databaseUnifiedError.messageResource,
+                                null
+                            )
+                        )
+
+                        is DatabaseResponseEmpty -> emit(Resource.successEmpty(null))
                     }
                 }
             }
+
             is ApiResponseEmpty -> {
-                fetchFromLocal().map { localData ->
-                    when (localData) {
-                        is DatabaseResponseSuccess -> emit(Resource.success(localData.data))
-                        is DatabaseResponseError -> emit(Resource.error(localData.databaseUnifiedError))
-                        is DatabaseResponseEmpty -> emit(Resource.error(localData.databaseUnifiedError.message))
+                fetchFromLocal().map { localResponse ->
+                    when (localResponse) {
+                        is DatabaseResponseSuccess -> emit(
+                            Resource.successEmpty(mapLocalToDomain(localResponse.data))
+                        )
+
+                        is DatabaseResponseError -> emit(
+                            Resource.error(
+                                localResponse.databaseUnifiedError.messageResource,
+                                null
+                            )
+                        )
+
+                        is DatabaseResponseEmpty -> emit(Resource.successEmpty(null))
                     }
                 }
             }
         }
     } else {
-        when (val localData = fetchFromLocal().first()) {
-            is DatabaseResponseSuccess -> TODO()
-            is DatabaseResponseError -> TODO()
-            is DatabaseResponseEmpty -> TODO()
-        }
+        (localData as? DatabaseResponseSuccess)?.let {
+            emit(Resource.success(mapLocalToDomain(it.data)))
+        } ?: emit(Resource.successEmpty(null))
     }
-
 }
-
-fun <T> FlowCollector<Resource<T>>.handleNetworkRequest() =
-
