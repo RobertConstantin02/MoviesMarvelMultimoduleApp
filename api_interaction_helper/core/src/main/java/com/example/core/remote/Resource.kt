@@ -24,7 +24,7 @@ class Resource<out T> private constructor(
                 this is Resource.State.Success && resource is State.Success -> Resource(
                     State.Success(transform(this.data, resource.data))
                 )
-                else -> this
+                else -> Resource(this) as Resource<W>
 //                this is Loading -> Resource(State.Loading)
 //                this is Error -> Resource(State.Error(this.apiError, this.localError, this.data))
 //                this is SuccessEmpty -> Resource(State.SuccessEmpty(transform(this.data)))
