@@ -5,6 +5,7 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import com.example.core.remote.Resource
+import com.example.core.remote.Resource.State.Loading.combineResource
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 
 class GetCharacterDetailsUseCaseUseCase @Inject constructor(
@@ -32,10 +32,17 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
 
     override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Resource<CharacterPresentationScreenBO>> {
 
-        return combine(
+        combine(
             characterRepository.getCharacter(input.characterId),
-            locationRepository.getExtendedLocation(input.locationId)
+            locationRepository.getExtendedLocation(input.locationId),
         ) { characterResult, locationResult ->
+
+            characterResult.state.combineResource(locationResult.state) { character, location ->
+                CharacterWithLocation(
+                    Pair(character, character.episodes),
+                    Pair(location, location.residents)
+                )
+            }
 
 //            characterResult.fold(
 //                ifLeft = { it.left() },
@@ -49,12 +56,13 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
 //                    ).right()
 //                }
 //            }
-        }.transform { characterWithLocation ->
-            characterWithLocation.fold(
-                ifLeft = { emit(it.left()) },
-                ifRight = { combineResidentsAndEpisodes(it) }
-            )
         }
+//            .transform { characterWithLocation ->
+//            characterWithLocation.fold(
+//                ifLeft = { emit(it.left()) },
+//                ifRight = { combineResidentsAndEpisodes(it) }
+//            )
+//        }
     }
 
     private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.combineResidentsAndEpisodes(

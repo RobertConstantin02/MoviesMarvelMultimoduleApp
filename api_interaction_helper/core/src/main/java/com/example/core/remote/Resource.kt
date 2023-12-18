@@ -13,17 +13,48 @@ class Resource<out T> private constructor(
         data class Success<out T>(val data: T): State<T>()
         data class SuccessEmpty<out T>(val data: T?): State<T>()
 
-        data class Error<out T>(val apiError: String?, val localError: Int?, val data: T?): State<T>()
+        data class Error<out T>(val apiError: String?, val localError: Int?, val data: T?) :
+            State<T>()
 
-        inline fun <R> fold(success: (T) -> R, error: (String?, Int?, T?) -> R, loading: (Unit) -> R, empty: (T) -> R): R =
-            when(this) {
-                is Error -> error(apiError, localError, data)
-                is Loading -> loading(Unit)
-                is Success -> TODO()
-                is SuccessEmpty -> TODO()
+        fun <R1, R2, W> Resource.State<R1>.combineResource(
+            resource: Resource.State<R2>,
+            transform: (a: R1, b: R2) -> W
+        ): Resource<W> =
+            when {
+                this is Resource.State.Success && resource is State.Success -> Resource(
+                    State.Success(transform(this.data, resource.data))
+                )
+                this is Loading -> Resource(State.Loading)
+                this is Error -> Resource(State.Error(this.apiError, this.localError, this.data))
+                this is SuccessEmpty -> Resource(State.SuccessEmpty(transform(this.data)))
             }
 
+
+
+//        fun <T, R> Resource<T>.mapData(transform: (T?) -> R): Resource<R> {
+//            return when (val currentState = state) {
+//                is Resource.State.Loading -> Resource(transform())
+//                is Resource.State.Success -> Resource(Resource.State.Success(transform(currentState.data)))
+//                is Resource.State.SuccessEmpty -> Resource(
+//                    Resource.State.SuccessEmpty(
+//                        transform(
+//                            currentState.data
+//                        )
+//                    )
+//                )
+//
+//                is Resource.State.Error -> Resource(
+//                    Resource.State.Error(
+//                        currentState.apiError,
+//                        currentState.localError,
+//                        transform(currentState.data)
+//                    )
+//                )
+//            }
+//        }
+
     }
+
 
 
     companion object {
