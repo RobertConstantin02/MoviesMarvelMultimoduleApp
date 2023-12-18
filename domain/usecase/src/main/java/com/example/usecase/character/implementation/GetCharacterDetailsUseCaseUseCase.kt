@@ -32,7 +32,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
 
     override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Resource<CharacterPresentationScreenBO>> {
 
-        combine(
+         combine(
             characterRepository.getCharacter(input.characterId),
             locationRepository.getExtendedLocation(input.locationId),
         ) { characterResult, locationResult ->
