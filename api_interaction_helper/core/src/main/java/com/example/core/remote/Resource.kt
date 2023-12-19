@@ -30,7 +30,7 @@ class Resource<out T> private constructor(
 //                else -> Resource(Loading)
 //            }
 
-        fun <R1, R2, W> Resource.State<R1>.combineSuccess(
+        fun <R1, R2, W> Resource.State<R1>.combineSuccess( //maybe if we dont get a success we can emit the current state. Lets play with flows and collect to emit what we want.
             resource: Resource.State<R2>,
             transform: (a: R1, b: R2) -> W,
         ): Resource<W>? = let {
