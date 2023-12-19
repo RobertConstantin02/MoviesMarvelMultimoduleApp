@@ -16,19 +16,38 @@ class Resource<out T> private constructor(
         data class Error<out T>(val apiError: String?, val localError: Int?, val data: T?) :
             State<T>()
 
-        fun <R1, R2, W> Resource.State<R1>.combineResource(
+//        fun <R1, R2, W> Resource.State<R1>.combineResource(
+//            resource: Resource.State<R2>,
+//            transform: (a: R1, b: R2) -> W,
+//            //currentState: State<T>,
+//            //unSuccess: (currentState : State<T>) -> Resource()
+//        ): Resource<W> =
+//            when {
+//                this is Resource.State.Success && resource is State.Success -> Resource(
+//                    State.Success(transform(this.data, resource.data))
+//                )
+//                this is Resource.State.Error -> Resource(State.Error(this.apiError, this.localError, this.data))
+//                else -> Resource(Loading)
+//            }
+
+        fun <R1, R2, W> Resource.State<R1>.combineSuccess(
             resource: Resource.State<R2>,
-            transform: (a: R1, b: R2) -> W
-        ): Resource<W> =
-            when {
-                this is Resource.State.Success && resource is State.Success -> Resource(
-                    State.Success(transform(this.data, resource.data))
-                )
-                else -> Resource(this) as Resource<W>
-//                this is Loading -> Resource(State.Loading)
-//                this is Error -> Resource(State.Error(this.apiError, this.localError, this.data))
-//                this is SuccessEmpty -> Resource(State.SuccessEmpty(transform(this.data)))
-            }
+            transform: (a: R1, b: R2) -> W,
+        ): Resource<W>? = let {
+            if (this is Resource.State.Success && resource is State.Success)
+                Resource(State.Success(transform(this.data, resource.data)))
+            else null
+        }
+
+        fun <R1> Resource<R1>.unWrap(
+        ): R1? = let {
+            if (this.state is Success)
+                this.state.data
+            else null
+        }
+
+
+
 
 
 

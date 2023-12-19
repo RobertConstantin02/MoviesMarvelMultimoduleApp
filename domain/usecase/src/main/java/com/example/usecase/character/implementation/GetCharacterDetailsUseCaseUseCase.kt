@@ -6,6 +6,8 @@ import arrow.core.left
 import arrow.core.right
 import com.example.core.remote.Resource
 import com.example.core.remote.Resource.State.Loading.combineResource
+import com.example.core.remote.Resource.State.Loading.combineSuccess
+import com.example.core.remote.Resource.State.Loading.unWrap
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 
 class GetCharacterDetailsUseCaseUseCase @Inject constructor(
@@ -32,12 +35,12 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
 
     override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Resource<CharacterPresentationScreenBO>> {
 
-         combine(
+         val asdads = combine(
             characterRepository.getCharacter(input.characterId),
             locationRepository.getExtendedLocation(input.locationId),
         ) { characterResult, locationResult ->
 
-            characterResult.state.combineResource(locationResult.state) { character, location ->
+            characterResult.state.combineSuccess(locationResult.state) { character, location ->
                 CharacterWithLocation(
                     Pair(character, character.episodes),
                     Pair(location, location.residents)
@@ -56,7 +59,27 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
 //                    ).right()
 //                }
 //            }
-        }
+        }.transform { characterWithLocationResource ->
+            characterWithLocationResource?.let {
+                with(it.unWrap())  {
+                    combine(
+                        characterRepository.getCharactersByIds(getIds(this?.characterMainDetail?.second)),
+                        episodesRepository.getEpisodes(getIds(this?.extendedLocation?.second))
+                    ) { residentsResult, episodesResult ->
+                        residentsResult.state.combineSuccess(episodesResult.state) { residents, episodes ->
+                            emit(
+                                CharacterPresentationScreenBO(
+                                    this?.characterMainDetail?.first,
+                                    this?.extendedLocation?.first,
+                                    residents,
+                                    episodes
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+         }
 //            .transform { characterWithLocation ->
 //            characterWithLocation.fold(
 //                ifLeft = { emit(it.left()) },
