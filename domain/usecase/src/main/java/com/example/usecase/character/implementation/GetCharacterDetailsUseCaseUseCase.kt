@@ -35,7 +35,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
 
     override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Resource<CharacterPresentationScreenBO>> {
 
-         val asdads = combine(
+         return combine(
             characterRepository.getCharacter(input.characterId),
             locationRepository.getExtendedLocation(input.locationId),
         ) { characterResult, locationResult ->
@@ -66,16 +66,18 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
                         characterRepository.getCharactersByIds(getIds(this?.characterMainDetail?.second)),
                         episodesRepository.getEpisodes(getIds(this?.extendedLocation?.second))
                     ) { residentsResult, episodesResult ->
-                        residentsResult.state.combineSuccess(episodesResult.state) { residents, episodes ->
-                            emit(
+
+                            residentsResult.state.combineSuccess(episodesResult.state) { residents, episodes ->
                                 CharacterPresentationScreenBO(
                                     this?.characterMainDetail?.first,
                                     this?.extendedLocation?.first,
                                     residents,
                                     episodes
                                 )
-                            )
-                        }
+                            }?.let {
+                                emit(it)
+                            }
+
                     }
                 }
             }
@@ -88,44 +90,44 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
 //        }
     }
 
-    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.combineResidentsAndEpisodes(
-        characterWithLocation: CharacterWithLocation
-    ) {
-        val (character, location) = characterWithLocation
-        combine(
-            characterRepository.getCharactersByIds(getIds(character.second)),
-            episodesRepository.getEpisodes(getIds(location.second))
-        ) { residentsResult, episodesResult ->
-            handleResidentEpisodeTransformation(
-                characterWithLocation,
-                residentsResult,
-                episodesResult
-            )
-        }.collect()
-    }
-
-    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.handleResidentEpisodeTransformation(
-        characterWithLocation: CharacterWithLocation,
-        residentsResult: Either<Throwable, List<CharacterNeighborBo>>,
-        episodesResult: Either<Throwable, List<EpisodeBo>>
-    ) {
-        residentsResult.fold(
-            ifLeft = { emit(it.left()) }
-        ) { residents ->
-            episodesResult.fold(
-                ifLeft = { emit(it.left()) }
-            ) { episodes ->
-                emit(
-                    CharacterPresentationScreenBO(
-                        characterWithLocation.characterMainDetail.first,
-                        characterWithLocation.extendedLocation.first,
-                        residents,
-                        episodes
-                    ).right()
-                )
-            }
-        }
-    }
+//    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.combineResidentsAndEpisodes(
+//        characterWithLocation: CharacterWithLocation
+//    ) {
+//        val (character, location) = characterWithLocation
+//        combine(
+//            characterRepository.getCharactersByIds(getIds(character.second)),
+//            episodesRepository.getEpisodes(getIds(location.second))
+//        ) { residentsResult, episodesResult ->
+//            handleResidentEpisodeTransformation(
+//                characterWithLocation,
+//                residentsResult,
+//                episodesResult
+//            )
+//        }.collect()
+//    }
+//
+//    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.handleResidentEpisodeTransformation(
+//        characterWithLocation: CharacterWithLocation,
+//        residentsResult: Either<Throwable, List<CharacterNeighborBo>>,
+//        episodesResult: Either<Throwable, List<EpisodeBo>>
+//    ) {
+//        residentsResult.fold(
+//            ifLeft = { emit(it.left()) }
+//        ) { residents ->
+//            episodesResult.fold(
+//                ifLeft = { emit(it.left()) }
+//            ) { episodes ->
+//                emit(
+//                    CharacterPresentationScreenBO(
+//                        characterWithLocation.characterMainDetail.first,
+//                        characterWithLocation.extendedLocation.first,
+//                        residents,
+//                        episodes
+//                    ).right()
+//                )
+//            }
+//        }
+//    }
 
     private fun getIds(urls: List<String?>?) =
         urls?.mapNotNull {
