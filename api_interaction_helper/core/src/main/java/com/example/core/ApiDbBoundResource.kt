@@ -26,7 +26,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
     crossinline mapApiToDomain: (API) -> BO,
     crossinline mapLocalToDomain: (DB) -> BO,
 ) = flow<Resource<BO>> {
-    emit(Resource.loading())
+    //emit(Resource.loading())
 
     val localData = fetchFromLocal().first()
 
