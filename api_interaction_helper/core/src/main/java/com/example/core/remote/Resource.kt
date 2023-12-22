@@ -11,8 +11,7 @@ class Resource<out T> private constructor(
     sealed class State<out T> {
 
         data class Success<out T>(val data: T) : State<T>()
-        data class SuccessEmpty<out T>(val data: T?) : State<T>()
-
+        object SuccessEmpty : State<Nothing>()
         data class Error<out T>(val apiError: String?, val localError: Int?, val data: T?) :
             State<T>()
 
@@ -36,21 +35,30 @@ class Resource<out T> private constructor(
         ): Resource<U> = when (this) {
             is Success -> when (other) {
                 is Success -> Resource(Success(combineFunction(data, other.data)))
-                is SuccessEmpty -> Resource(Success(combineFunction(data, other.data)))
+                is SuccessEmpty -> Resource(SuccessEmpty)
                 is Error -> Resource(Error(other.apiError, other.localError, combineFunction(data, other.data)))
             }
-            is SuccessEmpty -> when (other) {
-                is Success -> Resource(Success(combineFunction(data, other.data)))
-                is SuccessEmpty -> Resource(Success(combineFunction(data, other.data)))
-                is Error -> Resource(Error(other.apiError, other.localError, combineFunction(data, other.data)))
-            }
+            is SuccessEmpty -> Resource(SuccessEmpty)
             is Error -> Resource(Error(apiError, localError, combineFunction(data, (other as? Error)?.data)))
+        }
+
+        fun <R, U> combineResources2(
+            other: State<R>,
+            mapError: (r: Error<T>) -> Resource<T>
+        ): Resource<T> = when (this) {
+            is Success -> when (other) {
+                is Success -> Resource(this)
+                is SuccessEmpty -> Resource(this)
+                is Error -> Resource(mapError(this))
+            }
+            is SuccessEmpty -> Resource(SuccessEmpty)
+            is Error ->  Resource(this)
         }
 
         fun unwrap(): T? {
             return when (this) {
                 is State.Success -> this.data
-                is State.SuccessEmpty -> this.data
+                is State.SuccessEmpty -> null
                 is State.Error -> this.data
             }
         }
@@ -115,7 +123,7 @@ class Resource<out T> private constructor(
 
         fun <T> success(data: T) = Resource(State.Success(data))
 
-        fun <T> successEmpty(data: T?) = Resource(State.SuccessEmpty(data)) //review at the end
+        fun successEmpty() = Resource(State.SuccessEmpty) //review at the end
 
         fun <T> error(
             errorMessage: String,

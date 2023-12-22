@@ -11,7 +11,6 @@ import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.Resource
 import com.example.core.remote.UnifiedError
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -64,33 +63,16 @@ inline fun <BO, DB, API> apiDbBoundResource(
                             )
                         )
 
-                        is DatabaseResponseEmpty -> emit(Resource.successEmpty(null))
+                        is DatabaseResponseEmpty -> emit(Resource.successEmpty())
                     }
                 }
             }
 
-            is ApiResponseEmpty -> {
-                fetchFromLocal().map { localResponse ->
-                    when (localResponse) {
-                        is DatabaseResponseSuccess -> emit(
-                            Resource.successEmpty(mapLocalToDomain(localResponse.data))
-                        )
-
-                        is DatabaseResponseError -> emit(
-                            Resource.error(
-                                localResponse.databaseUnifiedError.messageResource,
-                                null
-                            )
-                        )
-
-                        is DatabaseResponseEmpty -> emit(Resource.successEmpty(null))
-                    }
-                }
-            }
+            is ApiResponseEmpty -> Resource.successEmpty() //no fetch from data base. If is empty and we need to refresh local database, then We wont represent not updated data to user
         }
     } else {
         (localData as? DatabaseResponseSuccess)?.let {
             emit(Resource.success(mapLocalToDomain(it.data)))
-        } ?: emit(Resource.successEmpty(null))
+        } ?: emit(Resource.successEmpty())
     }
 }

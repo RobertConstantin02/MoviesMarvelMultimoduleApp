@@ -24,13 +24,14 @@ class ApiErrorHandlerImpl(
 
     private fun HttpException.handleError(): UnifiedError {
         val message = response()?.errorBody()?.string() ?: message()
-
         return when (code()) {
-            HttpURLConnection.HTTP_UNAUTHORIZED -> UnifiedError.Http.Unauthorized(message = message)
-            HttpURLConnection.HTTP_NOT_FOUND -> UnifiedError.Http.NotFound(message = message)
-            HttpURLConnection.HTTP_INTERNAL_ERROR -> UnifiedError.Http.InternalError(message = message)
-            HttpURLConnection.HTTP_BAD_REQUEST -> UnifiedError.Http.BadRequest(message = message)
-            else -> UnifiedError.Generic(context.getString(R.string.error_generic))
+                HttpURLConnection.HTTP_UNAUTHORIZED -> UnifiedError.Http.Unauthorized(message = message)
+                HttpURLConnection.HTTP_NOT_FOUND -> UnifiedError.Http.NotFound(message = message)
+                HttpURLConnection.HTTP_INTERNAL_ERROR -> UnifiedError.Http.InternalError(message = message)
+                HttpURLConnection.HTTP_BAD_REQUEST -> UnifiedError.Http.BadRequest(message = message)
+                HttpURLConnection.HTTP_NO_CONTENT -> UnifiedError.Http.EmptyResponse(message = message)
+                else -> UnifiedError.Generic(context.getString(R.string.error_generic))
+            }
         }
     }
 

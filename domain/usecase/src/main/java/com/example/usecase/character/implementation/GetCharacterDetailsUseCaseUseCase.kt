@@ -28,38 +28,12 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
             characterRepository.getCharacter(input.characterId),
             locationRepository.getExtendedLocation(input.locationId),
         ) { characterResult, locationResult ->
-
             characterResult.state.combineResources(locationResult.state) { character, location ->
                 CharacterWithLocation(
                     Pair(character, character?.episodes),
                     Pair(location, location?.residents)
                 )
             }
-//
-//            val aaa = characterResult.state.unWrap(
-//                success = {
-//
-//                }
-//            )
-//            characterResult.state.combineSuccess(locationResult.state) { character, location ->
-//                CharacterWithLocation(
-//                    Pair(character, character.episodes),
-//                    Pair(location, location.residents)
-//                )
-//            }
-
-//            characterResult.fold(
-//                ifLeft = { it.left() },
-//            ) { character ->
-//                locationResult.fold(
-//                    ifLeft = { it.left() }
-//                ) { location ->
-//                    CharacterWithLocation(
-//                        Pair(character, character.episodes),
-//                        Pair(location, location.residents)
-//                    ).right()
-//                }
-//            }
         }.transform {
             it.state.unwrap()?.let {
                 combine(
@@ -68,8 +42,8 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
                 ) { residentsResult, episodesResult ->
                     residentsResult.state.combineResources(episodesResult.state) { residents , episodes ->
                         CharacterPresentationScreenBO(
-                            it.characterMainDetail?.first,
-                            it.extendedLocation?.first,
+                            it.characterMainDetail.first,
+                            it.extendedLocation.first,
                             residents,
                             episodes
                         )
