@@ -35,93 +35,22 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
                 )
             }
         }.transform {
-            it.state.unwrap()?.let {
-                combine(
-                    characterRepository.getCharactersByIds(getIds(it.characterMainDetail.second)),
-                    episodesRepository.getEpisodes(getIds(it.extendedLocation.second))
-                ) { residentsResult, episodesResult ->
-                    residentsResult.state.combineResources(episodesResult.state) { residents , episodes ->
-                        CharacterPresentationScreenBO(
-                            it.characterMainDetail.first,
-                            it.extendedLocation.first,
-                            residents,
-                            episodes
-                        )
-                    }.let {
-                        emit(it)
-                    }
-                }
+            val characterWithLocation = it.state.unwrap()
+            combine(
+                characterRepository.getCharactersByIds(getIds(characterWithLocation?.characterMainDetail?.second)),
+                episodesRepository.getEpisodes(getIds(characterWithLocation?.extendedLocation?.second))
+            ) { residentsResult, episodesResult ->
+                emit(residentsResult.state.combineResources(episodesResult.state) { residents , episodes ->
+                    CharacterPresentationScreenBO(
+                        characterWithLocation?.characterMainDetail?.first,
+                        characterWithLocation?.extendedLocation?.first,
+                        residents,
+                        episodes
+                    )
+                })
             }
         }
-//            .transform { characterWithLocationResource ->
-//            characterWithLocationResource?.let {
-//                with(it.unWrap()) {
-//                    combine(
-//                        characterRepository.getCharactersByIds(getIds(this?.characterMainDetail?.second)),
-//                        episodesRepository.getEpisodes(getIds(this?.extendedLocation?.second))
-//                    ) { residentsResult, episodesResult ->
-//
-//                        residentsResult.state.combineSuccess(episodesResult.state) { residents, episodes ->
-//                            CharacterPresentationScreenBO(
-//                                this?.characterMainDetail?.first,
-//                                this?.extendedLocation?.first,
-//                                residents,
-//                                episodes
-//                            )
-//                        }?.let {
-//                            emit(it)
-//                        }
-//
-//                    }
-//                }
-//            }
-//        }
-//            .transform { characterWithLocation ->
-//            characterWithLocation.fold(
-//                ifLeft = { emit(it.left()) },
-//                ifRight = { combineResidentsAndEpisodes(it) }
-//            )
-//        }
     }
-
-//    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.combineResidentsAndEpisodes(
-//        characterWithLocation: CharacterWithLocation
-//    ) {
-//        val (character, location) = characterWithLocation
-//        combine(
-//            characterRepository.getCharactersByIds(getIds(character.second)),
-//            episodesRepository.getEpisodes(getIds(location.second))
-//        ) { residentsResult, episodesResult ->
-//            handleResidentEpisodeTransformation(
-//                characterWithLocation,
-//                residentsResult,
-//                episodesResult
-//            )
-//        }.collect()
-//    }
-//
-//    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.handleResidentEpisodeTransformation(
-//        characterWithLocation: CharacterWithLocation,
-//        residentsResult: Either<Throwable, List<CharacterNeighborBo>>,
-//        episodesResult: Either<Throwable, List<EpisodeBo>>
-//    ) {
-//        residentsResult.fold(
-//            ifLeft = { emit(it.left()) }
-//        ) { residents ->
-//            episodesResult.fold(
-//                ifLeft = { emit(it.left()) }
-//            ) { episodes ->
-//                emit(
-//                    CharacterPresentationScreenBO(
-//                        characterWithLocation.characterMainDetail.first,
-//                        characterWithLocation.extendedLocation.first,
-//                        residents,
-//                        episodes
-//                    ).right()
-//                )
-//            }
-//        }
-//    }
 
     private fun getIds(urls: List<String?>?) =
         urls?.mapNotNull {

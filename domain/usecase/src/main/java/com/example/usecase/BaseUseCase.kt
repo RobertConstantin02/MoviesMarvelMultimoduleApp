@@ -2,6 +2,7 @@ package com.example.usecase
 
 import arrow.core.left
 import com.example.core.remote.Resource
+import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.resources.DataSourceError
 import com.example.resources.Result
 import kotlinx.coroutines.CoroutineDispatcher
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
+import kotlin.reflect.KFunction3
 
 interface UseCase<Input, Output> {
 
@@ -24,7 +26,8 @@ interface UseCase<Input, Output> {
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         coroutineScope: CoroutineScope? = null,
         success: (Output) -> Unit = {},
-        error: (error: DataSourceError) -> Unit = {} //review here and put something more gerneric because of the catch
+        error: (String?, Int?, Output?) -> Unit = { _, _, _ ->},
+        empty: () -> Unit = {}
     ) {
         coroutineScope?.let { scope ->
             val job = scope.async(dispatcher) { run(input) }
@@ -32,10 +35,13 @@ interface UseCase<Input, Output> {
                 try {
                     job.await().also { flow ->
                         flow.catch { e -> error(e) }.collectLatest {
-                            it.fold(
-                                ifLeft = { e -> error(e) },
-                                ifRight = { output -> success(output) }
-                            )
+                            when(val resource = it.state) {
+                                is Resource.State.Success -> { success(resource.data) }
+                                is Resource.State.Error ->
+                                    error(resource.apiError, resource.localError, resource.data)
+                                is Resource.State.SuccessEmpty -> empty()
+                            }
+
                         }
                     }
                 } catch (e: Exception) { error(e) }

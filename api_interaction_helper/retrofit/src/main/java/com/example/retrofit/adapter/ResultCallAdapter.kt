@@ -22,6 +22,7 @@ internal class ResultCallAdapter(
     override fun responseType(): Type = type
 
     override fun adapt(call: Call<Type>): Call<ApiResponse<Type>> =
-        CallResult(call, apiErrorHandler)//assistedFactory.create(call)
+        CallResult(call, apiErrorHandler)//
+// assistedFactory.create(call)
 
 }

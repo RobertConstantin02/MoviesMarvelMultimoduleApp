@@ -100,7 +100,7 @@ class CharacterRepository @Inject constructor(
             localResponse.databaseUnifiedError.messageResource,
             null
         )
-        is DatabaseResponseEmpty -> Resource.successEmpty(Unit)
+        is DatabaseResponseEmpty -> Resource.successEmpty()
     }
 
 

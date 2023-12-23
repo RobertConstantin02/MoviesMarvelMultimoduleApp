@@ -33,7 +33,6 @@ class ApiErrorHandlerImpl(
                 else -> UnifiedError.Generic(context.getString(R.string.error_generic))
             }
         }
-    }
 
     private fun IOException.handleError(): UnifiedError =
         when (this) {
@@ -45,6 +44,7 @@ class ApiErrorHandlerImpl(
 
             else -> UnifiedError.Generic(context.getString(R.string.error_generic))
         }
+}
 //        when (this) {
 //            is SocketTimeoutException -> UnifiedError.Connectivity.TimeOut(R.string.error_time_out)
 //
@@ -54,4 +54,3 @@ class ApiErrorHandlerImpl(
 //
 //            else -> UnifiedError.Generic(R.string.error_generic)
 //        }
-}

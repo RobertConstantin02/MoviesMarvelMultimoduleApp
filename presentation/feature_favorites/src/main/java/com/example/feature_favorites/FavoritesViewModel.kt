@@ -123,14 +123,13 @@ class FavoritesViewModel @Inject constructor(
                 currentCharacterList.remove(currentCharacterList.find { it.id == characterId })
                 onSuccess()
             },
-            error = {
-                onEvent(
-                    FavoritesScreenEvent.OnError(
-                        UiText.StringResources(R.string.local_db_update_error)
-                    )
+        ) {
+            onEvent(
+                FavoritesScreenEvent.OnError(
+                    UiText.StringResources(R.string.local_db_update_error)
                 )
-            },
-        )
+            )
+        }
     }
 
     private fun itemListHasPageSizeOrGrater() =

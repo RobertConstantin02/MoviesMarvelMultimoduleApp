@@ -100,7 +100,7 @@ fun DetailPresentationScreenContent(
             DetailSuccess(characterDetail = { state.characterDetail })
 
         is CharacterDetailPSState.Error ->
-            ErrorScreen(state.characterDetailError.message.asString(context)) {
+            ErrorScreen(state.apiError ?: state.localError?.let { context.getString(it) } ?: context.getString(R.string.detail_unknown)) { // TODO: refactor 
                 // TODO: retry and ask data again
             }
     }
@@ -242,7 +242,9 @@ fun DetailBodyContent(
     cardBgColor: () -> Color,
 ) {
 
-    Column(modifier = Modifier.fillMaxWidth().padding(top = dimens.spaceMedium)) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = dimens.spaceMedium)) {
         LocationCard(
             characterDetail = { characterDetail() },
             isExpanded = { isExpanded() },

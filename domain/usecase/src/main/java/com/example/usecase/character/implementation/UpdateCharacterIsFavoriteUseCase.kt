@@ -2,6 +2,7 @@ package com.example.usecase.character.implementation
 
 import arrow.core.left
 import arrow.core.right
+import com.example.core.remote.Resource
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.domain_repository.di.QCharacterRepository
 import com.example.resources.Result
@@ -14,7 +15,7 @@ import javax.inject.Inject
 class UpdateCharacterIsFavoriteUseCase @Inject constructor(
     @QCharacterRepository private val repository: ICharacterRepository
 ) : IUpdateCharacterIsFavoriteUseCase {
-    override suspend fun run(input: UpdateParams): Flow<Result<Unit>> =
+    override suspend fun run(input: UpdateParams): Resource<Unit> =
         repository.updateCharacterIsFavorite(input.isFavorite, input.characterId)
 
 }
