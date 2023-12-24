@@ -35,6 +35,26 @@ class Resource<out T> private constructor(
                 is Error -> this.data
             }
         }
+
+        fun <R> mapSuccess(success: (data: T?) -> R): Resource<R> {
+            return when(this) {
+                is Success -> Resource(Success(success(this.data)))
+                is Error -> Resource(Error(this.apiError, this.localError, success(this.data)))
+                is SuccessEmpty -> Resource(SuccessEmpty)
+            }
+        }
+
+        inline fun <R> fold(
+            success: (data: T) -> R,
+            error: (e: Error<T>) -> R,
+            empty: (SuccessEmpty) -> R
+        ): R {
+            return when(this) {
+                is Success -> success(this.data)
+                is Error -> error(this)
+                is SuccessEmpty -> empty(SuccessEmpty)
+            }
+        }
     }
 
 

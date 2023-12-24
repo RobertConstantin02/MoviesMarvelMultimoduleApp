@@ -20,7 +20,7 @@ const val ID_PATH = "id"
 const val IDS_PATH = "ids"
 interface RickAndMortyService {
     @GET(GET_ALL_CHARACTERS)
-    suspend fun getAllCharacters(@Query(PAGE_PARAMETER) page: Int): Response<FeedCharacterDto>
+    suspend fun getAllCharacters(@Query(PAGE_PARAMETER) page: Int): ApiResponse<FeedCharacterDto>
 
     @GET(GET_CHARACTER)
     suspend fun getCharacter(@Path(ID_PATH) characterId: Int): ApiResponse<CharacterDto>

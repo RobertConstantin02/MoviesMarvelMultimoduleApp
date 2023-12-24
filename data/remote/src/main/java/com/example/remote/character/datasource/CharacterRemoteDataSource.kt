@@ -12,8 +12,8 @@ class CharacterRemoteDataSource @Inject constructor(
     private val remoteService: RickAndMortyService
 ): ICharacterRemoteDataSource {
 
-    override suspend fun getAllCharacters(page: Int): Result<FeedCharacterDto> =
-        apiCall { remoteService.getAllCharacters(page) }
+    override suspend fun getAllCharacters(page: Int): ApiResponse<FeedCharacterDto> =
+         remoteService.getAllCharacters(page)
 
 //    override suspend fun getCharacterById(characterId: Int): Result<CharacterDto> =
 //        apiCall { remoteService.getCharacter(characterId) }

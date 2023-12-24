@@ -85,12 +85,14 @@ class CharacterLocalDatasource @Inject constructor(
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
-    ) = try {
-        if (characterDao.updateCharacterIsFavorite(isFavorite, characterId) != -1)
-            DatabaseResponse.create(Unit)
-        else DatabaseResponse.create(DatabaseUnifiedError.Update)
-    } catch (e: SQLiteException) {
-        DatabaseResponse.create(DatabaseUnifiedError.Reading)
+    ) = flow {
+        try {
+            if (characterDao.updateCharacterIsFavorite(isFavorite, characterId) != -1)
+                emit(DatabaseResponse.create(Unit))
+            else emit(DatabaseResponse.create(DatabaseUnifiedError.Update))
+        } catch (e: SQLiteException) {
+            emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))
+        }
     }
 
 

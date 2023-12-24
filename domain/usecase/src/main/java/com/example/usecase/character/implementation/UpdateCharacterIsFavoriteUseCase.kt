@@ -15,7 +15,7 @@ import javax.inject.Inject
 class UpdateCharacterIsFavoriteUseCase @Inject constructor(
     @QCharacterRepository private val repository: ICharacterRepository
 ) : IUpdateCharacterIsFavoriteUseCase {
-    override suspend fun run(input: UpdateParams): Resource<Unit> =
+    override suspend fun run(input: UpdateParams): Flow<Resource<Unit>> =
         repository.updateCharacterIsFavorite(input.isFavorite, input.characterId)
 
 }

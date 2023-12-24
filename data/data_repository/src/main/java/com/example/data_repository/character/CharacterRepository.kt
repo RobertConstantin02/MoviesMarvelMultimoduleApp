@@ -32,7 +32,10 @@ import com.example.resources.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
 
@@ -94,14 +97,16 @@ class CharacterRepository @Inject constructor(
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
-    ) = when(val localResponse = localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId)) {
-        is DatabaseResponseSuccess -> Resource.success(Unit)
-        is DatabaseResponseError -> Resource.error(
-            localResponse.databaseUnifiedError.messageResource,
-            null
-        )
-        is DatabaseResponseEmpty -> Resource.successEmpty()
-    }
+    ) = flowOf(
+        when(val localResponse = localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId).first()) {
+            is DatabaseResponseSuccess -> Resource.success(Unit)
+            is DatabaseResponseError -> Resource.error(
+                localResponse.databaseUnifiedError.messageResource,
+                null
+            )
+            is DatabaseResponseEmpty -> Resource.successEmpty()
+        }
+    )
 
 
 //    @OptIn(ExperimentalCoroutinesApi::class)

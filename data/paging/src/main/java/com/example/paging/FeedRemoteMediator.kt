@@ -7,11 +7,16 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.example.api.model.character.FeedCharacterDto
 import com.example.api.network.PAGE_PARAMETER
+import com.example.core.apiDbBoundResource
+import com.example.core.localResourceFlow
+import com.example.core.networkResourceFlow
+import com.example.core.remote.Resource
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
@@ -42,16 +47,19 @@ class FeedRemoteMediator @Inject constructor(
     }
 
     private suspend fun handleCacheSystem(page: Int): MediatorResult =
-        remoteDataSource.getAllCharacters(page).fold(
-            ifLeft = { error -> return@fold MediatorResult.Error(error) },
-            ifRight = { response ->
-                insertPagingKeys(response)
-                insertCharacters(response)
-                return@fold MediatorResult.Success(endOfPaginationReached = response.results?.isEmpty() == true)
-            }
+        networkResourceFlow(
+            makeNetworkRequest = { remoteDataSource.getAllCharacters(page) }
+        ).state.fold(
+            success = {
+                insertPagingKeys(it)
+                insertCharacters(it)
+                MediatorResult.Success(endOfPaginationReached = it.results?.isEmpty() == true)
+            },
+            error = {
+                MediatorResult.Error(Throwable(it.apiError))
+            },
+            empty = { MediatorResult.Error(Throwable()) }
         )
-
-
 
     private suspend fun insertPagingKeys(response: FeedCharacterDto) = with(response) {
         results?.filterNotNull()?.mapNotNull { character ->
@@ -63,11 +71,15 @@ class FeedRemoteMediator @Inject constructor(
 
     private suspend fun insertCharacters(response: FeedCharacterDto) = with(response) {
         results?.filterNotNull()?.filter { it.id != null }?.map { characterResponse ->
-            localDataSource.getCharacterById(characterResponse.id ?: -1).fold(
-                ifLeft = { characterResponse }
-            ) { characterEntity ->
-                characterResponse.copy(isFavorite = characterEntity.isFavorite)
-            }
+            localResourceFlow {
+                localDataSource.getCharacterById(characterResponse.id ?: -1)
+            }.state.fold(
+                success = { characterEntity ->
+                    characterResponse.copy(isFavorite = characterEntity.isFavorite)
+                },
+                error = { characterResponse },
+                empty = { characterResponse }
+            )
         }.let { characters ->
             if (characters?.isNotEmpty() == true) {
                 localDataSource.insertCharacters(characters.map { it.toCharacterEntity() })

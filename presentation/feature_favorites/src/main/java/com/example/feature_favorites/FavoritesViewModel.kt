@@ -95,13 +95,14 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
+    // TODO: refactor and handle favorites with new system, for now put 1
     private fun onError(error: Throwable) {
         when (val dbError = (error as? DataBase)) {
             is DataBase.Error.Reading -> UiText.DynamicText(
-                R.string.local_db_read_error,
+                1,
                 dbError.message
             )
-            else -> UiText.StringResources(R.string.local_db_unknown_error)
+            else -> UiText.StringResources(1)
         }.also { errorMessage -> onEvent(FavoritesScreenEvent.OnError(errorMessage)) }
     }
 
@@ -110,7 +111,7 @@ class FavoritesViewModel @Inject constructor(
             simulateLoading()
             onEvent(FavoritesScreenEvent.OnListFound(currentCharacterList + newCharacters))
             currentCharacterList.addAll(newCharacters)
-        } else onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(R.string.local_db_empty_result)))
+        } else onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(1)))
     }
 
     fun updateCharacter(isFavorite: Boolean, characterId: Int) {
@@ -126,7 +127,7 @@ class FavoritesViewModel @Inject constructor(
         ) {
             onEvent(
                 FavoritesScreenEvent.OnError(
-                    UiText.StringResources(R.string.local_db_update_error)
+                    UiText.StringResources(1)
                 )
             )
         }
