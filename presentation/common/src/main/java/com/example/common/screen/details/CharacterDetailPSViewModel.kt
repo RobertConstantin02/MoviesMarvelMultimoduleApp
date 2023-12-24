@@ -3,12 +3,8 @@ package com.example.common.screen.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.common.R
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.presentation_mapper.BoToVoCharacterPresentationMapper.toCharacterPresentationScreenVO
-import com.example.resources.DataBase
-import com.example.resources.RemoteError
-import com.example.resources.UiText
 import com.example.usecase.character.IGetCharacterDetailsUseCase
 import com.example.usecase.di.GetCharacterDetails
 import dagger.hilt.android.lifecycle.HiltViewModel

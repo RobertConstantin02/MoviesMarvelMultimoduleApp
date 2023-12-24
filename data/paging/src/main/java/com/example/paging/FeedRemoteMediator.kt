@@ -7,16 +7,13 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.example.api.model.character.FeedCharacterDto
 import com.example.api.network.PAGE_PARAMETER
-import com.example.core.apiDbBoundResource
-import com.example.core.localResourceFlow
-import com.example.core.networkResourceFlow
-import com.example.core.remote.Resource
+import com.example.core.localResource
+import com.example.core.networkResource
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
@@ -47,7 +44,7 @@ class FeedRemoteMediator @Inject constructor(
     }
 
     private suspend fun handleCacheSystem(page: Int): MediatorResult =
-        networkResourceFlow(
+        networkResource(
             makeNetworkRequest = { remoteDataSource.getAllCharacters(page) }
         ).state.fold(
             success = {
@@ -71,7 +68,7 @@ class FeedRemoteMediator @Inject constructor(
 
     private suspend fun insertCharacters(response: FeedCharacterDto) = with(response) {
         results?.filterNotNull()?.filter { it.id != null }?.map { characterResponse ->
-            localResourceFlow {
+            localResource {
                 localDataSource.getCharacterById(characterResponse.id ?: -1)
             }.state.fold(
                 success = { characterEntity ->

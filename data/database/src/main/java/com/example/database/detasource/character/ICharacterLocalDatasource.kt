@@ -17,5 +17,5 @@ interface ICharacterLocalDatasource {
     suspend fun insertCharacters(characters : List<CharacterEntity>): DatabaseResponse<Unit>
     suspend fun insertCharacter(character: CharacterEntity): DatabaseResponse<Unit>
     suspend fun updateCharacterIsFavorite(isFavorite: Boolean, characterId: Int): Flow<DatabaseResponse<Unit>>
-    fun getFavoriteCharacters(offset: Int):  Flow<Result<List<CharacterEntity>>>
+    fun getFavoriteCharacters(offset: Int):  Flow<DatabaseResponse<List<CharacterEntity>>>
 }

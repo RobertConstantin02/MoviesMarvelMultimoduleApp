@@ -101,5 +101,5 @@ interface FlowUseCase<Input, Output> {
     operator fun invoke(
         params: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
-    ) = run(params).catch { emit(it.left() as Output) }.flowOn(dispatcher)
+    ) = run(params).catch { emit(it as Output) }.flowOn(dispatcher) // TODO: review cast
 }

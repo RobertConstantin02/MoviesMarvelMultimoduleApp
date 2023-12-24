@@ -1,6 +1,7 @@
 package com.example.usecase.character.implementation
 
 import android.util.Log
+import com.example.core.remote.Resource
 import com.example.domain_model.character.CharacterBo
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.domain_repository.di.QCharacterRepository
@@ -15,7 +16,7 @@ import javax.inject.Inject
 class GetFavoriteCharactersUseCaseUseCase @Inject constructor(
     @QCharacterRepository private val repository: ICharacterRepository
 ) : IGetFavoriteCharactersUseCase {
-    override fun run(input: FavoritesParams): Flow<Result<List<CharacterBo>>> = with(input) {
+    override fun run(input: FavoritesParams): Flow<Resource<List<CharacterBo>>> = with(input) {
         Log.d("-----> currentPage", page.toString())
         repository.getFavoriteCharacters(page, offset)
 //        repository.getFavoriteCharacters(page, offset).flatMapLatest { result ->

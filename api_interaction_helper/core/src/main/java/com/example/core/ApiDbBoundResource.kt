@@ -11,6 +11,7 @@ import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.Resource
 import com.example.core.remote.UnifiedError
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -101,7 +102,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
     }
 }
 
-suspend inline fun <REMOTE> networkResourceFlow(
+suspend inline fun <REMOTE> networkResource(
     crossinline makeNetworkRequest: suspend () -> ApiResponse<REMOTE>,
     crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
 ): Resource<REMOTE> {
@@ -116,7 +117,7 @@ suspend inline fun <REMOTE> networkResourceFlow(
     }
 }
 
-suspend inline fun <LOCAL> localResourceFlow(
+suspend inline fun <LOCAL> localResource(
     crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<LOCAL>>
 ): Resource<LOCAL> {
 
@@ -127,4 +128,21 @@ suspend inline fun <LOCAL> localResourceFlow(
         }
         is DatabaseResponseEmpty -> Resource.successEmpty()
     }
+}
+
+inline fun <DB, BO> localResourceFlow(
+    crossinline fetchFromLocal: () -> Flow<DatabaseResponse<DB>>,
+    crossinline mapLocalToDomain: (DB) -> BO,
+) = flow<Resource<BO>> {
+
+    fetchFromLocal().collectLatest { localResponse ->
+        when(localResponse) {
+            is DatabaseResponseSuccess ->  emit(Resource.success(data = mapLocalToDomain(localResponse.data)))
+            is DatabaseResponseError -> {
+                emit(Resource.error(localResponse.databaseUnifiedError.messageResource, null))
+            }
+            is DatabaseResponseEmpty -> emit(Resource.successEmpty())
+        }
+    }
+
 }

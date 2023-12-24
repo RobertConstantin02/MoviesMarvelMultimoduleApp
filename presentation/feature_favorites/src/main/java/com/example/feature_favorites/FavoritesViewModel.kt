@@ -9,7 +9,6 @@ import com.example.common.R
 import com.example.feature_favorites.paginator.Paginator
 import com.example.presentation_mapper.toCharacterVo
 import com.example.presentation_model.CharacterVo
-import com.example.resources.DataBase
 import com.example.resources.UiText
 import com.example.usecase.character.FavoritesParams
 import com.example.usecase.character.IGetFavoriteCharactersUseCase
@@ -96,14 +95,8 @@ class FavoritesViewModel @Inject constructor(
     }
 
     // TODO: refactor and handle favorites with new system, for now put 1
-    private fun onError(error: Throwable) {
-        when (val dbError = (error as? DataBase)) {
-            is DataBase.Error.Reading -> UiText.DynamicText(
-                1,
-                dbError.message
-            )
-            else -> UiText.StringResources(1)
-        }.also { errorMessage -> onEvent(FavoritesScreenEvent.OnError(errorMessage)) }
+    private fun onError(localError: Int) {
+        onEvent(FavoritesScreenEvent.OnError(UiText.StringResources(localError)))
     }
 
     private fun onSuccess(newCharacters: List<CharacterVo> = emptyList()) {

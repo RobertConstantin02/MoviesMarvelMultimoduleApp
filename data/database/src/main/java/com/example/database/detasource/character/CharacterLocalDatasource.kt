@@ -2,20 +2,13 @@ package com.example.database.detasource.character
 
 import android.database.sqlite.SQLiteException
 import androidx.paging.PagingSource
-import arrow.core.left
-import arrow.core.right
 import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
-import com.example.core.local.DatabaseResponseError
-import com.example.core.local.DatabaseResponseSuccess
 import com.example.core.local.DatabaseUnifiedError
-import com.example.core.remote.Resource
-import com.example.database.dao.character.ICharacterDao
 import com.example.database.dao.IPagingKeysDao
+import com.example.database.dao.character.ICharacterDao
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
-import com.example.resources.DataBase
-import com.example.resources.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -97,14 +90,14 @@ class CharacterLocalDatasource @Inject constructor(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getFavoriteCharacters(offset: Int): Flow<Result<List<CharacterEntity>>> {
+    override fun getFavoriteCharacters(offset: Int): Flow<DatabaseResponse<List<CharacterEntity>>> {
         return try {
             characterDao.getFavoriteCharacters(offset).flatMapLatest { characters ->
-                if (characters.isNotEmpty()) flowOf(characters.right())
-                else flowOf(emptyList<CharacterEntity>().right())
+                if (characters.isNotEmpty()) flowOf(DatabaseResponse.create(characters))
+                else flowOf(DatabaseResponseEmpty())
             }
         } catch (e: SQLiteException) {
-            flowOf(DataBase.Error.Reading(e.message).left())
+            flowOf(DatabaseResponse.create(DatabaseUnifiedError.Reading))
         }
     }
 }

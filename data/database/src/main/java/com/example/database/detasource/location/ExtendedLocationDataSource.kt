@@ -1,15 +1,10 @@
 package com.example.database.detasource.location
 
 import android.database.sqlite.SQLiteException
-import arrow.core.left
-import arrow.core.right
 import com.example.core.local.DatabaseResponse
-import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseUnifiedError
 import com.example.database.dao.location.IExtendendLocationDao
 import com.example.database.entities.ExtendedLocationEntity
-import com.example.resources.DataBase
-import com.example.resources.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

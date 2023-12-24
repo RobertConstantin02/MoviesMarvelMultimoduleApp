@@ -5,14 +5,12 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import arrow.core.left
-import arrow.core.right
 import com.example.core.apiDbBoundResource
-import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseResponseSuccess
-import com.example.core.local.DatabaseUnifiedError
+import com.example.core.localResource
+import com.example.core.localResourceFlow
 import com.example.core.remote.Resource
 import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
@@ -28,14 +26,12 @@ import com.example.domain_repository.character.ICharacterRepository
 import com.example.paging.FeedRemoteMediator
 import com.example.preferences.datasource.ISharedPreferenceDataSource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
-import com.example.resources.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
 
@@ -58,24 +54,25 @@ class CharacterRepository @Inject constructor(
         }
 
     override fun getCharactersByIds(charactersIds: List<Int>): Flow<Resource<List<CharacterNeighborBo>>> =
-       apiDbBoundResource(
-           fetchFromLocal = { localDatabaseDatasource.getCharactersByIds(charactersIds) },
-           shouldMakeNetworkRequest = { databaseResult ->
-               System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS
-           },
-           makeNetworkRequest = { remoteDataSource.getCharactersByIds(charactersIds) },
-           saveApiData = { characters ->
-               localDatabaseDatasource.insertCharacters(characters?.map { it.toCharacterEntity() } ?: emptyList())
-           },
-           mapApiToDomain = { characterDtoList ->
-               characterDtoList?.map { characterDto -> characterDto.toCharacterNeighborBo() } ?: emptyList()
+        apiDbBoundResource(
+            fetchFromLocal = { localDatabaseDatasource.getCharactersByIds(charactersIds) },
+            shouldMakeNetworkRequest = { databaseResult ->
+                System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS
+            },
+            makeNetworkRequest = { remoteDataSource.getCharactersByIds(charactersIds) },
+            saveApiData = { characters ->
+                localDatabaseDatasource.insertCharacters(characters?.map { it.toCharacterEntity() }
+                    ?: emptyList())
+            },
+            mapApiToDomain = { characterDtoList ->
+                characterDtoList?.map { characterDto -> characterDto.toCharacterNeighborBo() }
+                    ?: emptyList()
 
-           },
-           mapLocalToDomain = {characterEntityList ->
-               characterEntityList.map { characterEntity -> characterEntity.toCharacterNeighborBo() }
-           }
-       )
-
+            },
+            mapLocalToDomain = { characterEntityList ->
+                characterEntityList.map { characterEntity -> characterEntity.toCharacterNeighborBo() }
+            }
+        )
 
 
     override fun getCharacter(characterId: Int): Flow<Resource<CharacterDetailBo>> {
@@ -98,12 +95,14 @@ class CharacterRepository @Inject constructor(
         isFavorite: Boolean,
         characterId: Int
     ) = flowOf(
-        when(val localResponse = localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId).first()) {
+        when (val localResponse =
+            localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId).first()) {
             is DatabaseResponseSuccess -> Resource.success(Unit)
             is DatabaseResponseError -> Resource.error(
                 localResponse.databaseUnifiedError.messageResource,
                 null
             )
+
             is DatabaseResponseEmpty -> Resource.successEmpty()
         }
     )
@@ -125,28 +124,28 @@ class CharacterRepository @Inject constructor(
 //    }
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<Result<List<CharacterBo>>> {
-//        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest { characters ->
-//            characters.map { character -> character.toCharacterBo() }
-//        }
-        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset)
-            .mapLatest { result ->
-                result.fold(ifLeft = { error -> error.left() }) { characters ->
-                    characters.map { it.toCharacterBo() }.right()
-                }
-            }
-    }
-
-//        localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).flatMapLatest { result ->
-//            flow {
-//                result.fold(
-//                    ifLeft = { it.left() }
-//                ) { characters ->
-//                    characters.map {
-//                        it.toCharacterBo().right()
-//                    }
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<Result<List<CharacterBo>>> {
+////        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset).mapLatest { characters ->
+////            characters.map { character -> character.toCharacterBo() }
+////        }
+//        return localDatabaseDatasource.getFavoriteCharacters(offset = page * offset)
+//            .mapLatest { result ->
+//                result.fold(ifLeft = { error -> error.left() }) { characters ->
+//                    characters.map { it.toCharacterBo() }.right()
 //                }
 //            }
-//        }
+//    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<Resource<List<CharacterBo>>> {
+        return localResourceFlow(
+            fetchFromLocal = {
+                localDatabaseDatasource.getFavoriteCharacters(offset = page * offset)
+            },
+            mapLocalToDomain = { charactersEntity ->
+                charactersEntity.map { characterEntity -> characterEntity.toCharacterBo() }
+            }
+        )
+    }
 }
