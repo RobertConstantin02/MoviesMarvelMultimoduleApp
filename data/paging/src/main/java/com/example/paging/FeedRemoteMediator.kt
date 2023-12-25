@@ -45,7 +45,9 @@ class FeedRemoteMediator @Inject constructor(
 
     private suspend fun handleCacheSystem(page: Int): MediatorResult =
         networkResource(
-            makeNetworkRequest = { remoteDataSource.getAllCharacters(page) }
+            makeNetworkRequest = {
+                remoteDataSource.getAllCharacters(page)
+            }
         ).state.fold(
             success = {
                 insertPagingKeys(it)
@@ -77,7 +79,7 @@ class FeedRemoteMediator @Inject constructor(
                 error = { characterResponse },
                 empty = { characterResponse }
             )
-        }.let { characters ->
+        }.also { characters ->
             if (characters?.isNotEmpty() == true) {
                 localDataSource.insertCharacters(characters.map { it.toCharacterEntity() })
             }

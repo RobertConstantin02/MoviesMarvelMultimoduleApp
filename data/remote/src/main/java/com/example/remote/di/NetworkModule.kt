@@ -42,9 +42,8 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl("https://rickandmortyapi.com")// why buildconfig from this module does not appear?
             .client(client)
-            .addConverterFactory(
-                GsonConverterFactory.create()
-            ).addCallAdapterFactory(callAdapterFactory)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(callAdapterFactory)
             .build()
     }
 
