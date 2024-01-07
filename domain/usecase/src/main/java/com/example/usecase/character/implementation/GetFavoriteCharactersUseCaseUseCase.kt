@@ -18,6 +18,7 @@ class GetFavoriteCharactersUseCaseUseCase @Inject constructor(
 ) : IGetFavoriteCharactersUseCase {
     override fun run(input: FavoritesParams): Flow<Resource<List<CharacterBo>>> = with(input) {
         Log.d("-----> currentPage", page.toString())
+
         repository.getFavoriteCharacters(page, offset)
 //        repository.getFavoriteCharacters(page, offset).flatMapLatest { result ->
 //            result.fold(

@@ -12,6 +12,7 @@ import com.example.domain_repository.episode.IEpisodeRepository
 import com.example.domain_repository.location.ILocationRepository
 import com.example.usecase.character.IGetCharacterDetailsUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.transform
 import javax.inject.Inject

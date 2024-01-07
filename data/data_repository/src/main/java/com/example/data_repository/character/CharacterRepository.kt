@@ -137,7 +137,6 @@ class CharacterRepository @Inject constructor(
 //            }
 //    }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getFavoriteCharacters(page: Int, offset: Int): Flow<Resource<List<CharacterBo>>> {
         return localResourceFlow(
             fetchFromLocal = {

@@ -1,5 +1,6 @@
 package com.example.usecase
 
+import android.util.Log
 import arrow.core.left
 import com.example.core.remote.Resource
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
@@ -101,5 +102,5 @@ interface FlowUseCase<Input, Output> {
     operator fun invoke(
         params: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
-    ) = run(params).catch { emit(it as Output) }.flowOn(dispatcher) // TODO: review cast
+    ) = run(params).flowOn(dispatcher) // TODO: review cast
 }

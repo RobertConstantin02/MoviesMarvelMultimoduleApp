@@ -11,6 +11,7 @@ import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -89,15 +90,26 @@ class CharacterLocalDatasource @Inject constructor(
     }
 
 
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    override fun getFavoriteCharacters(offset: Int): Flow<DatabaseResponse<List<CharacterEntity>>> {
+//        return try {
+//            characterDao.getFavoriteCharacters(offset).flatMapLatest { characters ->
+//                if (characters.isNotEmpty()) flowOf(DatabaseResponse.create(characters))
+//                else flowOf(DatabaseResponseEmpty())
+//            }
+//        } catch (e: SQLiteException) {
+//            flowOf(DatabaseResponse.create(DatabaseUnifiedError.Reading))
+//        }
+//    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getFavoriteCharacters(offset: Int): Flow<DatabaseResponse<List<CharacterEntity>>> {
-        return try {
-            characterDao.getFavoriteCharacters(offset).flatMapLatest { characters ->
-                if (characters.isNotEmpty()) flowOf(DatabaseResponse.create(characters))
-                else flowOf(DatabaseResponseEmpty())
+    override fun getFavoriteCharacters(offset: Int) = flow {
+        try {
+            with(characterDao.getFavoriteCharacters(offset)) {
+                emit(DatabaseResponse.create(this.first()))
             }
-        } catch (e: SQLiteException) {
-            flowOf(DatabaseResponse.create(DatabaseUnifiedError.Reading))
+        }catch (e: SQLiteException) {
+            emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))
         }
     }
 }

@@ -36,6 +36,6 @@ interface ICharacterDao {
 
     @Query("SELECT * FROM character_entity WHERE is_Favorite = 1 LIMIT :limit OFFSET :offset")
     @Throws(SQLiteException::class)
-    fun getFavoriteCharacters( offset: Int, limit: Int = 10): Flow<List<CharacterEntity>>
+    fun getFavoriteCharacters( offset: Int, limit: Int = 10): Flow<List<CharacterEntity>?>
 
 }

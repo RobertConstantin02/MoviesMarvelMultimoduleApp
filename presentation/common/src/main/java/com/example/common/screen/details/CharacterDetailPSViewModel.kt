@@ -1,5 +1,6 @@
 package com.example.common.screen.details
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -46,8 +47,9 @@ class DetailViewModel @Inject constructor(
             Dispatchers.IO,
             viewModelScope,
             error = ::onError,
-            success = ::onSuccess
-        ) {}
+            success = ::onSuccess,
+            empty = { Log.d("-----> empty", "called") }
+        )
     }
 
     private fun onSuccess(characterPS: CharacterPresentationScreenBO) =
