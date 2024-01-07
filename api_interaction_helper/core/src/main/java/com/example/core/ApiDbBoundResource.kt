@@ -20,30 +20,26 @@ import kotlinx.coroutines.flow.map
 inline fun <BO, DB, API> apiDbBoundResource(
     crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<DB>>, //Flow<DbResponse<DB>>
     crossinline shouldMakeNetworkRequest: suspend (DatabaseResponse<DB>) -> Boolean = { true },
+    crossinline localStorageStrategy: () -> Unit = {},
     crossinline makeNetworkRequest: suspend () -> ApiResponse<API>,
     crossinline processNetworkResponse: (response: ApiResponseSuccess<API>) -> Unit = { },
-    crossinline saveApiData: suspend (API) -> DatabaseResponse<Unit> = { _: API ->
-        DatabaseResponse.create(
-            Unit
-        )
-    },
+    crossinline saveApiData: suspend (API) -> DatabaseResponse<Unit> = { _: API -> DatabaseResponse.create(Unit) },
     crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
     crossinline mapApiToDomain: (API) -> BO,
     crossinline mapLocalToDomain: (DB) -> BO,
 ) = flow<Resource<BO>> {
-    //emit(Resource.loading())
-
     val localData = fetchFromLocal().first()
 
     if (shouldMakeNetworkRequest(localData)) { //here maybe only the time, not response different from success. After one day I want to get new data and cache it
         // TODO: action to save again the time for sharedPref. Here must be something generic developer want to apply
+        localStorageStrategy()
         when (val response = makeNetworkRequest()) {
             is ApiResponseSuccess -> {
                 processNetworkResponse(response)
                 if (saveApiData(response.body) is DatabaseResponseSuccess)
-                    fetchFromLocal().map { localResponse ->
-                        when (localResponse) {
-                            is DatabaseResponseSuccess -> emit(
+                    when (val localResponse = fetchFromLocal().first()) {
+                        is DatabaseResponseSuccess ->
+                            emit(
                                 Resource.success(
                                     mapLocalToDomain(
                                         localResponse.data
@@ -51,7 +47,8 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                 )
                             )
 
-                            is DatabaseResponseError -> emit(
+                        is DatabaseResponseError ->
+                            emit(
                                 Resource.success(
                                     mapApiToDomain(
                                         response.body
@@ -59,16 +56,17 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                 )
                             )
 
-                            is DatabaseResponseEmpty -> emit(
+                        is DatabaseResponseEmpty ->
+                            emit(
                                 Resource.success(
                                     mapApiToDomain(
                                         response.body
                                     )
                                 )
                             )
-                        }
                     }
                 else emit(Resource.success(mapApiToDomain(response.body)))
+
             }
 
             is ApiResponseError -> {
@@ -108,12 +106,13 @@ suspend inline fun <REMOTE> networkResource(
     crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
 ): Resource<REMOTE> {
 
-    return when(val apiResponse = makeNetworkRequest()) {
-        is ApiResponseSuccess ->  Resource.success(data = apiResponse.body)
+    return when (val apiResponse = makeNetworkRequest()) {
+        is ApiResponseSuccess -> Resource.success(data = apiResponse.body)
         is ApiResponseError -> {
             onNetworkRequestFailed(apiResponse.unifiedError)
             Resource.error(apiResponse.unifiedError.message, null)
         }
+
         is ApiResponseEmpty -> Resource.successEmpty()
     }
 }
@@ -122,11 +121,12 @@ suspend inline fun <LOCAL> localResource(
     crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<LOCAL>>
 ): Resource<LOCAL> {
 
-    return when(val localResponse = fetchFromLocal().first()) {
-        is DatabaseResponseSuccess ->  Resource.success(data = localResponse.data)
+    return when (val localResponse = fetchFromLocal().first()) {
+        is DatabaseResponseSuccess -> Resource.success(data = localResponse.data)
         is DatabaseResponseError -> {
             Resource.error(localResponse.databaseUnifiedError.messageResource, null)
         }
+
         is DatabaseResponseEmpty -> Resource.successEmpty()
     }
 }
@@ -137,13 +137,15 @@ inline fun <DB, BO> localResourceFlow(
     crossinline mapLocalToDomain: (DB) -> BO,
 ) = channelFlow<Resource<BO>> {
     fetchFromLocal().collectLatest { localResponse ->
-        when(localResponse) {
-            is DatabaseResponseSuccess ->  {
+        when (localResponse) {
+            is DatabaseResponseSuccess -> {
                 send(Resource.success(data = mapLocalToDomain(localResponse.data)))
             }
+
             is DatabaseResponseError -> {
                 send(Resource.error(localResponse.databaseUnifiedError.messageResource, null))
             }
+
             is DatabaseResponseEmpty -> send(Resource.successEmpty())
         }
     }

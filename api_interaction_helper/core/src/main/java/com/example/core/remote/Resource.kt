@@ -20,7 +20,9 @@ class Resource<out T> private constructor(
             combineFunction: (T?, R?) -> U
         ): Resource<U> = when (this) {
             is Success -> when (other) {
-                is Success -> Resource(Success(combineFunction(data, other.data)))
+                is Success -> {
+                    Resource(Success(combineFunction(data, other.data)))
+                }
                 is SuccessEmpty -> Resource(SuccessEmpty)
                 is Error -> Resource(Error(other.apiError, other.localError, combineFunction(data, other.data)))
             }
@@ -33,14 +35,6 @@ class Resource<out T> private constructor(
                 is Success -> this.data
                 is SuccessEmpty -> null
                 is Error -> this.data
-            }
-        }
-
-        fun <R> mapSuccess(success: (data: T?) -> R): Resource<R> {
-            return when(this) {
-                is Success -> Resource(Success(success(this.data)))
-                is Error -> Resource(Error(this.apiError, this.localError, success(this.data)))
-                is SuccessEmpty -> Resource(SuccessEmpty)
             }
         }
 

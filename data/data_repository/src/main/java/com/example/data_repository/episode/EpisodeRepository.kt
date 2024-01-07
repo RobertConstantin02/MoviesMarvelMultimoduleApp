@@ -1,6 +1,7 @@
 package com.example.data_repository.episode
 
 import com.example.core.apiDbBoundResource
+import com.example.core.local.DatabaseResponseSuccess
 import com.example.core.remote.Resource
 import com.example.data_mapper.DtoToEpisodeBo.toEpisodesBo
 import com.example.data_mapper.DtoToEpisodeEntityMapper.toEpisodesEntities
@@ -21,9 +22,12 @@ class EpisodeRepository @Inject constructor(
 ) : IEpisodeRepository {
     override fun getEpisodes(episodesIds: List<Int>): Flow<Resource<List<EpisodeBo>>> =
         apiDbBoundResource(
-            fetchFromLocal = { local.getEpisodes(episodesIds) },
+            fetchFromLocal = {
+                local.getEpisodes(episodesIds)
+            },
             shouldMakeNetworkRequest = { databaseResult ->
                 System.currentTimeMillis() - sharedPreference.getTime() >= DAY_IN_MILLIS
+                        || (databaseResult !is DatabaseResponseSuccess)
             },
             makeNetworkRequest = { remote.getEpisodesByIds(episodesIds) },
             saveApiData = { episodesDto ->

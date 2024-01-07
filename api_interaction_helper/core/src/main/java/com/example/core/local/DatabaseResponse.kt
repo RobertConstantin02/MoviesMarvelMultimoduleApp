@@ -6,7 +6,12 @@ sealed class DatabaseResponse<T> {
             DatabaseResponseError(databaseUnifiedError)
 
         fun <T> create(databaseResponse: T?): DatabaseResponse<T> =
-            databaseResponse?.let { DatabaseResponseSuccess(databaseResponse) } ?: DatabaseResponseEmpty()
+            databaseResponse?.let {
+                DatabaseResponseSuccess(databaseResponse)
+            } ?: run {
+                DatabaseResponseEmpty()
+            }
+
     }
 
 }

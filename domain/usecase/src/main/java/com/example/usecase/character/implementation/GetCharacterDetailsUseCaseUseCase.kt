@@ -49,7 +49,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
                         episodes
                     )
                 })
-            }
+            }.collect()
         }
     }
 
