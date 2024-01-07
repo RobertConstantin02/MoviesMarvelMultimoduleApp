@@ -55,7 +55,7 @@ class Resource<out T> private constructor(
     companion object {
         fun <T> success(data: T) = Resource(State.Success(data))
 
-        fun successEmpty() = Resource(State.SuccessEmpty) //review at the end
+        fun successEmpty() = Resource(State.SuccessEmpty)
 
         fun <T> error(
             errorMessage: String,
