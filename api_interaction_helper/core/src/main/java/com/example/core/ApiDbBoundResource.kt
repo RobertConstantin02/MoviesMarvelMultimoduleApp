@@ -31,7 +31,6 @@ inline fun <BO, DB, API> apiDbBoundResource(
     val localData = fetchFromLocal().first()
 
     if (shouldMakeNetworkRequest(localData)) { //here maybe only the time, not response different from success. After one day I want to get new data and cache it
-        // TODO: action to save again the time for sharedPref. Here must be something generic developer want to apply
         localStorageStrategy()
         when (val response = makeNetworkRequest()) {
             is ApiResponseSuccess -> {
@@ -66,7 +65,6 @@ inline fun <BO, DB, API> apiDbBoundResource(
                             )
                     }
                 else emit(Resource.success(mapApiToDomain(response.body)))
-
             }
 
             is ApiResponseError -> {

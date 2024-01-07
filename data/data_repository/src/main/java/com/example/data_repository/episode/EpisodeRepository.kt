@@ -26,8 +26,7 @@ class EpisodeRepository @Inject constructor(
                 local.getEpisodes(episodesIds)
             },
             shouldMakeNetworkRequest = { databaseResult ->
-                System.currentTimeMillis() - sharedPreference.getTime() >= DAY_IN_MILLIS
-                        || (databaseResult !is DatabaseResponseSuccess)
+                (databaseResult !is DatabaseResponseSuccess)
             },
             makeNetworkRequest = { remote.getEpisodesByIds(episodesIds) },
             saveApiData = { episodesDto ->

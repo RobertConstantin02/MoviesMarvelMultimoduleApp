@@ -1,5 +1,6 @@
 package com.example.data_repository.character
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -47,9 +48,7 @@ class CharacterRepository @Inject constructor(
             remoteMediator = FeedRemoteMediator(localDatabaseDatasource, remoteDataSource),
             pagingSourceFactory = { localDatabaseDatasource.getAllCharacters() }
         ).flow.mapLatest { pagingData ->
-            pagingData.map { character ->
-                character.toCharacterBo()
-            }
+            pagingData.map { character -> character.toCharacterBo() }
         }
 
     override fun getCharactersByIds(charactersIds: List<Int>): Flow<Resource<List<CharacterNeighborBo>>> =
@@ -58,8 +57,7 @@ class CharacterRepository @Inject constructor(
                 localDatabaseDatasource.getCharactersByIds(charactersIds)
                              },
             shouldMakeNetworkRequest = { databaseResult ->
-                System.currentTimeMillis() - sharedPreference.getTime() >= DAY_IN_MILLIS
-                        || (databaseResult !is DatabaseResponseSuccess)
+                (databaseResult !is DatabaseResponseSuccess)
             },
             makeNetworkRequest = {
                 remoteDataSource.getCharactersByIds(charactersIds)
@@ -85,12 +83,11 @@ class CharacterRepository @Inject constructor(
                 localDatabaseDatasource.getCharacterById(characterId)
             },
             shouldMakeNetworkRequest = { databaseResult ->
-                System.currentTimeMillis() - sharedPreference.getTime() >= DAY_IN_MILLIS
-                        || (databaseResult !is DatabaseResponseSuccess)
+              (databaseResult !is DatabaseResponseSuccess)
             },
-            localStorageStrategy = {
-                sharedPreference.saveCurrentTimeMs()
-            },
+//            localStorageStrategy = {
+//                sharedPreference.saveCurrentTimeMs()
+//            },
             makeNetworkRequest = {
                 remoteDataSource.getCharacterById(characterId)
             },

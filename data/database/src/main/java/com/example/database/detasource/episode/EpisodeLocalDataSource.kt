@@ -2,6 +2,7 @@ package com.example.database.detasource.episode
 
 import android.database.sqlite.SQLiteException
 import com.example.core.local.DatabaseResponse
+import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseUnifiedError
 import com.example.database.dao.episode.IEpisodeDao
 import com.example.database.entities.EpisodeEntity
@@ -15,7 +16,10 @@ class EpisodeLocalDataSource @Inject constructor(
     override suspend fun getEpisodes(episodesId: List<Int>): Flow<DatabaseResponse<List<EpisodeEntity>>> =
         flow {
             try {
-                with(dao.getEpisodes(episodesId)) { emit(DatabaseResponse.create(this)) }
+                with(dao.getEpisodes(episodesId)) {
+                    if (this?.isEmpty() == true) emit(DatabaseResponseEmpty())
+                    else emit(DatabaseResponse.create(this))
+                }
             }catch (e: SQLiteException) {
                 emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))
             }
