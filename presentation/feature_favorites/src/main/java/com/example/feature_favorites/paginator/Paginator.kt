@@ -1,10 +1,8 @@
 package com.example.feature_favorites.paginator
 
-import com.example.core.remote.Resource
-import com.example.resources.Result
+import com.example.core.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.takeWhile
 
 class Paginator<Key, Item>(

@@ -7,12 +7,12 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.example.api.model.character.FeedCharacterDto
 import com.example.api.network.PAGE_PARAMETER
-import com.example.core.localResource
-import com.example.core.networkResource
+import com.example.core.local.localResource
+import com.example.core.remote.networkResource
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
+import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
-import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import javax.inject.Inject
 

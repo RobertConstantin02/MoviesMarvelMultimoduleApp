@@ -12,6 +12,21 @@ import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
+/**
+ * HttpException and IOException are both exceptions in Java (and Kotlin) that can
+ * occur during network operations, but they represent different types of errors.
+ *
+ * @IOException : IOException is a general exception class in Java that is a subclass of Exception.
+ * It is thrown when an I/O operation (input/output) encounters an unexpected problem.
+ * I/O operations include reading from or writing to streams, files, sockets, etc.
+ * In the context of networking, IOException can be thrown for various reasons, such as
+ * network issues, connection timeouts, or problems with reading or writing data.
+ *
+ * @HttpException : HttpException is a class specific to the Retrofit library, which is commonly
+ * used for making HTTP requests in Android applications.
+ * HttpException is thrown when an HTTP response indicates a failure, i.e., when the HTTP
+ * status code is in the range 400-599 (client or server errors).
+ */
 class ApiErrorHandlerImpl(
     @ApplicationContext private val context: Context
 ) : IApiErrorHandler {
@@ -45,12 +60,3 @@ class ApiErrorHandlerImpl(
             else -> UnifiedError.Generic(context.getString(R.string.error_generic))
         }
 }
-//        when (this) {
-//            is SocketTimeoutException -> UnifiedError.Connectivity.TimeOut(R.string.error_time_out)
-//
-//            is ConnectException -> UnifiedError.Connectivity.NoConnection(R.string.error_network_connection)
-//
-//            is UnknownHostException -> UnifiedError.Connectivity.HostUnreachable(R.string.error_generic)
-//
-//            else -> UnifiedError.Generic(R.string.error_generic)
-//        }

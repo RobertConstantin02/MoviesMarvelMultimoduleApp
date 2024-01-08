@@ -1,7 +1,7 @@
 package com.example.usecase.character.implementation
 
 import android.net.Uri
-import com.example.core.remote.Resource
+import com.example.core.Resource
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
 import com.example.domain_repository.character.ICharacterRepository

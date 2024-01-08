@@ -94,19 +94,6 @@ class CharacterLocalDatasource @Inject constructor(
         }
     }
 
-
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    override fun getFavoriteCharacters(offset: Int): Flow<DatabaseResponse<List<CharacterEntity>>> {
-//        return try {
-//            characterDao.getFavoriteCharacters(offset).flatMapLatest { characters ->
-//                if (characters.isNotEmpty()) flowOf(DatabaseResponse.create(characters))
-//                else flowOf(DatabaseResponseEmpty())
-//            }
-//        } catch (e: SQLiteException) {
-//            flowOf(DatabaseResponse.create(DatabaseUnifiedError.Reading))
-//        }
-//    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getFavoriteCharacters(offset: Int) = flow {
         try {

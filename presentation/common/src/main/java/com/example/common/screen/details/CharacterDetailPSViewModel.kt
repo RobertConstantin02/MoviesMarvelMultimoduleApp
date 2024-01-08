@@ -58,70 +58,16 @@ class DetailViewModel @Inject constructor(
         )
 
     private fun onError(apiError: String?, localError: Int?, data: CharacterPresentationScreenBO?) {
-
         data?.let {
             onEvent(
                 CharacterDetailPSEvent.Found(data.toCharacterPresentationScreenVO())
             )
         } ?: onEvent(CharacterDetailPSEvent.Error(CharacterDetailPSState.Error(apiError, localError)))
-
-
-
-//        val errorEvent = when (error) {
-//            is RemoteError -> checkRemoteError(error)
-//            is DataBase -> checkLocalDbError(error)
-//        }
-//        onEvent(CharacterDetailPSEvent.Error(errorEvent))
     }
 
-//    private fun checkRemoteError(error: RemoteError) =
-//        when (error) {
-//            is RemoteError.Server -> CharacterDetailPSState.Error(
-//                CharacterDetailError.ServerError(
-//                    UiText.DynamicText(R.string.remote_server_error, error.codeError.toString())
-//                )
-//            )
-//
-//            is RemoteError.Connectivity -> CharacterDetailPSState.Error(
-//                CharacterDetailError.ConnectivityError(
-//                    UiText.StringResources(R.string.remote_connectivity_error)
-//                )
-//            )
-//
-//            is RemoteError.Unknown -> CharacterDetailPSState.Error(
-//                CharacterDetailError.UnknownError(
-//                    UiText.StringResources(R.string.remote_unknown_error)
-//                )
-//            )
-//        }
-//
-//    private fun checkLocalDbError(error: DataBase) =
-//        when (error) {
-//            is DataBase.Error.Insertion -> getLocalDbErrorMessage(R.string.local_db_insertion_error)
-//            is DataBase.Error.Deletion -> getLocalDbErrorMessage(R.string.local_db_deletion_error)
-//            is DataBase.EmptyResult -> getLocalDbErrorMessage(R.string.local_db_empty_result)
-//            is DataBase.EmptyResult -> getLocalDbErrorMessage(R.string.local_db_item_not_found)
-//            is DataBase.Error.Update -> getLocalDbErrorMessage(R.string.local_db_item_not_found) //refactor
-//            is DataBase.Error.Reading -> getLocalDbErrorMessage(R.string.local_db_read_error, error.message)
-//        }
-//
-//    private fun getLocalDbErrorMessage(resourcesMessage: Int, dynamicError: String? = null) =
-//        CharacterDetailPSState.Error(
-//            CharacterDetailError.DataBasError(
-//                dynamicError?.let { UiText.DynamicText(resourcesMessage, dynamicError) }
-//                    ?: UiText.StringResources(resourcesMessage)
-//            )
-//        )
 
     companion object {
         private const val CHARACTER_ID = "characterId"
         private const val LOCATION_ID = "locationId"
     }
 }
-
-//data class CharacterPresentationScreenVO(
-//    val characterMainDetail: CharacterDetailBo?,
-//    val extendedLocation: ExtendedLocationBo?,
-//    val neighbors: List<CharacterNeighborBo>?,
-//    val episodes: List<EpisodeBo>?
-//)

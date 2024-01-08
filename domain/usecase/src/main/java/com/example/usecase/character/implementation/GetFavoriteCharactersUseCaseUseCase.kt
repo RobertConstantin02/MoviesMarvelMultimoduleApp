@@ -1,11 +1,10 @@
 package com.example.usecase.character.implementation
 
 import android.util.Log
-import com.example.core.remote.Resource
+import com.example.core.Resource
 import com.example.domain_model.character.CharacterBo
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.domain_repository.di.QCharacterRepository
-import com.example.resources.Result
 import com.example.usecase.character.FavoritesParams
 import com.example.usecase.character.IGetFavoriteCharactersUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi

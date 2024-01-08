@@ -9,9 +9,12 @@ import retrofit2.Response
 /**
  * @T : Original repsonse from server
  * @R : Transformed Response
- * @proxy : This property holds the original Call object of type T that the delegate is wrapping.
+ * @proxy : holds the original Call object of type T that the delegate is wrapping.
  *
- * enqueueImpl(callback: Callback<R>): This abstract method is responsible for
+ * Original CallResult class does not need to implement all method from Call. So that wrapper class
+ * prevents that and gives the possibility to extend behaviour of those methods we need.
+ *
+ * @enqueueImpl(callback: Callback<R>): This abstract method is responsible for
  * implementing the logic of how to enqueue the original proxy Call object and handle the response.
  *
  * CallWrapper acts as a customizable wrapper around a Retrofit Call original object, allowing for

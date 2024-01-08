@@ -1,4 +1,4 @@
-package com.example.core.remote
+package com.example.core
 
 /**
  * The factory methods in the companion object (loading, success, emptySuccess, error) provide a

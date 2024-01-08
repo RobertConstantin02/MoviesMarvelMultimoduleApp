@@ -39,7 +39,6 @@ class FeedViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    // TODO: handle success, empty and error
     fun updateCharacter(isFavorite: Boolean, characterId: Int) {
         updateCharacterIsFavorite.invoke(
             UpdateParams(isFavorite, characterId),

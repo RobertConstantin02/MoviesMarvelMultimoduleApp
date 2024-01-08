@@ -1,12 +1,11 @@
 package com.example.data_repository.episode
 
-import com.example.core.apiDbBoundResource
+import com.example.core.remote.apiDbBoundResource
 import com.example.core.local.DatabaseResponseSuccess
-import com.example.core.remote.Resource
+import com.example.core.Resource
 import com.example.data_mapper.DtoToEpisodeBo.toEpisodesBo
 import com.example.data_mapper.DtoToEpisodeEntityMapper.toEpisodesEntities
 import com.example.data_mapper.EntityToEpisodeBoMapper.toEpisodesBo
-import com.example.data_repository.character.DAY_IN_MILLIS
 import com.example.database.detasource.episode.IEpisodeLocalDataSource
 import com.example.domain_model.episode.EpisodeBo
 import com.example.domain_repository.episode.IEpisodeRepository

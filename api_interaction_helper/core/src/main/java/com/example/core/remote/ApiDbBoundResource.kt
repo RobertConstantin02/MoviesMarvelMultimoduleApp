@@ -1,18 +1,11 @@
-package com.example.core
+package com.example.core.remote
 
+import com.example.core.Resource
 import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseResponseSuccess
-import com.example.core.remote.ApiResponse
-import com.example.core.remote.ApiResponseEmpty
-import com.example.core.remote.ApiResponseError
-import com.example.core.remote.ApiResponseSuccess
-import com.example.core.remote.Resource
-import com.example.core.remote.UnifiedError
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -96,55 +89,5 @@ inline fun <BO, DB, API> apiDbBoundResource(
         (localData as? DatabaseResponseSuccess)?.let {
             emit(Resource.success(mapLocalToDomain(it.data)))
         } ?: emit(Resource.successEmpty())
-    }
-}
-
-suspend inline fun <REMOTE> networkResource(
-    crossinline makeNetworkRequest: suspend () -> ApiResponse<REMOTE>,
-    crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
-): Resource<REMOTE> {
-
-    return when (val apiResponse = makeNetworkRequest()) {
-        is ApiResponseSuccess -> Resource.success(data = apiResponse.body)
-        is ApiResponseError -> {
-            onNetworkRequestFailed(apiResponse.unifiedError)
-            Resource.error(apiResponse.unifiedError.message, null)
-        }
-
-        is ApiResponseEmpty -> Resource.successEmpty()
-    }
-}
-
-suspend inline fun <LOCAL> localResource(
-    crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<LOCAL>>
-): Resource<LOCAL> {
-
-    return when (val localResponse = fetchFromLocal().first()) {
-        is DatabaseResponseSuccess -> Resource.success(data = localResponse.data)
-        is DatabaseResponseError -> {
-            Resource.error(localResponse.databaseUnifiedError.messageResource, null)
-        }
-
-        is DatabaseResponseEmpty -> Resource.successEmpty()
-    }
-}
-// TODO: here if we use flow an invariant exception happens
-
-inline fun <DB, BO> localResourceFlow(
-    crossinline fetchFromLocal: () -> Flow<DatabaseResponse<DB>>,
-    crossinline mapLocalToDomain: (DB) -> BO,
-) = channelFlow<Resource<BO>> {
-    fetchFromLocal().collectLatest { localResponse ->
-        when (localResponse) {
-            is DatabaseResponseSuccess -> {
-                send(Resource.success(data = mapLocalToDomain(localResponse.data)))
-            }
-
-            is DatabaseResponseError -> {
-                send(Resource.error(localResponse.databaseUnifiedError.messageResource, null))
-            }
-
-            is DatabaseResponseEmpty -> send(Resource.successEmpty())
-        }
     }
 }

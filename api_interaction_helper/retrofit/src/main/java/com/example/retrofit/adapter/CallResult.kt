@@ -8,10 +8,27 @@ import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
 
-// TODO: I need at same time passing proxy and the handler which can be injected but proxy no.
-//If not I have to pass it in the factory....
-
-//Here we can use @AssistedInjection
+/**
+ * Custom implementation of the Retrofit Call interface, designed to handle API error responses in a
+ * centralized way.
+ *
+ * Inside the overridden enqueue method, a new callback is provided to the original call.enqueue method.
+ * In the overridden callback's onResponse method:
+ *      If the response is successful (response.isSuccessful), the original callback is invoked with
+ *      the successful response.
+ *      If the response is not successful, an HttpException is created from the response, and the
+ *      error is handled by invoking the apiErrorHandlingUseCase with the HttpException.
+ * In the overridden callback's onFailure method:
+ *      If there is a failure in making the network call, the error is handled by invoking the
+ *      apiErrorHandlingUseCase with the throwable.
+ *
+ * @onResponse: is invoked when a successful response is received from the server.
+ *     -> @response: parameter contains information about the successful response
+ * @onFailure: is invoked when there is a failure during the network request.
+ *     -> @t : contains information about the failure
+ *
+ * @apiErrorHandler: handles errors depending on whether it is IOException or HttpException
+ */
 internal class CallResult<T>(
     proxy: Call<T>,
     private val apiErrorHandler: IApiErrorHandler

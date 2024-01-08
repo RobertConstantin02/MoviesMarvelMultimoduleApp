@@ -1,17 +1,16 @@
 package com.example.data_repository.character
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.example.core.apiDbBoundResource
+import com.example.core.Resource
+import com.example.core.remote.apiDbBoundResource
 import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseResponseSuccess
-import com.example.core.localResourceFlow
-import com.example.core.remote.Resource
+import com.example.core.local.localResourceFlow
 import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterBo
@@ -85,9 +84,6 @@ class CharacterRepository @Inject constructor(
             shouldMakeNetworkRequest = { databaseResult ->
               (databaseResult !is DatabaseResponseSuccess)
             },
-//            localStorageStrategy = {
-//                sharedPreference.saveCurrentTimeMs()
-//            },
             makeNetworkRequest = {
                 remoteDataSource.getCharacterById(characterId)
             },
