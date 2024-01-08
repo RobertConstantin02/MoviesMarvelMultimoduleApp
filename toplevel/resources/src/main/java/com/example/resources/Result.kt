@@ -29,6 +29,7 @@ import java.io.IOException
 
 //sealed interface makes that when it comes to check for errors remote and dataBase errors, only those two types
 //can be. So taht in onError function from Details then we wont have
+
 sealed interface DataSourceError
 
 typealias Result <T> = Either<Throwable, T>
@@ -38,42 +39,9 @@ sealed class RemoteError: Throwable(), DataSourceError {
     data class Unknown(override val message: String? = null): RemoteError()
 }
 
-sealed class DataBase: Exception(), DataSourceError {
-    sealed class Error: DataBase() {
-        object Insertion: DataBase()
-        object Deletion: DataBase()
-        object Update: DataBase()
-        data class Reading(override val message: String?): DataBase()
-    }
-    object EmptyResult: DataBase()
-}
-
-
 fun Exception.toError(): RemoteError =
     when(this) {
         is IOException -> RemoteError.Connectivity
         is HttpException -> RemoteError.Server(code())
         else -> RemoteError.Unknown(message.orEmpty())
     }
-
-//fun <T> Flow<T>.asResult(): Flow<Result<T>> {
-//    return this
-//        .map<T, Result<T>> {
-//            it.right()
-//        }
-//        .onStart { emit(T) }
-//        .catch { emit(T) }
-//}
-
-
-
-//fun Throwable.toErrorType() = when (this) {
-//    is IOException -> ErrorType.Api.Network
-//    is HttpException -> when (code()) {
-//        ErrorCodes.Http.ResourceNotFound -> ErrorType.Api.NotFound
-//        ErrorCodes.Http.InternalServer -> ErrorType.Api.Server
-//        ErrorCodes.Http.ServiceUnavailable -> ErrorType.Api.ServiceUnavailable
-//        else -> ErrorType.Unknown
-//    }
-//    else -> ErrorType.Unknown
-//}

@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.paging"
-    compileSdk = 33
+    compileSdk = 34
 
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":data:database"))
     implementation(project(":data:remote"))
     implementation(project(":data:data_mapper"))
+    implementation(project(":api_interaction_helper:core"))
 
     libs.bundles.apply {
         implementation(hilt)

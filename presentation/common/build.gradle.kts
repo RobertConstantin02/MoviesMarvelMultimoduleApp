@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.common"
-    compileSdk = 33
+    compileSdk = 34
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }
@@ -28,6 +28,9 @@ dependencies {
     implementation(project(":presentation:presentation_mapper"))
     implementation(project(":domain:domain_model"))
     implementation(project(":domain:usecase"))
+
+    api(project(":api_interaction_helper:retrofit"))
+    api(project(":api_interaction_helper:core"))
 
     libs.bundles.apply {
         implementation(compose)

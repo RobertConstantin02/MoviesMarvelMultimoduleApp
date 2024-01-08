@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.api"
-    compileSdk = 33
+    compileSdk = 34
 
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
@@ -21,7 +21,9 @@ dependencies {
 //    api(project(":featureFeed:feed_domain"))
 //    implementation(project(":toplevel:resources"))
 //    implementation(project(":toplevel:database"))
-//    implementation(project(":toplevel:network"))
+    api(project(":api_interaction_helper:retrofit"))
+    api(project(":api_interaction_helper:core"))
+
     implementation(libs.bundles.hilt)
     implementation(libs.retrofit)
     implementation(libs.gson)

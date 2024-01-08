@@ -12,5 +12,6 @@ import javax.inject.Inject
 class GetAllCharactersUseCase @Inject constructor(
     @QCharacterRepository private val repository: ICharacterRepository,
 ): IGetAllCharactersUseCase {
-    override fun run(input: Unit): Flow<PagingData<CharacterBo>> = repository.getAllCharacters()
+    override fun run(input: Unit): Flow<PagingData<CharacterBo>> =
+        repository.getAllCharacters()
 }

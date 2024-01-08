@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.feature_favorites"
-    compileSdk = 33
+    compileSdk = 34
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }

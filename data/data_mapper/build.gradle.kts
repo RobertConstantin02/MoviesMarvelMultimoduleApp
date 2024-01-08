@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.data_mapper"
-    compileSdk = 33
+    compileSdk = 34
 
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()

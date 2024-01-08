@@ -1,4 +1,0 @@
-com.example.ui
-drawable ic_placeholder
-string error_getting_characters
-string try_again

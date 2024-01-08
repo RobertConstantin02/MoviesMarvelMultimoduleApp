@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_network_connection">There is an issue with the network connection</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_time_out">Connection with server is taking too long</string>
+
+    <!-- Database errors-->
+    <string name="local_db_empty_result">No data gathered</string>
+    <string name="local_db_item_not_found">Item not found</string>
+    <string name="local_db_insertion_error">Data could not be saved properly</string>
+    <string name="local_db_deletion_error">Data could have not been deleted properly</string>
+    <string name="local_db_update_error">Error while updating data</string>
+    <string name="local_db_unknown_error">Unknown error</string>
+    <string name="local_db_read_error">Error while reading local file. Error: %s</string>
+
+
+</resources>

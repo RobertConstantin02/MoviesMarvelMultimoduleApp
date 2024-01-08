@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.udemycourseapp"
-    compileSdk = 33
+    compileSdk = 34
 
     buildTypes {
         getByName("debug") {

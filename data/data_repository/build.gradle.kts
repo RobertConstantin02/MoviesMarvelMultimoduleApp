@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.data_repository"
-    compileSdk = 33
+    compileSdk = 34
 
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
@@ -31,6 +31,9 @@ dependencies {
     api(project(":domain:domain_repository"))
     api(project(":domain:domain_model"))
     api(project(":domain:usecase"))
+
+    api(project(":api_interaction_helper:retrofit"))
+    api(project(":api_interaction_helper:core"))
 
     libs.bundles.apply {
         implementation(hilt)

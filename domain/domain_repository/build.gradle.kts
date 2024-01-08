@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.domain_repository"
-    compileSdk = 33
+    compileSdk = 34
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }
@@ -18,6 +18,10 @@ kapt {
 dependencies {
     implementation(project(":toplevel:resources"))
     implementation(project(":domain:domain_model"))
+
+    api(project(":api_interaction_helper:retrofit"))
+    api(project(":api_interaction_helper:core"))
+
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.arrow)
     kapt(libs.hilt.compiler)

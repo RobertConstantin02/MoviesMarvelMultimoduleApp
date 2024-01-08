@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.presentation_model"
-    compileSdk = 33
+    compileSdk = 34
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }

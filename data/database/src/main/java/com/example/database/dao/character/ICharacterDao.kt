@@ -8,6 +8,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.core.local.DatabaseResponse
 import com.example.database.entities.CharacterEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -35,6 +36,6 @@ interface ICharacterDao {
 
     @Query("SELECT * FROM character_entity WHERE is_Favorite = 1 LIMIT :limit OFFSET :offset")
     @Throws(SQLiteException::class)
-    fun getFavoriteCharacters( offset: Int, limit: Int = 10): Flow<List<CharacterEntity>>
+    fun getFavoriteCharacters( offset: Int, limit: Int = 10): Flow<List<CharacterEntity>?>
 
 }

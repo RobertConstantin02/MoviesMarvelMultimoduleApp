@@ -1,23 +1,17 @@
 package com.example.usecase.character.implementation
 
 import android.net.Uri
-import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
-import com.example.domain_model.character.CharacterNeighborBo
+import com.example.core.Resource
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
-import com.example.domain_model.episode.EpisodeBo
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.domain_repository.di.QCharacterRepository
 import com.example.domain_repository.di.QEpisodesRepository
 import com.example.domain_repository.di.QLocationRepository
 import com.example.domain_repository.episode.IEpisodeRepository
 import com.example.domain_repository.location.ILocationRepository
-import com.example.resources.Result
 import com.example.usecase.character.IGetCharacterDetailsUseCase
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.transform
@@ -29,68 +23,33 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     @QEpisodesRepository private val episodesRepository: IEpisodeRepository,
 ) : IGetCharacterDetailsUseCase {
 
-    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Result<CharacterPresentationScreenBO>> {
+    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Resource<CharacterPresentationScreenBO>> {
 
         return combine(
             characterRepository.getCharacter(input.characterId),
-            locationRepository.getExtendedLocation(input.locationId)
+            locationRepository.getExtendedLocation(input.locationId),
         ) { characterResult, locationResult ->
-            characterResult.fold(
-                ifLeft = { it.left() },
-            ) { character ->
-                locationResult.fold(
-                    ifLeft = { it.left() }
-                ) { location ->
-                    CharacterWithLocation(
-                        Pair(character, character.episodes),
-                        Pair(location, location.residents)
-                    ).right()
-                }
-            }
-        }.transform { characterWithLocation ->
-            characterWithLocation.fold(
-                ifLeft = { emit(it.left()) },
-                ifRight = { combineResidentsAndEpisodes(it) }
-            )
-        }
-    }
-
-    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.combineResidentsAndEpisodes(
-        characterWithLocation: CharacterWithLocation
-    ) {
-        val (character, location) = characterWithLocation
-        combine(
-            characterRepository.getCharactersByIds(getIds(character.second)),
-            episodesRepository.getEpisodes(getIds(location.second))
-        ) { residentsResult, episodesResult ->
-            handleResidentEpisodeTransformation(
-                characterWithLocation,
-                residentsResult,
-                episodesResult
-            )
-        }.collect()
-    }
-
-    private suspend fun FlowCollector<Result<CharacterPresentationScreenBO>>.handleResidentEpisodeTransformation(
-        characterWithLocation: CharacterWithLocation,
-        residentsResult: Either<Throwable, List<CharacterNeighborBo>>,
-        episodesResult: Either<Throwable, List<EpisodeBo>>
-    ) {
-        residentsResult.fold(
-            ifLeft = { emit(it.left()) }
-        ) { residents ->
-            episodesResult.fold(
-                ifLeft = { emit(it.left()) }
-            ) { episodes ->
-                emit(
-                    CharacterPresentationScreenBO(
-                        characterWithLocation.characterMainDetail.first,
-                        characterWithLocation.extendedLocation.first,
-                        residents,
-                        episodes
-                    ).right()
+            characterResult.state.combineResources(locationResult.state) { character, location ->
+                CharacterWithLocation(
+                    Pair(character, character?.episodes),
+                    Pair(location, location?.residents)
                 )
             }
+        }.transform {
+            val characterWithLocation = it.state.unwrap()
+            combine(
+                characterRepository.getCharactersByIds(getIds(characterWithLocation?.characterMainDetail?.second)),
+                episodesRepository.getEpisodes(getIds(characterWithLocation?.extendedLocation?.second))
+            ) { residentsResult, episodesResult ->
+                emit(residentsResult.state.combineResources(episodesResult.state) { residents , episodes ->
+                    CharacterPresentationScreenBO(
+                        characterWithLocation?.characterMainDetail?.first,
+                        characterWithLocation?.extendedLocation?.first,
+                        residents,
+                        episodes
+                    )
+                })
+            }.collect()
         }
     }
 

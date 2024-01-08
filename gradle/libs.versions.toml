@@ -1,46 +1,46 @@
 [versions]
 
-compileSdk = "33"
+compileSdk = "34"
 minSdk = "24"
-targetSdk = "33"
+targetSdk = "34"
 jvmTarget = "17"
 
 #kotlin
-kotlin-jetbrains = "1.7.21"
-kotlin-version = '1.7.21'
+kotlin-jetbrains = "1.9.0"
+kotlin-version = '1.9.10'
 kotlinCompilerExtensionVersion = "1.4.8"
 
 #architecture components
-androidx-lifecycle = "2.6.0-alpha05"
+androidx-lifecycle = "2.6.2"
 
 #compose
-compose = "1.3.3"
-compose-material3 = "1.1.1"
+compose = "1.5.4"
+compose-material3 = "1.1.2"
 compose-constraint = "1.0.1"
-compose-paging = "1.0.0-alpha16"
-androidx-activity-compose = "1.6.1"
-androidx-compose-boom = "2022.10.00"
+compose-paging = "3.2.1"
+androidx-activity-compose = "1.8.2"
+androidx-compose-boom = "2023.10.01"
 #compose navigation
-compose-navigation = "2.5.1"
+compose-navigation = "2.7.6"
 
 #room
-room = "2.5.2"
+room = "2.6.1"
 
 #image
-coil = "2.2.2"
+coil = "2.4.0"
 
 #network
 retrofit = "2.9.0"
-okhttp = "4.9.0"
+okhttp = "4.11.0"
 corutines = "1.6.4"
 gson = "2.10.1"
 
 #coroutines
-coroutines = "1.6.4"
+coroutines = "1.7.3"
 
 #di
-hilt = "2.46.1"
-hilt-compose = "1.0.0-alpha03"
+hilt = "2.48"
+hilt-compose = "1.1.0"
 
 #test
 junit = "4.13.2"
@@ -52,7 +52,14 @@ coroutines-test = "1.6.4"
 arrow = "1.2.0"
 
 #paging
-paging = "3.1.1"
+paging = "3.2.1"
+org-jetbrains-kotlin-jvm = "1.8.22"
+agp = "8.2.1"
+org-jetbrains-kotlin-android = "1.8.22"
+core-ktx = "1.12.0"
+espresso-core = "3.5.1"
+appcompat = "1.6.1"
+material = "1.11.0"
 
 [libraries]
 #kotlin
@@ -121,6 +128,10 @@ coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 #arrow
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 
 [bundles]
@@ -133,3 +144,7 @@ kotlin = ["jetbrains"]
 network = ["retrofit", "retrofit-converter-gson", "okhttp3", "okhttp3-logging-interceptor"]
 test = ["junit", "junit-ext", "mockk", "coroutines-test"]
 arrow = [ "arrow-core","arrow-fx-coroutines" ]
+[plugins]
+org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "org-jetbrains-kotlin-jvm" }
+com-android-library = { id = "com.android.library", version.ref = "agp" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
