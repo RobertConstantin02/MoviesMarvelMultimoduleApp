@@ -9,7 +9,6 @@ import com.example.presentation_mapper.toCharacterVo
 import com.example.presentation_model.CharacterVo
 import com.example.usecase.character.IGetAllCharactersUseCase
 import com.example.usecase.character.IUpdateCharacterIsFavoriteUseCase
-import com.example.usecase.character.UpdateParams
 import com.example.usecase.di.GetCharacters
 import com.example.usecase.di.UpdateCharacterIsFavorite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +40,7 @@ class FeedViewModel @Inject constructor(
 
     fun updateCharacter(isFavorite: Boolean, characterId: Int) {
         updateCharacterIsFavorite.invoke(
-            UpdateParams(isFavorite, characterId),
+            IUpdateCharacterIsFavoriteUseCase.Params(isFavorite, characterId),
             Dispatchers.IO,
             viewModelScope
         )

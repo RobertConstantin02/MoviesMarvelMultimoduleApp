@@ -1,9 +1,8 @@
 package com.example.usecase.character
 
-import com.example.resources.Result
 import com.example.usecase.UseCase
-import com.example.usecase.UseCaseNoOutput
 
-interface IUpdateCharacterIsFavoriteUseCase: UseCase<UpdateParams, Unit>
+interface IUpdateCharacterIsFavoriteUseCase: UseCase<IUpdateCharacterIsFavoriteUseCase.Params, Unit> {
+    data class Params(val isFavorite: Boolean, val characterId: Int): UseCase.Input
+}
 
-data class UpdateParams(val isFavorite: Boolean, val characterId: Int): UseCaseNoOutput.Input

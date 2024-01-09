@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
+import com.example.domain_model.error.DomainError
 import com.example.presentation_mapper.BoToVoCharacterPresentationMapper.toCharacterPresentationScreenVO
 import com.example.usecase.character.IGetCharacterDetailsUseCase
 import com.example.usecase.di.GetCharacterDetails
@@ -57,14 +58,17 @@ class DetailViewModel @Inject constructor(
             CharacterDetailPSEvent.Found(characterPS.toCharacterPresentationScreenVO())
         )
 
-    private fun onError(apiError: String?, localError: Int?, data: CharacterPresentationScreenBO?) {
-        data?.let {
-            onEvent(
-                CharacterDetailPSEvent.Found(data.toCharacterPresentationScreenVO())
-            )
-        } ?: onEvent(CharacterDetailPSEvent.Error(CharacterDetailPSState.Error(apiError, localError)))
-    }
+    private fun onError(error: DomainError<CharacterPresentationScreenBO>) {
+        when(error) {
+            is DomainError.ApiError -> {
+                error.data?.let {
+                    onEvent(CharacterDetailPSEvent.Found(it.toCharacterPresentationScreenVO()))
+                } ?: onEvent(CharacterDetailPSEvent.Error(CharacterDetailPSState.Error(error.message, null)))
+            }
+            is DomainError.LocalError -> onEvent(CharacterDetailPSEvent.Error(CharacterDetailPSState.Error(null, error.error)))
+        }
 
+    }
 
     companion object {
         private const val CHARACTER_ID = "characterId"

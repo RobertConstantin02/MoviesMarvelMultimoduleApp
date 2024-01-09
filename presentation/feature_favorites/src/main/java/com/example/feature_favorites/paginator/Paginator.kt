@@ -24,14 +24,9 @@ class Paginator<Key, Item>(
         (onRequest(getNextKey()).takeWhile { !stopCollecting }
             .collectLatest { newItems ->
                 newItems.state.fold(
-                    success = {
-                        onSuccess(it)
-                    },
-                    error = {
-                        onError(it.localError ?: -1) },
-                    empty = {
-                        onEmpty()
-                    }
+                    success = { onSuccess(it) },
+                    error = { onError(it.localError ?: -1) },
+                    empty = { onEmpty() }
                 )
             })
     }

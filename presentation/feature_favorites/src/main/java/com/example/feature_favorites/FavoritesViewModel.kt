@@ -6,14 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.common.R
+import com.example.domain_model.error.DomainError
 import com.example.feature_favorites.paginator.Paginator
 import com.example.presentation_mapper.toCharacterVo
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
-import com.example.usecase.character.FavoritesParams
 import com.example.usecase.character.IGetFavoriteCharactersUseCase
 import com.example.usecase.character.IUpdateCharacterIsFavoriteUseCase
-import com.example.usecase.character.UpdateParams
 import com.example.usecase.di.GetFavoriteCharacters
 import com.example.usecase.di.UpdateCharacterIsFavorite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,7 +54,7 @@ class FavoritesViewModel @Inject constructor(
             else _paginationState.update { Paginator.State.Loading }
         },
         onRequest = { nextPage ->
-            getFavoriteCharacters.invoke(FavoritesParams(nextPage), Dispatchers.IO)
+            getFavoriteCharacters.invoke(IGetFavoriteCharactersUseCase.Params(nextPage), Dispatchers.IO)
         },
         getNextKey = {
             currentPage += 1
@@ -66,7 +65,8 @@ class FavoritesViewModel @Inject constructor(
             if (!canPaginate && itemListHasPageSizeOrGrater()) _paginationState.update { Paginator.State.End }
             onSuccess(newCharacters.map { it.toCharacterVo() })
         },
-        onError = ::onError
+        onError = ::onError,
+        onEmpty = { onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(R.string.empty_favorite_list))) }
     )
 
 
@@ -94,7 +94,6 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    // TODO: refactor and handle favorites with new system, for now put 1
     private fun onError(localError: Int) {
         onEvent(FavoritesScreenEvent.OnError(UiText.StringResources(localError)))
     }
@@ -104,26 +103,25 @@ class FavoritesViewModel @Inject constructor(
             simulateLoading()
             onEvent(FavoritesScreenEvent.OnListFound(currentCharacterList + newCharacters))
             currentCharacterList.addAll(newCharacters)
-        } else onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(1)))
+        } else onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(R.string.empty_favorite_list)))
     }
 
     fun updateCharacter(isFavorite: Boolean, characterId: Int) {
         pagination.stopCollection() //for not duplicate data when removing
         updateCharacterIsFavorite.invoke(
-            UpdateParams(isFavorite, characterId),
+            IUpdateCharacterIsFavoriteUseCase.Params(isFavorite, characterId),
             Dispatchers.IO,
             viewModelScope,
             success = {
                 currentCharacterList.remove(currentCharacterList.find { it.id == characterId })
                 onSuccess()
             },
-        ) {
-            onEvent(
-                FavoritesScreenEvent.OnError(
-                    UiText.StringResources(1)
-                )
-            )
-        }
+            error = { error ->
+                (error as? DomainError.LocalError)?.let {
+                    onEvent(FavoritesScreenEvent.OnError(UiText.StringResources(it.error)))
+                }
+            }
+        )
     }
 
     private fun itemListHasPageSizeOrGrater() =

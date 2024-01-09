@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import com.example.core.R
+import com.example.domain_model.error.DomainError
+import kotlin.Error
 
 interface UseCase<Input, Output> {
 
@@ -20,7 +23,7 @@ interface UseCase<Input, Output> {
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         coroutineScope: CoroutineScope? = null,
         success: (Output) -> Unit = {},
-        error: (String?, Int?, Output?) -> Unit = { _, _, _ ->},
+        error: (e: DomainError<Output>) -> Unit = { _ ->},
         empty: () -> Unit = {}
     ) {
         coroutineScope?.let { scope ->
@@ -32,16 +35,19 @@ interface UseCase<Input, Output> {
                             when(val resource = it.state) {
                                 is Resource.State.Success -> { success(resource.data) }
                                 is Resource.State.Error ->
-                                    error(resource.apiError, resource.localError, resource.data)
+                                    resource.apiError?.let { apiError ->
+                                        error(DomainError.ApiError(apiError, resource.data))
+                                    } ?: error(DomainError.LocalError<Unit>(resource.localError ?: R.string.error_generic))
                                 is Resource.State.SuccessEmpty -> empty()
                             }
-
                         }
                     }
                 } catch (e: Exception) { error(e) }
             }
         }
     }
+
+    interface Input
 }
 
 interface UseCaseNoOutput<Input> {

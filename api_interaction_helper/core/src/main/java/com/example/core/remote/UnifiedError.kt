@@ -1,6 +1,6 @@
 package com.example.core.remote
 
-sealed class UnifiedError(override val message: String) : Exception() {
+sealed class UnifiedError(open val message: String) {
     data class Generic(override val message: String) : UnifiedError(message)
 
     sealed class Http(message: String) : UnifiedError(message) {
