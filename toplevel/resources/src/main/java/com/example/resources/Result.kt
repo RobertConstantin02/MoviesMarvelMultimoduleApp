@@ -29,6 +29,7 @@ import java.io.IOException
 
 //sealed interface makes that when it comes to check for errors remote and dataBase errors, only those two types
 //can be. So taht in onError function from Details then we wont have
+
 sealed interface DataSourceError
 
 typealias Result <T> = Either<Throwable, T>

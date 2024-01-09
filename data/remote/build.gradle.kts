@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.remote"
-    compileSdk = 33
+    compileSdk = 34
 
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()

@@ -1,3 +1,0 @@
-int drawable ic_placeholder 0x0
-int string error_getting_characters 0x0
-int string try_again 0x0

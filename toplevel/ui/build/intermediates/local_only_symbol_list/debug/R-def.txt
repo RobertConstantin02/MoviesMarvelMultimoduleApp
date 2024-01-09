@@ -1,5 +1,0 @@
-R_DEF: Internal format may change without notice
-local
-drawable ic_placeholder
-string error_getting_characters
-string try_again

@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.resources"
-    compileSdk = 33
+    compileSdk = 34
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }
