@@ -33,13 +33,14 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.paging)
     //Unit test
-//    testImplementation(kotlin("test"))
-//    testImplementation(libs.bundles.test)
-//
-//    tasks.withType<Test> {
-//        useJUnitPlatform()
-//        testLogging {
-//            events("passed", "skipped", "failed")
-//        }
-//    }
+    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.test)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
 }

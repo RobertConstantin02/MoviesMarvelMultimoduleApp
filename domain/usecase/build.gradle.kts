@@ -19,6 +19,12 @@ dependencies {
     implementation(project(":domain:domain_repository"))
     implementation(project(":domain:domain_model"))
     implementation(project(":toplevel:resources"))
+
+    //Unit test
+    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.test)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
     libs.bundles.apply {
         implementation(hilt)
         implementation(coroutines)

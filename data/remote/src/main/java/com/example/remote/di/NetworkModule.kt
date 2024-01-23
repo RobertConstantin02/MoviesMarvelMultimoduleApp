@@ -1,6 +1,7 @@
 package com.example.remote.di
 
 
+import com.example.api.network.BASE_API_URL
 import com.example.api.network.RickAndMortyService
 import com.example.retrofit.facotry.CallAdapterFactory
 import dagger.Module
@@ -38,9 +39,9 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideService(client: OkHttpClient, callAdapterFactory: CallAdapterFactory): Retrofit {
+    fun provideService(baseUrl: String, client: OkHttpClient, callAdapterFactory: CallAdapterFactory): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://rickandmortyapi.com")// why buildconfig from this module does not appear?
+            .baseUrl(baseUrl)// why buildconfig from this module does not appear?
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(callAdapterFactory)
@@ -52,6 +53,11 @@ object NetworkModule {
     fun provideRickMortyService(retrofit: Retrofit): RickAndMortyService =
         retrofit.create(RickAndMortyService::class.java)
 
+    @TheMovieApiBaseUrl
+    @Singleton
+    @Provides
+    fun provideBaseApiUrl(): String = BASE_API_URL
+
 //    @Provides
 //    fun provideRickMortyEndPoint(
 //        retrofitBuilder: Retrofit.Builder,
@@ -61,3 +67,5 @@ object NetworkModule {
 //        return retrofit.create(RickMortyEndPoint::class.java)
 //    }
 }
+
+

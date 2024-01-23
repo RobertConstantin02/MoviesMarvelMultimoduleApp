@@ -10,7 +10,6 @@ import com.example.api.network.CharacterEndPoints.GET_CHARACTERS_BY_IDS
 import com.example.api.network.EpisodeEndPoints.GET_EPISODES_BY_IDS
 import com.example.api.network.LocationEndPoints.GET_LOCATION
 import com.example.core.remote.ApiResponse
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -18,6 +17,8 @@ import retrofit2.http.Query
 const val PAGE_PARAMETER = "page"
 const val ID_PATH = "id"
 const val IDS_PATH = "ids"
+
+const val BASE_API_URL = "https://rickandmortyapi.com"
 interface RickAndMortyService {
     @GET(GET_ALL_CHARACTERS)
     suspend fun getAllCharacters(@Query(PAGE_PARAMETER) page: Int): ApiResponse<FeedCharacterDto>

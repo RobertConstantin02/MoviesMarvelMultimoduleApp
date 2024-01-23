@@ -29,6 +29,7 @@ dependencies {
     //Unit test
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 
     tasks.withType<Test> {
         useJUnitPlatform()
