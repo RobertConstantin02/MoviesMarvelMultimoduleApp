@@ -1,7 +1,7 @@
 package com.example.core.remote
 
 import com.example.core.implement.Response
-import java.net.HttpURLConnection.HTTP_NO_CONTENT
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 
 sealed class ApiResponse<T> {
 
@@ -12,7 +12,7 @@ sealed class ApiResponse<T> {
         fun <T> create(response: Response<T>, httpException: () -> ApiResponse<T>): ApiResponse<T> =
             if (response.isSuccessful) {
                 with(response.body()){
-                    if (this == null || response.code == HTTP_NO_CONTENT) ApiResponseEmpty()
+                    if (this == null || response.code == HTTP_BAD_REQUEST) ApiResponseEmpty()
                     else ApiResponseSuccess(this)
                 }
             } else httpException()

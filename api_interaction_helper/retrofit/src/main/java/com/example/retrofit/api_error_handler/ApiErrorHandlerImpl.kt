@@ -1,9 +1,9 @@
 package com.example.retrofit.api_error_handler
 
 import android.content.Context
-import com.example.core.remote.UnifiedError
-import com.example.core.implement.IApiErrorHandler
 import com.example.core.R
+import com.example.core.implement.IApiErrorHandler
+import com.example.core.remote.UnifiedError
 import dagger.hilt.android.qualifiers.ApplicationContext
 import retrofit2.HttpException
 import java.io.IOException
@@ -56,6 +56,7 @@ class ApiErrorHandlerImpl(
             is ConnectException -> UnifiedError.Connectivity.NoConnection(context.getString(R.string.error_network_connection))
 
             is UnknownHostException -> UnifiedError.Connectivity.HostUnreachable(context.getString(R.string.error_generic))
+
 
             else -> UnifiedError.Generic(context.getString(R.string.error_generic))
         }
