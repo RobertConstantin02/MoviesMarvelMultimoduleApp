@@ -1,4 +1,3 @@
-
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -12,6 +11,23 @@ android {
 
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
+    }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
+        }
+    }
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true // Robolectric config: https://robolectric.org/getting-started
+        }
     }
 }
 kapt {

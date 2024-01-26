@@ -38,7 +38,7 @@ class ApiErrorHandlerImpl(
         }
 
     private fun HttpException.handleError(): UnifiedError {
-        val message = response()?.errorBody()?.string() ?: message()
+        val message = response()?.errorBody()?.string() ?: message() //i only need a message because I dont have a body error that I can parse in rick adn morty api
         return when (code()) {
                 HttpURLConnection.HTTP_UNAUTHORIZED -> UnifiedError.Http.Unauthorized(message = message)
                 HttpURLConnection.HTTP_NOT_FOUND -> UnifiedError.Http.NotFound(message = message)
@@ -52,12 +52,8 @@ class ApiErrorHandlerImpl(
     private fun IOException.handleError(): UnifiedError =
         when (this) {
             is SocketTimeoutException -> UnifiedError.Connectivity.TimeOut(context.getString(R.string.error_time_out)) //maybe here change for message from Exception or leave it with int becaus enow Resource.error handles it
-
             is ConnectException -> UnifiedError.Connectivity.NoConnection(context.getString(R.string.error_network_connection))
-
             is UnknownHostException -> UnifiedError.Connectivity.HostUnreachable(context.getString(R.string.error_generic))
-
-
             else -> UnifiedError.Generic(context.getString(R.string.error_generic))
         }
 }

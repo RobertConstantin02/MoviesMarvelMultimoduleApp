@@ -57,7 +57,9 @@ internal class CallResult<T>(
     private fun<T> Response<T>.handleOnResponse() = Response.success(
         ApiResponse.create(
             this.mapToCommonResponse(),
-            httpException = { ApiResponse.create(apiErrorHandler.invoke(HttpException(this))) }
+            httpException = {
+                ApiResponse.create(apiErrorHandler.invoke(HttpException(this)))
+            }
         )
     )
 }

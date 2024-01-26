@@ -15,7 +15,9 @@ sealed class ApiResponse<T> {
                     if (this == null || response.code == HTTP_BAD_REQUEST) ApiResponseEmpty()
                     else ApiResponseSuccess(this)
                 }
-            } else httpException()
+            } else {
+                httpException()
+            }
     }
 }
 

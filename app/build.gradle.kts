@@ -68,8 +68,9 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
-    testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
+    testImplementation(kotlin("test"))
+    testRuntimeOnly(libs.junit.jupiter.engine)
 
     tasks.withType<Test> {
         useJUnitPlatform()

@@ -10,6 +10,16 @@ android {
     namespace = "com.example.core"
     compileSdk = 34
 
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true // Robolectric config: https://robolectric.org/getting-started
+        }
+    }
+
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }
