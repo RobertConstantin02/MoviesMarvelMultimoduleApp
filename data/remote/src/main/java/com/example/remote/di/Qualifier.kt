@@ -4,4 +4,4 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class TheMovieApiBaseUrl
+annotation class RickAndMortyApiBaseUrl

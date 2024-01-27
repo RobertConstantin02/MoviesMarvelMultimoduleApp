@@ -37,9 +37,14 @@ object NetworkModule {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    @RickAndMortyApiBaseUrl
+    @Singleton
+    @Provides
+    fun provideBaseApiUrl(): String = BASE_API_URL
+
     @Provides
     @Singleton
-    fun provideService(baseUrl: String, client: OkHttpClient, callAdapterFactory: CallAdapterFactory): Retrofit {
+    fun provideService(@RickAndMortyApiBaseUrl baseUrl: String, client: OkHttpClient, callAdapterFactory: CallAdapterFactory): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)// why buildconfig from this module does not appear?
             .client(client)
@@ -53,10 +58,6 @@ object NetworkModule {
     fun provideRickMortyService(retrofit: Retrofit): RickAndMortyService =
         retrofit.create(RickAndMortyService::class.java)
 
-    @TheMovieApiBaseUrl
-    @Singleton
-    @Provides
-    fun provideBaseApiUrl(): String = BASE_API_URL
 
 //    @Provides
 //    fun provideRickMortyEndPoint(

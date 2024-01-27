@@ -2,9 +2,6 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="api error handler, return IOException SocketTimeoutException()">
-        <State />
-      </entry>
       <entry key="app">
         <State>
           <targetSelectedWithDropDown>
@@ -20,9 +17,6 @@
           </targetSelectedWithDropDown>
           <timeTargetWasSelectedWithDropDown value="2024-01-22T18:52:01.178033Z" />
         </State>
-      </entry>
-      <entry key="asdasdad()">
-        <State />
       </entry>
     </value>
   </component>
