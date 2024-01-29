@@ -35,6 +35,8 @@ dependencies {
     api(project(":api_interaction_helper:retrofit"))
     api(project(":api_interaction_helper:core"))
 
+    implementation(project(":test"))
+
     //Unit test
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
@@ -47,4 +49,11 @@ dependencies {
     }
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.paging)
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
 }

@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":toplevel:resources"))
     implementation(project(":toplevel:resources"))
     implementation(project("::api_interaction_helper:retrofit"))
+    implementation(project(":test"))
 
     libs.bundles.apply {
         implementation(hilt)

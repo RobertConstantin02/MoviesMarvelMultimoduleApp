@@ -1,10 +1,11 @@
-package com.example.remote.util
+package com.example.test.character
 
 import com.example.api.model.character.CharacterDto
 import com.example.api.model.character.FeedCharacterDto
 import com.example.api.model.episode.EpisodeDto
 import com.example.api.model.location.ExtendedLocationDto
-import com.example.remote.extension.GsonAdapterExt.fromJson
+import com.example.test.FileUtil
+import com.example.test.GsonAdapterExt.fromJson
 
 const val ALL_CHARACTERS_JSON = "json/getAllCharacters.json"
 const val EMPTY_JSON = "json/empty.json"

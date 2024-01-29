@@ -9,7 +9,9 @@ import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.UnifiedError
 import com.example.remote.extension.toRickAndMortyService
 import com.example.remote.fake.ApiErrorHandlerFake
-import com.example.remote.util.CharacterUtil
+import com.example.test.character.CharacterUtil
+import com.example.test.character.EXTENDED_LOCATION
+import com.example.test.FileUtil
 import io.mockk.coEvery
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -39,6 +41,26 @@ class ExtendedLocationRemoteDataSourceTest {
         apiErrorHandler = ApiErrorHandlerFake()
         service = mockWebServer.toRickAndMortyService(apiErrorHandler)
         extendedLocationRemoteDataSource = ExtendedLocationRemoteDataSource(service)
+    }
+
+    @Test
+    fun `service get location, is success request url`() = runTest {
+        mockWebServer.enqueue(
+            MockResponse().setResponseCode(200).setBody(FileUtil.getJson(EXTENDED_LOCATION).orEmpty())
+        )
+
+        val result = service.getLocation(LOCATION_ID)
+
+        val request = mockWebServer.takeRequest()
+        val requestUrl = request.requestUrl
+        val queryParams = requestUrl?.queryParameterNames
+
+        assertThat(request.method).isEqualTo("GET")
+        assertThat(requestUrl?.encodedPath).isEqualTo("/api/location/3")
+        with(queryParams) {
+            assertThat(this?.size).isEqualTo(0)
+        }
+        assertThat(result).isEqualTo(ApiResponseSuccess(CharacterUtil.expectedSuccessLocation))
     }
 
     @Test

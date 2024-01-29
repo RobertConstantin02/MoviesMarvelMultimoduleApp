@@ -1,4 +1,4 @@
-package com.example.data_repository
+package com.example.test
 
 import org.junit.Test
 

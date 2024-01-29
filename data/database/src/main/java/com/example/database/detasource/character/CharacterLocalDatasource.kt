@@ -43,12 +43,8 @@ class CharacterLocalDatasource @Inject constructor(
         flow {
             try {
                 with(characterDao.getCharactersByIds(characterIds)) {
-                    if (this?.isEmpty() == true) {
-                        emit(DatabaseResponseEmpty())
-                    }
-                    else {
-                        emit(DatabaseResponse.create(this))
-                    }
+                    if (this?.isEmpty() == true) { emit(DatabaseResponseEmpty()) }
+                    else { emit(DatabaseResponse.create(this)) }
                 }
             } catch (e: SQLiteException) {
                 emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))

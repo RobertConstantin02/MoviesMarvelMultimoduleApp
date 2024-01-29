@@ -36,8 +36,7 @@ const val DAY_IN_MILLIS = 24 * 60 * 60 * 1000
 
 class CharacterRepository @Inject constructor(
     private val remoteDataSource: ICharacterRemoteDataSource,
-    private val localDatabaseDatasource: ICharacterLocalDatasource,
-    private val sharedPreference: ISharedPreferenceDataSource
+    private val localDatabaseDatasource: ICharacterLocalDatasource
 ) : ICharacterRepository {
 
     @OptIn(ExperimentalPagingApi::class, ExperimentalCoroutinesApi::class)
@@ -52,15 +51,11 @@ class CharacterRepository @Inject constructor(
 
     override fun getCharactersByIds(charactersIds: List<Int>): Flow<Resource<List<CharacterNeighborBo>>> =
         apiDbBoundResource(
-            fetchFromLocal = {
-                localDatabaseDatasource.getCharactersByIds(charactersIds)
-                             },
+            fetchFromLocal = { localDatabaseDatasource.getCharactersByIds(charactersIds) },
             shouldMakeNetworkRequest = { databaseResult ->
                 (databaseResult !is DatabaseResponseSuccess)
             },
-            makeNetworkRequest = {
-                remoteDataSource.getCharactersByIds(charactersIds)
-            },
+            makeNetworkRequest = { remoteDataSource.getCharactersByIds(charactersIds) },
             saveApiData = { characters ->
                 localDatabaseDatasource.insertCharacters(characters?.map { it.toCharacterEntity() }
                     ?: emptyList())
@@ -78,15 +73,9 @@ class CharacterRepository @Inject constructor(
 
     override fun getCharacter(characterId: Int): Flow<Resource<CharacterDetailBo>> {
         return apiDbBoundResource(
-            fetchFromLocal = {
-                localDatabaseDatasource.getCharacterById(characterId)
-            },
-            shouldMakeNetworkRequest = { databaseResult ->
-              (databaseResult !is DatabaseResponseSuccess)
-            },
-            makeNetworkRequest = {
-                remoteDataSource.getCharacterById(characterId)
-            },
+            fetchFromLocal = { localDatabaseDatasource.getCharacterById(characterId) },
+            shouldMakeNetworkRequest = { databaseResult -> (databaseResult !is DatabaseResponseSuccess) },
+            makeNetworkRequest = { remoteDataSource.getCharacterById(characterId) },
             saveApiData = { characterDto ->
                 localDatabaseDatasource.insertCharacter(characterDto.toCharacterEntity())
             },
@@ -113,9 +102,7 @@ class CharacterRepository @Inject constructor(
 
     override fun getFavoriteCharacters(page: Int, offset: Int): Flow<Resource<List<CharacterBo>>> {
         return localResourceFlow(
-            fetchFromLocal = {
-                localDatabaseDatasource.getFavoriteCharacters(offset = page * offset)
-            },
+            fetchFromLocal = { localDatabaseDatasource.getFavoriteCharacters(offset = page * offset) },
             mapLocalToDomain = { charactersEntity ->
                 charactersEntity.map { characterEntity -> characterEntity.toCharacterBo() }
             }
