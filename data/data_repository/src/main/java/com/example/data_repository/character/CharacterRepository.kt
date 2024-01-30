@@ -51,11 +51,15 @@ class CharacterRepository @Inject constructor(
 
     override fun getCharactersByIds(charactersIds: List<Int>): Flow<Resource<List<CharacterNeighborBo>>> =
         apiDbBoundResource(
-            fetchFromLocal = { localDatabaseDatasource.getCharactersByIds(charactersIds) },
+            fetchFromLocal = {
+                localDatabaseDatasource.getCharactersByIds(charactersIds)
+            },
             shouldMakeNetworkRequest = { databaseResult ->
                 (databaseResult !is DatabaseResponseSuccess)
             },
-            makeNetworkRequest = { remoteDataSource.getCharactersByIds(charactersIds) },
+            makeNetworkRequest = {
+                remoteDataSource.getCharactersByIds(charactersIds)
+            },
             saveApiData = { characters ->
                 localDatabaseDatasource.insertCharacters(characters?.map { it.toCharacterEntity() }
                     ?: emptyList())

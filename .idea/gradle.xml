@@ -31,6 +31,7 @@
             <option value="$PROJECT_DIR$/presentation/feature_feed" />
             <option value="$PROJECT_DIR$/presentation/presentation_mapper" />
             <option value="$PROJECT_DIR$/presentation/presentation_model" />
+            <option value="$PROJECT_DIR$/test" />
             <option value="$PROJECT_DIR$/toplevel" />
             <option value="$PROJECT_DIR$/toplevel/designsystem" />
             <option value="$PROJECT_DIR$/toplevel/navigationlogic" />

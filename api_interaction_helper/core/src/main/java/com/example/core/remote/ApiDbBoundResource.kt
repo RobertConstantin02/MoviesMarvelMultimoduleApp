@@ -30,7 +30,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
                 processNetworkResponse(response)
                 if (saveApiData(response.body) is DatabaseResponseSuccess)
                     when (val localResponse = fetchFromLocal().first()) {
-                        is DatabaseResponseSuccess ->
+                        is DatabaseResponseSuccess -> //*1
                             emit(
                                 Resource.success(
                                     mapLocalToDomain(
@@ -39,7 +39,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                 )
                             )
 
-                        is DatabaseResponseError ->
+                        is DatabaseResponseError -> //*2
                             emit(
                                 Resource.success(
                                     mapApiToDomain(
@@ -48,7 +48,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                 )
                             )
 
-                        is DatabaseResponseEmpty ->
+                        is DatabaseResponseEmpty -> //*3
                             emit(
                                 Resource.success(
                                     mapApiToDomain(
@@ -88,6 +88,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
     } else {
         (localData as? DatabaseResponseSuccess)?.let {
             emit(Resource.success(mapLocalToDomain(it.data)))
-        } ?: emit(Resource.successEmpty())
+        }
+            ?: emit(Resource.successEmpty())
     }
 }
