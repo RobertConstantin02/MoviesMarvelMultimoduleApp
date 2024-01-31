@@ -2,8 +2,6 @@ package com.example.data_repository.fake
 
 import com.example.api.model.character.CharacterDto
 import com.example.api.model.character.FeedCharacterDto
-import com.example.core.local.DatabaseResponseError
-import com.example.core.local.DatabaseUnifiedError
 import com.example.core.remote.ApiResponse
 import com.example.core.remote.ApiResponseEmpty
 import com.example.core.remote.ApiResponseError
@@ -16,7 +14,7 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
 
     private var characters: MutableList<CharacterDto> = mutableListOf()
 
-    var remoteError: ApiResponseError<Unit>? = ApiResponseError(UnifiedError.Generic("Generic error"))
+    var remoteError: ApiResponseError<Unit>? = null
     fun setCharacters(characters: List<CharacterDto>) {
         this.characters = characters.toMutableList()
     }

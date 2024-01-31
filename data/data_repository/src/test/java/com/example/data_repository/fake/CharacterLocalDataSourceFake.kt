@@ -27,8 +27,10 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     /**
      * replicates an error in the local database
      */
-    var localError: DatabaseResponseError<Unit>? =
-        DatabaseResponseError(DatabaseUnifiedError.Reading)
+    var readError: DatabaseResponseError<Unit>? = null
+    var insertError: DatabaseResponseError<Unit>? = null
+    var databaseEmpty: DatabaseResponseEmpty<Unit>? = null
+
 
     override fun getAllCharacters(): PagingSource<Int, CharacterEntity> =
         object : PagingSource<Int, CharacterEntity>() {
@@ -48,7 +50,8 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     override suspend fun getCharacterById(
         characterId: Int
     ): Flow<DatabaseResponse<CharacterEntity>> {
-        localError?.let { return characters.map { getDatabaseError() } }
+        readError?.let { return characters.map { getDatabaseError() } }
+        if (databaseEmpty != null) return characters.map { DatabaseResponseEmpty() }
 
         return characters.map { charactersEntity ->
             charactersEntity?.singleOrNull { characterEntity ->
@@ -64,7 +67,8 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     override suspend fun getCharactersByIds(
         characterIds: List<Int>
     ): Flow<DatabaseResponse<List<CharacterEntity>>> {
-        localError?.let { return characters.map { getDatabaseError() } }
+        readError?.let { return characters.map { getDatabaseError() } }
+        if (databaseEmpty != null) return characters.map { DatabaseResponseEmpty() }
 
         return characters.map { charactersEntity ->
             charactersEntity?.filter { characterEntity ->
@@ -89,7 +93,8 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     override suspend fun insertCharacters(
         characters: List<CharacterEntity>
     ): DatabaseResponse<Unit> {
-        localError?.let { return getDatabaseError() }
+        readError?.let { return getDatabaseError() }
+        insertError?.let { return getDatabaseError() }
 
         val originalCharacterSize = this.characters.value?.size ?: 0
         this.characters.value = this.characters.value?.plus(characters)?.toSet()?.toList()
@@ -99,7 +104,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     }
 
     override suspend fun insertCharacter(character: CharacterEntity): DatabaseResponse<Unit> {
-        localError?.let { return getDatabaseError() }
+        insertError?.let { return getDatabaseError() }
 
         val originalCharacterSize = this.characters.value?.size ?: 0
         this.characters.value = this.characters.value?.toMutableList()?.also {
@@ -110,11 +115,12 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         } else DatabaseResponseSuccess(Unit)
     }
 
+    //Update specific error?
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
     ): Flow<DatabaseResponse<Unit>> = flow {
-        localError?.let { emit(getDatabaseError()) }
+        insertError?.let { emit(getDatabaseError()) }
 
         this@CharacterLocalDataSourceFake.characters.map { charactersEntity ->
             charactersEntity?.map { character ->
@@ -133,7 +139,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     }
 
     override fun getFavoriteCharacters(offset: Int): Flow<DatabaseResponse<List<CharacterEntity>>> {
-        localError?.let { return characters.map { getDatabaseError() } }
+        readError?.let { return characters.map { getDatabaseError() } }
 
         return this.characters.map { charactersEntity ->
             charactersEntity?.filter { characterEntity ->
@@ -143,7 +149,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     }
 
     private fun <T> getDatabaseError(): DatabaseResponseError<T> =
-        when (val error = localError?.databaseUnifiedError) {
+        when (val error = readError?.databaseUnifiedError) {
             DatabaseUnifiedError.Deletion -> DatabaseResponseError(error)
             DatabaseUnifiedError.Insertion -> DatabaseResponseError(error)
             DatabaseUnifiedError.Update -> DatabaseResponseError(error)

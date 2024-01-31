@@ -57,7 +57,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                 )
                             )
                     }
-                else emit(Resource.success(mapApiToDomain(response.body)))
+                else emit(Resource.success(mapApiToDomain(response.body))) //*4
             }
 
             is ApiResponseError -> {

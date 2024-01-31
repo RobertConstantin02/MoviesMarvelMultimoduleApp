@@ -6,11 +6,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.core.Resource
-import com.example.core.remote.apiDbBoundResource
 import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseResponseSuccess
 import com.example.core.local.localResourceFlow
+import com.example.core.remote.apiDbBoundResource
 import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterBo
@@ -23,7 +23,6 @@ import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.paging.FeedRemoteMediator
-import com.example.preferences.datasource.ISharedPreferenceDataSource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
