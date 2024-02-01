@@ -18,8 +18,11 @@ import com.example.data_repository.fake.CharacterLocalDataSourceFake
 import com.example.data_repository.fake.CharacterRemoteDataSourceFake
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.domain_model.character.CharacterNeighborBo
+import com.example.preferences.datasource.ISharedPreferenceDataSource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
@@ -33,12 +36,14 @@ class CharacterRepositoryTest {
     private lateinit var remoteDataSource: ICharacterRemoteDataSource
     private lateinit var localDatasource: ICharacterLocalDatasource
     private lateinit var repository: CharacterRepository
+    private lateinit var sharedPref: ISharedPreferenceDataSource
 
     @BeforeEach
     fun setUp() {
         remoteDataSource = CharacterRemoteDataSourceFake()
         localDatasource = CharacterLocalDataSourceFake()
-        repository = CharacterRepository(remoteDataSource, localDatasource)
+        sharedPref = mockk()
+        repository = CharacterRepository(remoteDataSource, localDatasource, sharedPref)
     }
 
     /**
@@ -142,15 +147,25 @@ class CharacterRepositoryTest {
     @Test
     fun `getCharactersByIds call, returns Resource Error with local data if fetch from local is DatabaseResponseSuccess`() =
         runTest {
+            //Given
             val expected =
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
-            (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = ApiResponseError(UnifiedError.Generic("Generic error"))
+
+            val fakeLocalData =  CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                it.toCharacterEntity()
+            } ?: emptyList()
+
+            (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
+                ApiResponseError(UnifiedError.Generic("Generic error"))
+
+            (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+            every { sharedPref.getTime() } returns 0L
+            //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
                 //Then
-                //assert message also if is iqual to expected
                 assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
                 assertThat(apiErrorMessage).isEqualTo(UnifiedError.Generic("Generic error").message)
             }
@@ -158,14 +173,9 @@ class CharacterRepositoryTest {
 
     /**
      * *6
-     * Simulate:
-     * Api error
-     * Local database with data
-     *
-     *
      */
     @Test
-    fun `getCharactersByIds call, returns Resource Error with api error message and null data`() = runTest {
+    fun `getCharactersByIds call, returns Resource Error with message and null data when api error and local error`() = runTest {
         val expectedError = UnifiedError.Generic("Generic Error")
         (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = ApiResponseError(UnifiedError.Generic("Generic error"))
         (localDatasource as CharacterLocalDataSourceFake).readError =
@@ -175,11 +185,12 @@ class CharacterRepositoryTest {
 //                it.toCharacterEntity()
 //            } ?: emptyList()
 //        )
-        val result = repository.getCharactersByIds(listOf(1, 2, 3)).drop(1).first()
-        println("-----> apiError: ${(result?.state as? Resource.State.Error)?.apiError}")
-        val apiErrorMessage = (result?.state as? Resource.State.Error)?.apiError
-        assertThat(apiErrorMessage).isEqualTo(expectedError.message)
-        assertThat(result?.state?.unwrap()).isNull()
+        val result = repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
+            println("-----> apiError: ${(result.state as? Resource.State.Error)?.apiError}")
+            val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+            assertThat(apiErrorMessage).isEqualTo(expectedError.message)
+            assertThat(result.state?.unwrap()).isNull()
+        }
     }
 
 

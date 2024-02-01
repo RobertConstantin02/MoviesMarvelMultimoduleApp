@@ -23,6 +23,7 @@ import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.paging.FeedRemoteMediator
+import com.example.preferences.datasource.ISharedPreferenceDataSource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +36,8 @@ const val DAY_IN_MILLIS = 24 * 60 * 60 * 1000
 
 class CharacterRepository @Inject constructor(
     private val remoteDataSource: ICharacterRemoteDataSource,
-    private val localDatabaseDatasource: ICharacterLocalDatasource
+    private val localDatabaseDatasource: ICharacterLocalDatasource,
+    private val sharedPref: ISharedPreferenceDataSource
 ) : ICharacterRepository {
 
     @OptIn(ExperimentalPagingApi::class, ExperimentalCoroutinesApi::class)
@@ -54,7 +56,8 @@ class CharacterRepository @Inject constructor(
                 localDatabaseDatasource.getCharactersByIds(charactersIds)
             },
             shouldMakeNetworkRequest = { databaseResult ->
-                (databaseResult !is DatabaseResponseSuccess)
+                (databaseResult !is DatabaseResponseSuccess) ||
+                        (System.currentTimeMillis() - sharedPref.getTime() > DAY_IN_MILLIS)
             },
             makeNetworkRequest = {
                 remoteDataSource.getCharactersByIds(charactersIds)
@@ -77,7 +80,11 @@ class CharacterRepository @Inject constructor(
     override fun getCharacter(characterId: Int): Flow<Resource<CharacterDetailBo>> {
         return apiDbBoundResource(
             fetchFromLocal = { localDatabaseDatasource.getCharacterById(characterId) },
-            shouldMakeNetworkRequest = { databaseResult -> (databaseResult !is DatabaseResponseSuccess) },
+            shouldMakeNetworkRequest = { databaseResult ->
+                (databaseResult !is DatabaseResponseSuccess) ||
+                        (System.currentTimeMillis() - sharedPref.getTime() > DAY_IN_MILLIS)
+            },
+            localStorageStrategy = { sharedPref.saveCurrentTimeMs() },
             makeNetworkRequest = { remoteDataSource.getCharacterById(characterId) },
             saveApiData = { characterDto ->
                 localDatabaseDatasource.insertCharacter(characterDto.toCharacterEntity())

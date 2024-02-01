@@ -24,8 +24,8 @@ class LocationRepository @Inject constructor(
         apiDbBoundResource(
             fetchFromLocal = { local.getExtendedLocation(extendedLocationId) },
             shouldMakeNetworkRequest = { databaseResult ->
-                System.currentTimeMillis() - sharedPreferenceDataSource.getTime() >= DAY_IN_MILLIS
-                        && (databaseResult !is DatabaseResponseSuccess)
+                (databaseResult !is DatabaseResponseSuccess) ||
+                System.currentTimeMillis() - sharedPreferenceDataSource.getTime() > DAY_IN_MILLIS
             },
             makeNetworkRequest = { remote.getLocation(extendedLocationId) },
             saveApiData = { extendedLocationResult ->
