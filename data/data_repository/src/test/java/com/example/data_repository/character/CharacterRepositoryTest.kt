@@ -3,6 +3,7 @@ package com.example.data_repository.character
 import assertk.Assert
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import assertk.assertions.support.expected
 import assertk.assertions.support.show
 import com.example.core.Resource
@@ -11,6 +12,7 @@ import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseUnifiedError
 import com.example.core.remote.ApiResponseError
 import com.example.core.remote.UnifiedError
+import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.data_mapper.toCharacterNeighborBo
 import com.example.data_repository.fake.CharacterLocalDataSourceFake
 import com.example.data_repository.fake.CharacterRemoteDataSourceFake
@@ -19,6 +21,10 @@ import com.example.domain_model.character.CharacterNeighborBo
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,6 +46,8 @@ class CharacterRepositoryTest {
      * Local database does not have any data. Request to remote datasource is made.
      * @isEqualToWithGivenProperties -> only compares the fields, not class itself.
      */
+
+    //now that I know that this works will colled try to break the inliune function and see
     @Test
     fun `getCharactersByIds call, returns Resource Success when requesting from remote and local DatabaseResponseSuccess`() =
         runTest {
@@ -89,7 +97,7 @@ class CharacterRepositoryTest {
      * *3
      */
     @Test
-    fun `getCharactersByIds call, returns Resource Success if DatabaseResponseEmpty`() = runTest {
+    fun `getCharactersByIds call, returns Resource Success when requesting from api success and DatabaseResponseEmpty`() = runTest {
         val expected =
             CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                 it.toCharacterNeighborBo()
@@ -147,6 +155,32 @@ class CharacterRepositoryTest {
                 assertThat(apiErrorMessage).isEqualTo(UnifiedError.Generic("Generic error").message)
             }
         }
+
+    /**
+     * *6
+     * Simulate:
+     * Api error
+     * Local database with data
+     *
+     *
+     */
+    @Test
+    fun `getCharactersByIds call, returns Resource Error with api error message and null data`() = runTest {
+        val expectedError = UnifiedError.Generic("Generic Error")
+        (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = ApiResponseError(UnifiedError.Generic("Generic error"))
+        (localDatasource as CharacterLocalDataSourceFake).readError =
+            DatabaseResponseError(DatabaseUnifiedError.Reading)
+//        (localDatasource as CharacterLocalDataSourceFake).setCharacters(
+//            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+//                it.toCharacterEntity()
+//            } ?: emptyList()
+//        )
+        val result = repository.getCharactersByIds(listOf(1, 2, 3)).drop(1).first()
+        println("-----> apiError: ${(result?.state as? Resource.State.Error)?.apiError}")
+        val apiErrorMessage = (result?.state as? Resource.State.Error)?.apiError
+        assertThat(apiErrorMessage).isEqualTo(expectedError.message)
+        assertThat(result?.state?.unwrap()).isNull()
+    }
 
 
     private fun Assert<List<CharacterNeighborBo>>.isExpectedNeighbors(

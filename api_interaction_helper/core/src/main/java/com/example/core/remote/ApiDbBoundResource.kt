@@ -1,5 +1,6 @@
 package com.example.core.remote
 
+import android.util.Log
 import com.example.core.Resource
 import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
@@ -13,24 +14,30 @@ import kotlinx.coroutines.flow.map
 inline fun <BO, DB, API> apiDbBoundResource(
     crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<DB>>, //Flow<DbResponse<DB>>
     crossinline shouldMakeNetworkRequest: suspend (DatabaseResponse<DB>) -> Boolean = { true },
-    crossinline localStorageStrategy: () -> Unit = {},
+    crossinline localStorageStrategy: () -> Boolean = {false}, //if we applyed local strateguCache or not
     crossinline makeNetworkRequest: suspend () -> ApiResponse<API>,
     crossinline processNetworkResponse: (response: ApiResponseSuccess<API>) -> Unit = { },
-    crossinline saveApiData: suspend (API) -> DatabaseResponse<Unit> = { _: API -> DatabaseResponse.create(Unit) },
+    crossinline saveApiData: suspend (API) -> DatabaseResponse<Unit> = { _: API ->
+        DatabaseResponse.create(
+            Unit
+        )
+    },
     crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
     crossinline mapApiToDomain: (API) -> BO,
     crossinline mapLocalToDomain: (DB) -> BO,
 ) = flow<Resource<BO>> {
     val localData = fetchFromLocal().first()
-
+    //if is success and you cache condition is not satisfied also enter.
     if (shouldMakeNetworkRequest(localData)) { //here maybe only the time, not response different from success. After one day I want to get new data and cache it
-        localStorageStrategy()
         when (val response = makeNetworkRequest()) {
             is ApiResponseSuccess -> {
+                localStorageStrategy() //for example if me made an api call and is success with data, we maybe want to cache the time in wich that request was made to handle when we want to ask server again. Hre save time, then in shouldmekeNetwork call check condiition. if satfied make the reqeust and if taht is succeess then save again the current time.
                 processNetworkResponse(response)
                 if (saveApiData(response.body) is DatabaseResponseSuccess)
                     when (val localResponse = fetchFromLocal().first()) {
-                        is DatabaseResponseSuccess -> //*1
+                        is DatabaseResponseSuccess -> {
+                            //*1
+                            println("-----> 1 api success, local success -> @return  Resource.success with local data: ${localResponse.data}")
                             emit(
                                 Resource.success(
                                     mapLocalToDomain(
@@ -38,8 +45,11 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                     )
                                 )
                             )
+                        }
 
-                        is DatabaseResponseError -> //*2
+                        is DatabaseResponseError -> {
+                            //*2
+                            println("-----> 2 api success, local error -> @return  Resource.success with api data: ${response.body}")
                             emit(
                                 Resource.success(
                                     mapApiToDomain(
@@ -47,8 +57,11 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                     )
                                 )
                             )
+                        }
 
-                        is DatabaseResponseEmpty -> //*3
+                        is DatabaseResponseEmpty -> {
+                            //*3
+                            println("-----> 3 api success, local empty -> @return  Resource.success with api data: ${response.body}")
                             emit(
                                 Resource.success(
                                     mapApiToDomain(
@@ -56,34 +69,59 @@ inline fun <BO, DB, API> apiDbBoundResource(
                                     )
                                 )
                             )
+                        }
                     }
-                else emit(Resource.success(mapApiToDomain(response.body))) //*4
+                else {
+                    println("-----> 4 api success, save local error -> @return  Resource.success with api data: ${response.body}")
+                    emit(Resource.success(mapApiToDomain(response.body)))
+                }
             }
 
             is ApiResponseError -> {
                 onNetworkRequestFailed(response.unifiedError)
-                fetchFromLocal().map { localResponse ->
-                    when (localResponse) {
-                        is DatabaseResponseSuccess -> emit(
-                            Resource.error(
-                                response.unifiedError.message,
-                                mapLocalToDomain(localResponse.data)
-                            )
-                        )
 
-                        is DatabaseResponseError -> emit(
-                            Resource.error(
-                                localResponse.databaseUnifiedError.messageResource,
-                                null
-                            )
-                        )
 
-                        is DatabaseResponseEmpty -> emit(Resource.successEmpty())
-                    }
-                }
+                //this
+//                when (val localResponse = fetchFromLocal().first()) {
+//                    is DatabaseResponseSuccess -> {
+//                        //*5
+//                        println("-----> 5 api error, local success with previous saved data -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data ${localResponse.data}")
+//                        emit(
+//                            Resource.error(
+//                                response.unifiedError.message,
+//                                mapLocalToDomain(localResponse.data)
+//                            )
+//                        )
+//                    }
+//
+//                    is DatabaseResponseError -> {
+//                        //*6
+//                        println("-----> api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
+//                        emit(
+//                            Resource.error(
+//                                response.unifiedError.message,
+//                                null
+//                            )
+//                        )
+//                    }
+//
+//                    is DatabaseResponseEmpty -> {
+//                        //*7
+//                        println("-----> api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
+//                        emit(
+//                            Resource.error(
+//                                response.unifiedError.message,
+//                                null
+//                            )
+//                        )
+//                    }
+//                }
             }
 
-            is ApiResponseEmpty -> Resource.successEmpty() //no fetch from data base. If is empty and we need to refresh local database, then We wont represent not updated data to user
+            is ApiResponseEmpty -> {
+                println("-----> api empty -> @return  Resource.successEmpty")
+                Resource.successEmpty()
+            } //no fetch from data base. If is empty and we need to refresh local database, then We wont represent not updated data to user
         }
     } else {
         (localData as? DatabaseResponseSuccess)?.let {

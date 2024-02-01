@@ -31,6 +31,9 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     var insertError: DatabaseResponseError<Unit>? = null
     var databaseEmpty: DatabaseResponseEmpty<Unit>? = null
 
+    fun setCharacters(characters: List<CharacterEntity>) {
+        this.characters.value = characters
+    }
 
     override fun getAllCharacters(): PagingSource<Int, CharacterEntity> =
         object : PagingSource<Int, CharacterEntity>() {
