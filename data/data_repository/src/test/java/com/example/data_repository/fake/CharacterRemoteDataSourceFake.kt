@@ -50,6 +50,6 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
             is UnifiedError.Http.InternalError -> ApiResponseError(UnifiedError.Http.InternalError("Internal error"))
             is UnifiedError.Http.NotFound -> ApiResponseError(UnifiedError.Http.NotFound("Not found"))
             is UnifiedError.Http.Unauthorized -> ApiResponseError(UnifiedError.Http.Unauthorized("Unauthorized"))
-            else -> ApiResponseError(UnifiedError.Generic("Generic error"))
+            else -> ApiResponseError(UnifiedError.Generic("Generic Error"))
         }
 }

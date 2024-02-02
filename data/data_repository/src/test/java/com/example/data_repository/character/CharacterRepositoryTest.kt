@@ -3,6 +3,7 @@ package com.example.data_repository.character
 import assertk.Assert
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
 import assertk.assertions.support.expected
 import assertk.assertions.support.show
@@ -24,14 +25,11 @@ import com.example.test.character.CharacterUtil
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+const val CHARACTER_ID = 2
 class CharacterRepositoryTest {
     private lateinit var remoteDataSource: ICharacterRemoteDataSource
     private lateinit var localDatasource: ICharacterLocalDatasource
@@ -42,45 +40,34 @@ class CharacterRepositoryTest {
     fun setUp() {
         remoteDataSource = CharacterRemoteDataSourceFake()
         localDatasource = CharacterLocalDataSourceFake()
-        sharedPref = mockk()
+        sharedPref = mockk(relaxed = true)
         repository = CharacterRepository(remoteDataSource, localDatasource, sharedPref)
     }
 
-    /**
-     * 1*
-     * Local database does not have any data. Request to remote datasource is made.
-     * @isEqualToWithGivenProperties -> only compares the fields, not class itself.
-     */
-
-    //now that I know that this works will colled try to break the inliune function and see
     @Test
-    fun `getCharactersByIds call, returns Resource Success when requesting from remote and local DatabaseResponseSuccess`() =
+    fun `getCharactersByIds call, returns Resource Success when api success and local success`() =
         runTest {
+            //Given
             val expected =
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
-            //Given
             (localDatasource as CharacterLocalDataSourceFake).readError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
             )
-
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
-                //assertThat(result.state).isInstanceOf(Resource.State.Success::class)
                 assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
             }
         }
 
-    /**
-     * *2
-     */
     @Test
-    fun `getCharactersByIds call, returns Resource Success when requesting from api success and DatabaseResponseError`() =
+    fun `getCharactersByIds call, returns Resource Success when api success and local error`() =
         runTest {
+            //Given
             val expected =
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
@@ -98,11 +85,9 @@ class CharacterRepositoryTest {
             }
         }
 
-    /**
-     * *3
-     */
     @Test
-    fun `getCharactersByIds call, returns Resource Success when requesting from api success and DatabaseResponseEmpty`() = runTest {
+    fun `getCharactersByIds call, returns Resource Success when api success and local empty`() = runTest {
+        //Given
         val expected =
             CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                 it.toCharacterNeighborBo()
@@ -119,12 +104,10 @@ class CharacterRepositoryTest {
         }
     }
 
-    /**
-     * *4
-     */
     @Test
-    fun `getCharactersByIds call, returns Resource Success if database has not saved api data`() =
+    fun `getCharactersByIds call, returns Resource Success when database has not saved api data`() =
         runTest {
+            //Given
             val expected =
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
@@ -135,17 +118,15 @@ class CharacterRepositoryTest {
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
             )
+            //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
                 assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
             }
         }
 
-    /**
-     * *5
-     */
     @Test
-    fun `getCharactersByIds call, returns Resource Error with local data if fetch from local is DatabaseResponseSuccess`() =
+    fun `getCharactersByIds call, returns Resource Error with local data if local is success`() =
         runTest {
             //Given
             val expected =
@@ -171,28 +152,73 @@ class CharacterRepositoryTest {
             }
         }
 
-    /**
-     * *6
-     */
     @Test
     fun `getCharactersByIds call, returns Resource Error with message and null data when api error and local error`() = runTest {
+        //Given
         val expectedError = UnifiedError.Generic("Generic Error")
-        (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = ApiResponseError(UnifiedError.Generic("Generic error"))
+        (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = ApiResponseError(UnifiedError.Generic("Generic Error"))
         (localDatasource as CharacterLocalDataSourceFake).readError =
             DatabaseResponseError(DatabaseUnifiedError.Reading)
-//        (localDatasource as CharacterLocalDataSourceFake).setCharacters(
-//            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
-//                it.toCharacterEntity()
-//            } ?: emptyList()
-//        )
-        val result = repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
-            println("-----> apiError: ${(result.state as? Resource.State.Error)?.apiError}")
+        //When
+        repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
             val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+            //Then
             assertThat(apiErrorMessage).isEqualTo(expectedError.message)
-            assertThat(result.state?.unwrap()).isNull()
+            assertThat(result.state.unwrap()).isNull()
         }
     }
 
+    @Test
+    fun `getCharactersByIds call, returns Resource Error with message and null data when api error and local empty`() = runTest {
+        //Then
+        repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
+            assertThat(result.state).isInstanceOf(Resource.State.SuccessEmpty::class.java)
+            assertThat(result.state.unwrap()).isNull()
+        }
+    }
+
+    @Test
+    fun `getCharactersByIds call, returns Resource Success with localData when local success`() = runTest {
+        //Given
+        val expected =
+            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                it.toCharacterNeighborBo()
+            } ?: emptyList()
+
+        val fakeLocalData =  CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+            it.toCharacterEntity()
+        } ?: emptyList()
+        every { sharedPref.getTime() } returns System.currentTimeMillis()
+        //When
+        (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+
+
+        repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
+            //Then
+            assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
+        }
+    }
+
+    @Test
+    fun `getCharacter call, returns Resource Success when api success and local success`() =
+        runTest {
+            //Given
+            val expected =
+                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    it.toCharacterNeighborBo()
+                }?.first { character ->
+                    character.id == CHARACTER_ID
+                }
+
+            (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
+                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+            )
+            //When
+            repository.getCharacter(CHARACTER_ID).collectLatest { result ->
+                //Then
+                assertThat(result.state.unwrap()).isEqualTo(expected)
+            }
+        }
 
     private fun Assert<List<CharacterNeighborBo>>.isExpectedNeighbors(
         expected: List<CharacterNeighborBo>

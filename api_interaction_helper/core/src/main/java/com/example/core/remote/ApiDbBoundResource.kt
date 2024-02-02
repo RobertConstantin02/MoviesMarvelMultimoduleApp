@@ -93,7 +93,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
 
                     is DatabaseResponseError -> {
                         //*6
-                        println("-----> api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
+                        println("-----> 6 api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
                         emit(
                             Resource.error(
                                 response.unifiedError.message,
@@ -104,7 +104,7 @@ inline fun <BO, DB, API> apiDbBoundResource(
 
                     is DatabaseResponseEmpty -> {
                         //*7
-                        println("-----> api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
+                        println("-----> 7 api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
                         emit(
                             Resource.error(
                                 response.unifiedError.message,
@@ -116,14 +116,14 @@ inline fun <BO, DB, API> apiDbBoundResource(
             }
 
             is ApiResponseEmpty -> {
-                println("-----> api empty -> @return  Resource.successEmpty")
-                Resource.successEmpty()
+                println("-----> 8 api empty -> @return  Resource.successEmpty")
+                emit(Resource.successEmpty())
             } //no fetch from data base. If is empty and we need to refresh local database, then We wont represent not updated data to user
         }
     } else {
         (localData as? DatabaseResponseSuccess)?.let {
+            println("-----> 9 local success -> @returns local data: ${it.data}")
             emit(Resource.success(mapLocalToDomain(it.data)))
         }
-            ?: emit(Resource.successEmpty())
     }
 }
