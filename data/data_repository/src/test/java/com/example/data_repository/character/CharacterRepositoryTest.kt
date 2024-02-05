@@ -13,12 +13,14 @@ import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseUnifiedError
 import com.example.core.remote.ApiResponseError
 import com.example.core.remote.UnifiedError
+import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.data_mapper.toCharacterNeighborBo
 import com.example.data_repository.fake.CharacterLocalDataSourceFake
 import com.example.data_repository.fake.CharacterRemoteDataSourceFake
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.domain_model.character.CharacterNeighborBo
+import com.example.domain_model.characterDetail.CharacterDetailBo
 import com.example.preferences.datasource.ISharedPreferenceDataSource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
@@ -205,10 +207,10 @@ class CharacterRepositoryTest {
             //Given
             val expected =
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
-                    it.toCharacterNeighborBo()
+                    it.toCharacterDetailBo()
                 }?.first { character ->
                     character.id == CHARACTER_ID
-                }
+                }?.id
 
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
@@ -216,8 +218,16 @@ class CharacterRepositoryTest {
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap()).isEqualTo(expected)
+                assertThat(result.state.unwrap()).isExpectedCharacter(expected)
             }
+        }
+
+    private fun Assert<CharacterDetailBo?>.isExpectedCharacter(expectedId: Int?) =
+        given { actual ->
+            if (expectedId == actual?.id) {
+                return
+            }
+            expected("character id: ${show(expectedId)} but was character id: ${show(actual?.id)}")
         }
 
     private fun Assert<List<CharacterNeighborBo>>.isExpectedNeighbors(

@@ -39,10 +39,9 @@ inline fun <BO, DB, API> apiDbBoundResource(
                             //*1
                             println("-----> 1 api success, local success -> @return  Resource.success with local data: ${localResponse.data}")
                             emit(
-                                Resource.success(
-                                    mapLocalToDomain(
-                                        localResponse.data
-                                    )
+                                Resource.error(
+                                    "mojon",
+                                    mapLocalToDomain(localResponse.data)
                                 )
                             )
                         }
