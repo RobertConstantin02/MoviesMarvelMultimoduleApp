@@ -12,43 +12,46 @@ import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
 
     private val characters =
-        MutableStateFlow<List<CharacterEntity>?>(emptyList()) //init list with fale data fcrom json?. At the beggining i dont think so because it will call remotemediator which and we will pass out fakes?
-
-    // TODO: create set for characters in order to simulate that the database has already data inside
+        MutableStateFlow<List<CharacterEntity>?>(emptyList())
 
     private val pagingKeys: MutableList<PagingKeys> = mutableListOf()
 
-    /**
-     * replicates an error in the local database
-     */
+    //errors for remote and local
     var readError: DatabaseResponseError<Unit>? = null
     var insertError: DatabaseResponseError<Unit>? = null
     var databaseEmpty: DatabaseResponseEmpty<Unit>? = null
+    //error for pagination
+    var paginationError: Boolean = false
 
-    fun setCharacters(characters: List<CharacterEntity>) {
+    fun setCharacters(characters: List<CharacterEntity>?) {
         this.characters.value = characters
     }
 
-    override fun getAllCharacters(): PagingSource<Int, CharacterEntity> =
-        object : PagingSource<Int, CharacterEntity>() {
-            override fun getRefreshKey(state: PagingState<Int, CharacterEntity>): Int {
-                return 0
-            }
-
-            override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharacterEntity> {
-                return LoadResult.Page(
-                    data = this@CharacterLocalDataSourceFake.characters.value.orEmpty(),
-                    prevKey = null,
-                    nextKey = null
-                )
-            }
+    val pagingSource = object : PagingSource<Int, CharacterEntity>() {
+        override fun getRefreshKey(state: PagingState<Int, CharacterEntity>): Int {
+            return state.anchorPosition ?: 1
         }
+
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharacterEntity> {
+            if (paginationError) {
+                return LoadResult.Error(Exception("pagination test error", Throwable("test")))
+            }
+            return LoadResult.Page(
+                data = this@CharacterLocalDataSourceFake.characters.value?.take(params.loadSize).orEmpty(),
+                prevKey = 0,
+                nextKey = 0
+            )
+        }
+    }
+
+    override fun getAllCharacters(): PagingSource<Int, CharacterEntity> = pagingSource
 
     override suspend fun getCharacterById(
         characterId: Int
@@ -128,10 +131,12 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         this@CharacterLocalDataSourceFake.characters.map { charactersEntity ->
             charactersEntity?.map { character ->
                 if (character.id == characterId) {
+                    println("${character.copy(isFavorite = isFavorite)}")
                     character.copy(isFavorite = isFavorite)
                 } else character
             }
         }
+
         val updatedCharacter = this@CharacterLocalDataSourceFake.characters.value?.firstOrNull {
             it.id == characterId
         }

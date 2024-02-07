@@ -45,9 +45,13 @@ class CharacterRepository @Inject constructor(
         Pager(
             config = PagingConfig(10),
             remoteMediator = FeedRemoteMediator(localDatabaseDatasource, remoteDataSource),
-            pagingSourceFactory = { localDatabaseDatasource.getAllCharacters() }
+            pagingSourceFactory = {
+                localDatabaseDatasource.getAllCharacters()
+            }
         ).flow.mapLatest { pagingData ->
-            pagingData.map { character -> character.toCharacterBo() }
+            pagingData.map { character ->
+                character.toCharacterBo()
+            }
         }
 
     override fun getCharactersByIds(charactersIds: List<Int>): Flow<Resource<List<CharacterNeighborBo>>> =

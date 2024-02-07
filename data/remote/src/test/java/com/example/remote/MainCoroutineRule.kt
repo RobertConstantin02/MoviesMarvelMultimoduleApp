@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
-class MainCoroutineExtesion(
+class MainCoroutineExtension(
     val testDispatcher: TestDispatcher = StandardTestDispatcher()
 ) : BeforeEachCallback, AfterEachCallback {
     @OptIn(ExperimentalCoroutinesApi::class)

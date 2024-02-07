@@ -1,11 +1,11 @@
 package com.example.data_repository.character
 
+import androidx.paging.PagingSource
 import assertk.Assert
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
-import assertk.assertions.isSameInstanceAs
 import assertk.assertions.support.expected
 import assertk.assertions.support.show
 import com.example.core.Resource
@@ -20,6 +20,7 @@ import com.example.data_mapper.toCharacterNeighborBo
 import com.example.data_repository.fake.CharacterLocalDataSourceFake
 import com.example.data_repository.fake.CharacterRemoteDataSourceFake
 import com.example.database.detasource.character.ICharacterLocalDatasource
+import com.example.database.entities.CharacterEntity
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
 import com.example.preferences.datasource.ISharedPreferenceDataSource
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test
 
 const val CHARACTER_ID = 2
 
+
 class CharacterRepositoryTest {
     private lateinit var remoteDataSource: ICharacterRemoteDataSource
     private lateinit var localDatasource: ICharacterLocalDatasource
@@ -46,6 +48,46 @@ class CharacterRepositoryTest {
         localDatasource = CharacterLocalDataSourceFake()
         sharedPref = mockk(relaxed = true)
         repository = CharacterRepository(remoteDataSource, localDatasource, sharedPref)
+    }
+
+    @Test
+    fun `getAllCharacters, PagingSource load success`() = runTest {
+        val fakeLocalData =
+            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+                it.toCharacterEntity()
+            } ?: emptyList()
+        (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+
+        val expected = PagingSource.LoadResult.Page(
+            data = fakeLocalData.take(10),
+            prevKey = 0,
+            nextKey = 2
+        ).data
+
+        val result = ((localDatasource as CharacterLocalDataSourceFake).getAllCharacters().load(
+            PagingSource.LoadParams.Append(1, 10, false)
+        ) as? PagingSource.LoadResult.Page)?.data
+
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `getAllCharacters, PagingSource load failure`() = runTest {
+        val fakeLocalData =
+            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+                it.toCharacterEntity()
+            } ?: emptyList()
+
+        (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+        (localDatasource as CharacterLocalDataSourceFake).paginationError = true
+
+        val expected = PagingSource.LoadResult.Error<Int, CharacterEntity>(Exception("pagination test error", Throwable())).throwable.message
+
+        val result = ((localDatasource as CharacterLocalDataSourceFake).getAllCharacters().load(
+            PagingSource.LoadParams.Append(1, 10, false)
+        ) as? PagingSource.LoadResult.Error)?.throwable?.message
+
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
@@ -369,6 +411,62 @@ class CharacterRepositoryTest {
                 assertThat(apiErrorMessage).isEqualTo(expectedErrorState.apiError)
             }
         }
+
+    @Test
+    fun `getCharacter call, returns Resource error with message and null data when api error and local empty`() =
+        runTest {
+            //Given
+            val expectedErrorState = Resource.State.SuccessEmpty
+            //When
+            repository.getCharacter(CHARACTER_ID).collectLatest { result ->
+                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+                //Then
+                assertThat(result.state.unwrap()).isNull()
+                assertThat(result.state).isInstanceOf(Resource.State.SuccessEmpty::class.java)
+                assertThat(result.state).isEqualTo(expectedErrorState)
+                assertThat(apiErrorMessage).isNull()
+            }
+        }
+
+    @Test
+    fun `getCharacter call, returns Resource Success when database has saved data`() =
+        runTest {
+            //Given
+            val expected =
+                Resource.State.Success(
+                    CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                        it.toCharacterDetailBo()
+                    }?.first { character ->
+                        character.id == CHARACTER_ID
+                    })
+            val fakeLocalData =
+                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    it.toCharacterEntity()
+                } ?: emptyList()
+
+            (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+            every { sharedPref.getTime() } returns System.currentTimeMillis()
+            //When
+            repository.getCharacter(CHARACTER_ID).collectLatest { result ->
+                //Then
+                assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
+                assertThat(result.state).isInstanceOf(Resource.State.Success::class.java)
+            }
+        }
+
+    @Test
+    fun `updateCharactersIsFavorite, update is success`() = runTest {
+        val fakeLocalData =
+            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+                it.toCharacterEntity()
+            } ?: emptyList()
+
+        (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+
+        repository.updateCharacterIsFavorite(true, 2).collectLatest { result ->
+            assertThat(result.state).isEqualTo(Resource.State.Success(Unit)::class.java)
+        }
+    }
 
 
     private fun Assert<CharacterDetailBo?>.isExpectedCharacter(expectedId: Int?) =
