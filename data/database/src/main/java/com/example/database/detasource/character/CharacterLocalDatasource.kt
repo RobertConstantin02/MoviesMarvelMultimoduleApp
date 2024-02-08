@@ -90,7 +90,6 @@ class CharacterLocalDatasource @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getFavoriteCharacters(offset: Int) = flow {
         try {
             with(characterDao.getFavoriteCharacters(offset)) {

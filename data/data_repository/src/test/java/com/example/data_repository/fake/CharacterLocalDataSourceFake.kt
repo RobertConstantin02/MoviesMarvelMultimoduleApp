@@ -12,29 +12,24 @@ import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
 
-    private val characters =
-        MutableStateFlow<List<CharacterEntity>?>(emptyList())
+    private val characters = MutableStateFlow<List<CharacterEntity>?>(emptyList())
 
     private val pagingKeys: MutableList<PagingKeys> = mutableListOf()
 
     //errors for remote and local
     var readError: DatabaseResponseError<Unit>? = null
     var insertError: DatabaseResponseError<Unit>? = null
+    var updateError: DatabaseResponseError<Unit>? = null
     var databaseEmpty: DatabaseResponseEmpty<Unit>? = null
     //error for pagination
     var paginationError: Boolean = false
 
-    fun setCharacters(characters: List<CharacterEntity>?) {
-        this.characters.value = characters
-    }
-
-    val pagingSource = object : PagingSource<Int, CharacterEntity>() {
+    private val pagingSource = object : PagingSource<Int, CharacterEntity>() {
         override fun getRefreshKey(state: PagingState<Int, CharacterEntity>): Int {
             return state.anchorPosition ?: 1
         }
@@ -49,6 +44,10 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
                 nextKey = 0
             )
         }
+    }
+
+    fun setCharacters(characters: List<CharacterEntity>?) {
+        this.characters.value = characters
     }
 
     override fun getAllCharacters(): PagingSource<Int, CharacterEntity> = pagingSource
@@ -67,9 +66,6 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         }
     }
 
-    /**
-     * emptyList or null -> DatabaseResponseEmpty
-     */
     override suspend fun getCharactersByIds(
         characterIds: List<Int>
     ): Flow<DatabaseResponse<List<CharacterEntity>>> {
@@ -100,7 +96,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         characters: List<CharacterEntity>
     ): DatabaseResponse<Unit> {
         readError?.let { return getDatabaseError() }
-        insertError?.let { return getDatabaseError() }
+        insertError?.let { return DatabaseResponseError(DatabaseUnifiedError.Insertion) }
 
         val originalCharacterSize = this.characters.value?.size ?: 0
         this.characters.value = this.characters.value?.plus(characters)?.toSet()?.toList()
@@ -110,7 +106,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     }
 
     override suspend fun insertCharacter(character: CharacterEntity): DatabaseResponse<Unit> {
-        insertError?.let { return getDatabaseError() }
+        insertError?.let { return DatabaseResponseError(DatabaseUnifiedError.Insertion) }
 
         val originalCharacterSize = this.characters.value?.size ?: 0
         this.characters.value = this.characters.value?.toMutableList()?.also {
@@ -121,26 +117,20 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         } else DatabaseResponseSuccess(Unit)
     }
 
-    //Update specific error?
     override suspend fun updateCharacterIsFavorite(
         isFavorite: Boolean,
         characterId: Int
     ): Flow<DatabaseResponse<Unit>> = flow {
-        insertError?.let { emit(getDatabaseError()) }
-
-        this@CharacterLocalDataSourceFake.characters.map { charactersEntity ->
-            charactersEntity?.map { character ->
-                if (character.id == characterId) {
-                    println("${character.copy(isFavorite = isFavorite)}")
-                    character.copy(isFavorite = isFavorite)
-                } else character
-            }
+        updateError?.let { emit(DatabaseResponseError(DatabaseUnifiedError.Update)) }
+        characters.value = characters.value?.map { character ->
+            if (character.id == characterId) {
+                println("${character.copy(isFavorite = isFavorite)}")
+                character.copy(isFavorite = isFavorite)
+            } else character
         }
-
-        val updatedCharacter = this@CharacterLocalDataSourceFake.characters.value?.firstOrNull {
+        val updatedCharacter = characters.value?.firstOrNull {
             it.id == characterId
         }
-
         if (updatedCharacter?.isFavorite == isFavorite) {
             emit(DatabaseResponseSuccess(Unit))
         } else emit(DatabaseResponseError(DatabaseUnifiedError.Update))
@@ -148,11 +138,13 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
 
     override fun getFavoriteCharacters(offset: Int): Flow<DatabaseResponse<List<CharacterEntity>>> {
         readError?.let { return characters.map { getDatabaseError() } }
-
-        return this.characters.map { charactersEntity ->
-            charactersEntity?.filter { characterEntity ->
+        return characters.map { charactersEntity ->
+            charactersEntity?.subList(offset, offset + 10)?.filter { characterEntity ->
                 characterEntity.isFavorite
-            }?.let { DatabaseResponseSuccess(it) } ?: DatabaseResponseEmpty()
+            }?.let { characters ->
+                if (characters.isEmpty())DatabaseResponseEmpty()
+                else DatabaseResponseSuccess(characters)
+            } ?: DatabaseResponseEmpty()
         }
     }
 
@@ -161,8 +153,6 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
             DatabaseUnifiedError.Deletion -> DatabaseResponseError(error)
             DatabaseUnifiedError.Insertion -> DatabaseResponseError(error)
             DatabaseUnifiedError.Update -> DatabaseResponseError(error)
-            else -> {
-                DatabaseResponseError(DatabaseUnifiedError.Reading)
-            }
+            else -> DatabaseResponseError(DatabaseUnifiedError.Reading)
         }
 }

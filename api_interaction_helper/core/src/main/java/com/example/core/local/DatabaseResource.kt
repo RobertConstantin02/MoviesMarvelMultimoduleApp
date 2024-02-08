@@ -12,10 +12,8 @@ suspend inline fun <LOCAL> localResource(
 
     return when (val localResponse = fetchFromLocal().first()) {
         is DatabaseResponseSuccess -> Resource.success(data = localResponse.data)
-        is DatabaseResponseError -> {
+        is DatabaseResponseError ->
             Resource.error(localResponse.databaseUnifiedError.messageResource, null)
-        }
-
         is DatabaseResponseEmpty -> Resource.successEmpty()
     }
 }
@@ -24,17 +22,11 @@ inline fun <DB, BO> localResourceFlow(
     crossinline fetchFromLocal: () -> Flow<DatabaseResponse<DB>>,
     crossinline mapLocalToDomain: (DB) -> BO,
 ) = channelFlow<Resource<BO>> {
-    fetchFromLocal().collectLatest { localResponse ->
-        when (localResponse) {
-            is DatabaseResponseSuccess -> {
-                send(Resource.success(data = mapLocalToDomain(localResponse.data)))
-            }
-
-            is DatabaseResponseError -> {
-                send(Resource.error(localResponse.databaseUnifiedError.messageResource, null))
-            }
-
-            is DatabaseResponseEmpty -> send(Resource.successEmpty())
-        }
+    when(val localResponse = fetchFromLocal().first()) {
+        is DatabaseResponseSuccess ->
+            send(Resource.success(data = mapLocalToDomain(localResponse.data)))
+        is DatabaseResponseError ->
+            send(Resource.error(localResponse.databaseUnifiedError.messageResource, null))
+        is DatabaseResponseEmpty -> send(Resource.successEmpty())
     }
 }

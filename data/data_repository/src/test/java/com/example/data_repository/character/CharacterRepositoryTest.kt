@@ -16,11 +16,13 @@ import com.example.core.remote.ApiResponseError
 import com.example.core.remote.UnifiedError
 import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
+import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterBo
 import com.example.data_mapper.toCharacterNeighborBo
 import com.example.data_repository.fake.CharacterLocalDataSourceFake
 import com.example.data_repository.fake.CharacterRemoteDataSourceFake
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.database.entities.CharacterEntity
+import com.example.domain_model.character.CharacterBo
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
 import com.example.preferences.datasource.ISharedPreferenceDataSource
@@ -28,14 +30,21 @@ import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 const val CHARACTER_ID = 2
+const val OFFSET = 10
 
-
+@OptIn(ExperimentalCoroutinesApi::class)
 class CharacterRepositoryTest {
     private lateinit var remoteDataSource: ICharacterRemoteDataSource
     private lateinit var localDatasource: ICharacterLocalDatasource
@@ -44,10 +53,16 @@ class CharacterRepositoryTest {
 
     @BeforeEach
     fun setUp() {
+        Dispatchers.setMain(StandardTestDispatcher())
         remoteDataSource = CharacterRemoteDataSourceFake()
         localDatasource = CharacterLocalDataSourceFake()
         sharedPref = mockk(relaxed = true)
         repository = CharacterRepository(remoteDataSource, localDatasource, sharedPref)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -81,7 +96,12 @@ class CharacterRepositoryTest {
         (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
         (localDatasource as CharacterLocalDataSourceFake).paginationError = true
 
-        val expected = PagingSource.LoadResult.Error<Int, CharacterEntity>(Exception("pagination test error", Throwable())).throwable.message
+        val expected = PagingSource.LoadResult.Error<Int, CharacterEntity>(
+            Exception(
+                "pagination test error",
+                Throwable()
+            )
+        ).throwable.message
 
         val result = ((localDatasource as CharacterLocalDataSourceFake).getAllCharacters().load(
             PagingSource.LoadParams.Append(1, 10, false)
@@ -456,24 +476,80 @@ class CharacterRepositoryTest {
 
     @Test
     fun `updateCharactersIsFavorite, update is success`() = runTest {
+        //Given
+        val fakeLocalData =
+            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+                it.toCharacterEntity()
+            } ?: emptyList()
+        //When
+        (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+        //Then
+        repository.updateCharacterIsFavorite(true, 2).collectLatest { result ->
+            assertThat(result.state).isEqualTo(Resource.State.Success(Unit))
+        }
+    }
+
+    @Test
+    fun `updateCharactersIsFavorite, update is error`() = runTest {
+        //Given
         val fakeLocalData =
             CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
                 it.toCharacterEntity()
             } ?: emptyList()
 
         (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
-
+        (localDatasource as CharacterLocalDataSourceFake).updateError =
+            DatabaseResponseError(DatabaseUnifiedError.Update)
+        //When
         repository.updateCharacterIsFavorite(true, 2).collectLatest { result ->
-            assertThat(result.state).isEqualTo(Resource.State.Success(Unit)::class.java)
+            //Then
+            assertThat(result.state).isEqualTo(
+                Resource.State.Error(
+                    null,
+                    DatabaseUnifiedError.Update.messageResource,
+                    null
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `getFavoriteCharacters, returns local success`() = runTest {
+        //Given
+        val fakeLocalData =
+            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+                it.toCharacterEntity().copy(isFavorite = true)
+            } ?: emptyList()
+
+        val expected =
+            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.subList(0, 10)?.map {
+                it.toCharacterEntity().copy(isFavorite = true).toCharacterBo()
+            } ?: emptyList()
+        //When
+        (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
+        //Then
+        repository.getFavoriteCharacters(0, OFFSET).collectLatest { result ->
+            assertThat(result.state.unwrap().orEmpty()).isExpectedCharacters(expected)
+        }
+    }
+
+    @Test
+    fun `getFavoriteCharacters, returns local error`() = runTest {
+        //Given
+        (localDatasource as CharacterLocalDataSourceFake).readError =
+            DatabaseResponseError(DatabaseUnifiedError.Reading)
+        //When
+        repository.getFavoriteCharacters(1, OFFSET).collectLatest { result ->
+            //Then
+            assertThat(result.state.unwrap()).isNull()
+            assertThat(result.state).isInstanceOf(Resource.State.Error::class.java)
         }
     }
 
 
     private fun Assert<CharacterDetailBo?>.isExpectedCharacter(expectedId: Int?) =
         given { actual ->
-            if (expectedId == actual?.id) {
-                return
-            }
+            if (expectedId == actual?.id) return
             expected("character id: ${show(expectedId)} but was character id: ${show(actual?.id)}")
         }
 
@@ -483,6 +559,18 @@ class CharacterRepositoryTest {
         if (expected.size == actual.size && expected.zip(actual).all { (actual, expected) ->
                 actual.image.value.orEmpty() == expected.image.value.orEmpty() &&
                         actual.id == expected.id
+            }) return
+
+        expected("characters: ${show(expected)} but was characters: ${show(actual)}")
+    }
+
+    private fun Assert<List<CharacterBo>>.isExpectedCharacters(
+        expected: List<CharacterBo>
+    ) = given { actual ->
+        println("-----> actual size: ${actual.size}")
+        println("-----> expected size: ${expected.size}")
+        if (expected.size == actual.size && expected.zip(actual).all { (actual, expected) ->
+                actual.id == expected.id
             }) return
 
         expected("character: ${show(expected)} but was character: ${show(actual)}")
