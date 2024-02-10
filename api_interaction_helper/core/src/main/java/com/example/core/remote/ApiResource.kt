@@ -4,16 +4,15 @@ import com.example.core.Resource
 
 suspend inline fun <REMOTE> networkResource(
     crossinline makeNetworkRequest: suspend () -> ApiResponse<REMOTE>,
-    crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
+    crossinline onNetworkRequestFailed: (apiUnifiedError: ApiUnifiedError) -> Unit = { _: ApiUnifiedError -> },
 ): Resource<REMOTE> {
 
     return when (val apiResponse = makeNetworkRequest()) {
         is ApiResponseSuccess -> Resource.success(data = apiResponse.body)
         is ApiResponseError -> {
-            onNetworkRequestFailed(apiResponse.unifiedError)
-            Resource.error(apiResponse.unifiedError.message, null)
+            onNetworkRequestFailed(apiResponse.apiUnifiedError)
+            Resource.error(apiResponse.apiUnifiedError, null)
         }
-
         is ApiResponseEmpty -> Resource.successEmpty()
     }
 }

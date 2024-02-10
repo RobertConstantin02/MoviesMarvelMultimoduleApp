@@ -4,6 +4,7 @@ import android.net.Uri
 import com.example.core.Resource
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
+import com.example.domain_model.resource.DomainResource
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.domain_repository.di.QCharacterRepository
 import com.example.domain_repository.di.QEpisodesRepository
@@ -23,25 +24,32 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     @QEpisodesRepository private val episodesRepository: IEpisodeRepository,
 ) : IGetCharacterDetailsUseCase {
 
-    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<Resource<CharacterPresentationScreenBO>> {
-
+    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<DomainResource<CharacterPresentationScreenBO>> {
         return combine(
             characterRepository.getCharacter(input.characterId),
             locationRepository.getExtendedLocation(input.locationId),
         ) { characterResult, locationResult ->
-            characterResult.state.combineResources(locationResult.state) { character, location ->
+            characterResult.domainState.combineResources(
+                locationResult.domainState
+            ) { character, location ->
                 CharacterWithLocation(
                     Pair(character, character?.episodes),
                     Pair(location, location?.residents)
                 )
             }
         }.transform {
-            val characterWithLocation = it.state.unwrap()
+            val characterWithLocation = it.domainState.unwrap()
             combine(
-                characterRepository.getCharactersByIds(getIds(characterWithLocation?.characterMainDetail?.second)),
-                episodesRepository.getEpisodes(getIds(characterWithLocation?.extendedLocation?.second))
+                characterRepository.getCharactersByIds(
+                    getIds(characterWithLocation?.characterMainDetail?.second)
+                ),
+                episodesRepository.getEpisodes(
+                    getIds(characterWithLocation?.extendedLocation?.second)
+                )
             ) { residentsResult, episodesResult ->
-                emit(residentsResult.state.combineResources(episodesResult.state) { residents , episodes ->
+                emit(residentsResult.domainState.combineResources(
+                    episodesResult.domainState
+                ) { residents, episodes ->
                     CharacterPresentationScreenBO(
                         characterWithLocation?.characterMainDetail?.first,
                         characterWithLocation?.extendedLocation?.first,

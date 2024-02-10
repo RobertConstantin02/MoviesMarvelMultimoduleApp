@@ -1,10 +1,9 @@
 package com.example.retrofit.api_error_handler
 
-import android.content.Context
-import com.example.core.R
 import com.example.core.implement.IApiErrorHandler
-import com.example.core.remote.UnifiedError
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.example.core.remote.ApiUnifiedError
+import com.google.gson.Gson
+import com.google.gson.JsonIOException
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.ConnectException
@@ -27,33 +26,38 @@ import java.net.UnknownHostException
  * HttpException is thrown when an HTTP response indicates a failure, i.e., when the HTTP
  * status code is in the range 400-599 (client or server errors).
  */
-class ApiErrorHandlerImpl(
-    @ApplicationContext private val context: Context
-) : IApiErrorHandler {
-    override fun invoke(t: Throwable): UnifiedError =
+class ApiErrorHandlerImpl : IApiErrorHandler {
+    override fun invoke(t: Throwable): ApiUnifiedError =
         when (t) {
             is IOException -> t.handleError()
             is HttpException -> t.handleError()
-            else -> UnifiedError.Generic(context.getString(R.string.error_generic))
+            else -> ApiUnifiedError.Generic(t.message)
         }
 
-    private fun HttpException.handleError(): UnifiedError {
-        val message = response()?.errorBody()?.string() ?: message() //i only need a message because I dont have a body error that I can parse in rick adn morty api
-        return when (code()) {
-                HttpURLConnection.HTTP_UNAUTHORIZED -> UnifiedError.Http.Unauthorized(message = message)
-                HttpURLConnection.HTTP_NOT_FOUND -> UnifiedError.Http.NotFound(message = message)
-                HttpURLConnection.HTTP_INTERNAL_ERROR -> UnifiedError.Http.InternalError(message = message)
-                HttpURLConnection.HTTP_BAD_REQUEST -> UnifiedError.Http.BadRequest(message = message)
-                HttpURLConnection.HTTP_NO_CONTENT -> UnifiedError.Http.EmptyResponse(message = message)
-                else -> UnifiedError.Generic(context.getString(R.string.error_generic))
+    private fun HttpException.handleError(): ApiUnifiedError {
+        val apiError = response()?.errorBody()?.string()
+
+        val apiErrorMessage = try {
+            Gson().fromJson(apiError, ApiErrorModel::class.java).errorMessage
+        }catch (e: JsonIOException) {
+            ""
+        }.ifEmpty { message() }
+
+        return when (val code = code()) {
+                HttpURLConnection.HTTP_UNAUTHORIZED -> ApiUnifiedError.Http.Unauthorized(message = apiErrorMessage, code)
+                HttpURLConnection.HTTP_NOT_FOUND -> ApiUnifiedError.Http.NotFound(message = apiErrorMessage, code)
+                HttpURLConnection.HTTP_INTERNAL_ERROR -> ApiUnifiedError.Http.InternalErrorApi(message = apiErrorMessage, code)
+                HttpURLConnection.HTTP_BAD_REQUEST -> ApiUnifiedError.Http.BadRequest(message = apiErrorMessage, code)
+                HttpURLConnection.HTTP_NO_CONTENT -> ApiUnifiedError.Http.EmptyResponse(message = apiErrorMessage, code)
+                else -> ApiUnifiedError.Generic(apiErrorMessage)
             }
         }
 
-    private fun IOException.handleError(): UnifiedError =
+    private fun IOException.handleError(): ApiUnifiedError =
         when (this) {
-            is SocketTimeoutException -> UnifiedError.Connectivity.TimeOut(context.getString(R.string.error_time_out)) //maybe here change for message from Exception or leave it with int becaus enow Resource.error handles it
-            is ConnectException -> UnifiedError.Connectivity.NoConnection(context.getString(R.string.error_network_connection))
-            is UnknownHostException -> UnifiedError.Connectivity.HostUnreachable(context.getString(R.string.error_generic))
-            else -> UnifiedError.Generic(context.getString(R.string.error_generic))
+            is SocketTimeoutException -> ApiUnifiedError.Connectivity.TimeOut(message)
+            is ConnectException -> ApiUnifiedError.Connectivity.NoConnection(message)
+            is UnknownHostException -> ApiUnifiedError.Connectivity.HostUnreachable(message)
+            else -> ApiUnifiedError.Generic(message)
         }
 }

@@ -3,7 +3,7 @@ package com.example.database.detasource.episode
 import android.database.sqlite.SQLiteException
 import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
-import com.example.core.local.DatabaseUnifiedError
+import com.example.core.local.LocalUnifiedError
 import com.example.database.dao.episode.IEpisodeDao
 import com.example.database.entities.EpisodeEntity
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +21,7 @@ class EpisodeLocalDataSource @Inject constructor(
                     else emit(DatabaseResponse.create(this))
                 }
             }catch (e: SQLiteException) {
-                emit(DatabaseResponse.create(DatabaseUnifiedError.Reading))
+                emit(DatabaseResponse.create(LocalUnifiedError.Reading))
             }
         }
 
@@ -30,10 +30,10 @@ class EpisodeLocalDataSource @Inject constructor(
         try {
             with(dao.insertEpisodes(*episodes.toTypedArray()) ) {
                 if (this.size == episodes.size) DatabaseResponse.create(Unit)
-                else DatabaseResponse.create(DatabaseUnifiedError.Insertion)
+                else DatabaseResponse.create(LocalUnifiedError.Insertion)
             }
         }catch (e: SQLiteException) {
-            DatabaseResponse.create(DatabaseUnifiedError.Reading)
+            DatabaseResponse.create(LocalUnifiedError.Reading)
         }
 
 }

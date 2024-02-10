@@ -6,7 +6,7 @@ import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseResponseError
 import com.example.core.local.DatabaseResponseSuccess
-import com.example.core.local.DatabaseUnifiedError
+import com.example.core.local.LocalUnifiedError
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
@@ -96,24 +96,24 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         characters: List<CharacterEntity>
     ): DatabaseResponse<Unit> {
         readError?.let { return getDatabaseError() }
-        insertError?.let { return DatabaseResponseError(DatabaseUnifiedError.Insertion) }
+        insertError?.let { return DatabaseResponseError(LocalUnifiedError.Insertion) }
 
         val originalCharacterSize = this.characters.value?.size ?: 0
         this.characters.value = this.characters.value?.plus(characters)?.toSet()?.toList()
         return if ((this.characters.value?.size ?: 0) <= originalCharacterSize) {
-            DatabaseResponse.create(DatabaseUnifiedError.Insertion)
+            DatabaseResponse.create(LocalUnifiedError.Insertion)
         } else DatabaseResponseSuccess(Unit)
     }
 
     override suspend fun insertCharacter(character: CharacterEntity): DatabaseResponse<Unit> {
-        insertError?.let { return DatabaseResponseError(DatabaseUnifiedError.Insertion) }
+        insertError?.let { return DatabaseResponseError(LocalUnifiedError.Insertion) }
 
         val originalCharacterSize = this.characters.value?.size ?: 0
         this.characters.value = this.characters.value?.toMutableList()?.also {
             it.add(character)
         }
         return if ((this.characters.value?.size ?: 0) <= originalCharacterSize) {
-            DatabaseResponse.create(DatabaseUnifiedError.Insertion)
+            DatabaseResponse.create(LocalUnifiedError.Insertion)
         } else DatabaseResponseSuccess(Unit)
     }
 
@@ -121,7 +121,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         isFavorite: Boolean,
         characterId: Int
     ): Flow<DatabaseResponse<Unit>> = flow {
-        updateError?.let { emit(DatabaseResponseError(DatabaseUnifiedError.Update)) }
+        updateError?.let { emit(DatabaseResponseError(LocalUnifiedError.Update)) }
         characters.value = characters.value?.map { character ->
             if (character.id == characterId) {
                 println("${character.copy(isFavorite = isFavorite)}")
@@ -133,7 +133,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         }
         if (updatedCharacter?.isFavorite == isFavorite) {
             emit(DatabaseResponseSuccess(Unit))
-        } else emit(DatabaseResponseError(DatabaseUnifiedError.Update))
+        } else emit(DatabaseResponseError(LocalUnifiedError.Update))
     }
 
     override fun getFavoriteCharacters(offset: Int): Flow<DatabaseResponse<List<CharacterEntity>>> {
@@ -149,10 +149,10 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
     }
 
     private fun <T> getDatabaseError(): DatabaseResponseError<T> =
-        when (val error = readError?.databaseUnifiedError) {
-            DatabaseUnifiedError.Deletion -> DatabaseResponseError(error)
-            DatabaseUnifiedError.Insertion -> DatabaseResponseError(error)
-            DatabaseUnifiedError.Update -> DatabaseResponseError(error)
-            else -> DatabaseResponseError(DatabaseUnifiedError.Reading)
+        when (val error = readError?.localUnifiedError) {
+            LocalUnifiedError.Deletion -> DatabaseResponseError(error)
+            LocalUnifiedError.Insertion -> DatabaseResponseError(error)
+            LocalUnifiedError.Update -> DatabaseResponseError(error)
+            else -> DatabaseResponseError(LocalUnifiedError.Reading)
         }
 }

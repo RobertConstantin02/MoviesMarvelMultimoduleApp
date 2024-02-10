@@ -11,9 +11,9 @@ import assertk.assertions.support.show
 import com.example.core.Resource
 import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseResponseError
-import com.example.core.local.DatabaseUnifiedError
+import com.example.core.local.LocalUnifiedError
 import com.example.core.remote.ApiResponseError
-import com.example.core.remote.UnifiedError
+import com.example.core.remote.ApiUnifiedError
 import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterBo
@@ -139,7 +139,7 @@ class CharacterRepositoryTest {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
             (localDatasource as CharacterLocalDataSourceFake).readError =
-                DatabaseResponseError(DatabaseUnifiedError.Reading)
+                DatabaseResponseError(LocalUnifiedError.Reading)
             (localDatasource as CharacterLocalDataSourceFake).insertError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
@@ -182,7 +182,7 @@ class CharacterRepositoryTest {
                 } ?: emptyList()
             (localDatasource as CharacterLocalDataSourceFake).readError = null
             (localDatasource as CharacterLocalDataSourceFake).insertError =
-                DatabaseResponseError(DatabaseUnifiedError.Insertion)
+                DatabaseResponseError(LocalUnifiedError.Insertion)
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
@@ -209,16 +209,16 @@ class CharacterRepositoryTest {
                 } ?: emptyList()
 
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
-                ApiResponseError(UnifiedError.Generic("Generic error"))
+                ApiResponseError(ApiUnifiedError.Generic("Generic error"))
 
             (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
             every { sharedPref.getTime() } returns 0L
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
                 //Then
                 assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
-                assertThat(apiErrorMessage).isEqualTo(UnifiedError.Generic("Generic error").message)
+                assertThat(apiErrorMessage).isEqualTo(ApiUnifiedError.Generic("Generic error").message)
             }
         }
 
@@ -226,14 +226,14 @@ class CharacterRepositoryTest {
     fun `getCharactersByIds call, returns Resource Error with message and null data when api error and local error`() =
         runTest {
             //Given
-            val expectedError = UnifiedError.Generic("Generic Error")
+            val expectedError = ApiUnifiedError.Generic("Generic Error")
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
-                ApiResponseError(UnifiedError.Generic("Generic Error"))
+                ApiResponseError(ApiUnifiedError.Generic("Generic Error"))
             (localDatasource as CharacterLocalDataSourceFake).readError =
-                DatabaseResponseError(DatabaseUnifiedError.Reading)
+                DatabaseResponseError(LocalUnifiedError.Reading)
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
                 //Then
                 assertThat(apiErrorMessage).isEqualTo(expectedError.message)
                 assertThat(result.state.unwrap()).isNull()
@@ -310,7 +310,7 @@ class CharacterRepositoryTest {
                     })
 
             (localDatasource as CharacterLocalDataSourceFake).readError =
-                DatabaseResponseError(DatabaseUnifiedError.Reading)
+                DatabaseResponseError(LocalUnifiedError.Reading)
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
             )
@@ -360,7 +360,7 @@ class CharacterRepositoryTest {
                     })
 
             (localDatasource as CharacterLocalDataSourceFake).insertError =
-                DatabaseResponseError(DatabaseUnifiedError.Insertion)
+                DatabaseResponseError(LocalUnifiedError.Insertion)
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
                 CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
             )
@@ -394,14 +394,14 @@ class CharacterRepositoryTest {
                 } ?: emptyList()
 
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
-                ApiResponseError(UnifiedError.Generic("Generic error"))
+                ApiResponseError(ApiUnifiedError.Generic("Generic error"))
 
             (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
             every { sharedPref.getTime() } returns 0L
 
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
                 //Then
                 assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
                 assertThat(result.state).isInstanceOf(Resource.State.Error::class.java)
@@ -417,18 +417,18 @@ class CharacterRepositoryTest {
                 Resource.State.Error("Generic error", null, null)
 
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
-                ApiResponseError(UnifiedError.Generic("Generic Error"))
+                ApiResponseError(ApiUnifiedError.Generic("Generic Error"))
             (localDatasource as CharacterLocalDataSourceFake).readError =
-                DatabaseResponseError(DatabaseUnifiedError.Reading)
+                DatabaseResponseError(LocalUnifiedError.Reading)
 
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
                 //Then
                 assertThat(result.state.unwrap()).isNull()
                 assertThat(result.state).isInstanceOf(Resource.State.Error::class.java)
                 assertThat(result.state).isEqualTo(expectedErrorState)
-                assertThat(apiErrorMessage).isEqualTo(expectedErrorState.apiError)
+                assertThat(apiErrorMessage).isEqualTo(expectedErrorState.apiErrorData)
             }
         }
 
@@ -439,7 +439,7 @@ class CharacterRepositoryTest {
             val expectedErrorState = Resource.State.SuccessEmpty
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiError
+                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
                 //Then
                 assertThat(result.state.unwrap()).isNull()
                 assertThat(result.state).isInstanceOf(Resource.State.SuccessEmpty::class.java)
@@ -499,14 +499,14 @@ class CharacterRepositoryTest {
 
         (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
         (localDatasource as CharacterLocalDataSourceFake).updateError =
-            DatabaseResponseError(DatabaseUnifiedError.Update)
+            DatabaseResponseError(LocalUnifiedError.Update)
         //When
         repository.updateCharacterIsFavorite(true, 2).collectLatest { result ->
             //Then
             assertThat(result.state).isEqualTo(
                 Resource.State.Error(
                     null,
-                    DatabaseUnifiedError.Update.messageResource,
+                    LocalUnifiedError.Update.messageResource,
                     null
                 )
             )
@@ -537,7 +537,7 @@ class CharacterRepositoryTest {
     fun `getFavoriteCharacters, returns local error`() = runTest {
         //Given
         (localDatasource as CharacterLocalDataSourceFake).readError =
-            DatabaseResponseError(DatabaseUnifiedError.Reading)
+            DatabaseResponseError(LocalUnifiedError.Reading)
         //When
         repository.getFavoriteCharacters(1, OFFSET).collectLatest { result ->
             //Then

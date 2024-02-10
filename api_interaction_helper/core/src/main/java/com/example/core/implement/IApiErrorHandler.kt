@@ -1,7 +1,7 @@
 package com.example.core.implement
 
-import com.example.core.remote.UnifiedError
+import com.example.core.remote.ApiUnifiedError
 
 interface IApiErrorHandler {
-    operator fun invoke(t: Throwable): UnifiedError
+    operator fun invoke(t: Throwable): ApiUnifiedError
 }

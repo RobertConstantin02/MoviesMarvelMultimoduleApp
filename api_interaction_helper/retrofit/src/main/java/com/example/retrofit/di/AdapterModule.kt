@@ -23,8 +23,7 @@ internal object AdapterModule {
 
     @Provides
     @Singleton
-    fun provideApiErrorHandler(@ApplicationContext context: Context) : IApiErrorHandler =
-        ApiErrorHandlerImpl(context)
+    fun provideApiErrorHandler() : IApiErrorHandler = ApiErrorHandlerImpl()
 
 
 

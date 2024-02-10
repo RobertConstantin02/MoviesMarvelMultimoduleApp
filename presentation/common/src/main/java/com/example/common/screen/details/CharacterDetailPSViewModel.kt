@@ -4,9 +4,13 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.common.screen.ScreenState
+import com.example.common.screen.ScreenStateEvent
+import com.example.common.util.translateError
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
-import com.example.domain_model.error.DomainError
+import com.example.domain_model.error.DomainUnifiedError
 import com.example.presentation_mapper.BoToVoCharacterPresentationMapper.toCharacterPresentationScreenVO
+import com.example.presentation_model.CharacterPresentationScreenVO
 import com.example.usecase.character.IGetCharacterDetailsUseCase
 import com.example.usecase.di.GetCharacterDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,19 +26,27 @@ class DetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _characterDetailState =
-        MutableStateFlow<CharacterDetailPSState>(CharacterDetailPSState.Loading)
-    val characterDetailState: MutableStateFlow<CharacterDetailPSState> = _characterDetailState
+        MutableStateFlow<ScreenState<CharacterPresentationScreenVO>>(ScreenState.Loading())
+    val characterDetailState: MutableStateFlow<ScreenState<CharacterPresentationScreenVO>> = _characterDetailState
 
-    fun onEvent(event: CharacterDetailPSEvent) {
+    fun onEvent(event: CharacterDetailPSEvent<CharacterPresentationScreenVO>) {
         when (event) {
             is CharacterDetailPSEvent.OnGetCharacterDetails -> getCharacterDetails()
 
-            is CharacterDetailPSEvent.Found ->
-                _characterDetailState.update {
-                    CharacterDetailPSState.Success(event.characterPresentationScreen)
+            is CharacterDetailPSEvent.OnScreenState -> {
+                when(event.screenStateEvent) {
+                    is ScreenStateEvent.OnError -> {
+                        _characterDetailState.update {
+                            ScreenState.Error(event.screenStateEvent.error, event.screenStateEvent.data)
+                        }
+                    }
+                    is ScreenStateEvent.OnSuccess -> {
+                        _characterDetailState.update {
+                            ScreenState.Success(event.screenStateEvent.data)
+                        }
+                    }
                 }
-
-            is CharacterDetailPSEvent.Error -> _characterDetailState.update { event.error }
+            }
         }
     }
 
@@ -54,20 +66,10 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun onSuccess(characterPS: CharacterPresentationScreenBO) =
-        onEvent(
-            CharacterDetailPSEvent.Found(characterPS.toCharacterPresentationScreenVO())
-        )
+        onEvent(CharacterDetailPSEvent.OnScreenState(ScreenStateEvent.OnSuccess(characterPS.toCharacterPresentationScreenVO())))
 
-    private fun onError(error: DomainError<CharacterPresentationScreenBO>) {
-        when(error) {
-            is DomainError.ApiError -> {
-                error.data?.let {
-                    onEvent(CharacterDetailPSEvent.Found(it.toCharacterPresentationScreenVO()))
-                } ?: onEvent(CharacterDetailPSEvent.Error(CharacterDetailPSState.Error(error.message, null)))
-            }
-            is DomainError.LocalError -> onEvent(CharacterDetailPSEvent.Error(CharacterDetailPSState.Error(null, error.error)))
-        }
-
+    private fun onError(error: DomainUnifiedError, data: CharacterPresentationScreenBO?) {
+        onEvent(CharacterDetailPSEvent.OnScreenState(translateError(error, data?.toCharacterPresentationScreenVO())))
     }
 
     companion object {

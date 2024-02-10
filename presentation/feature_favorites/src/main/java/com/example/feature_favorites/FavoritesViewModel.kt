@@ -6,7 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.common.R
-import com.example.domain_model.error.DomainError
+import com.example.common.screen.ScreenState
+import com.example.common.screen.ScreenStateEvent
+import com.example.common.util.translateError
+import com.example.domain_model.error.DomainUnifiedError
 import com.example.feature_favorites.paginator.Paginator
 import com.example.presentation_mapper.toCharacterVo
 import com.example.presentation_model.CharacterVo
@@ -34,7 +37,7 @@ class FavoritesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _favoritesState =
-        MutableStateFlow<FavoritesScreenState>(FavoritesScreenState.Loading)
+        MutableStateFlow<ScreenState<List<CharacterVo>>>(ScreenState.Loading())
     val favoritesState = _favoritesState.asStateFlow()
 
     private val _paginationState = MutableStateFlow<Paginator.State>(Paginator.State.Idle)
@@ -50,11 +53,14 @@ class FavoritesViewModel @Inject constructor(
     private val pagination = Paginator(
         initialKey = currentPage,
         onLoading = {
-            if (currentPage == -1) _favoritesState.update { FavoritesScreenState.Loading }
+            if (currentPage == -1) _favoritesState.update { ScreenState.Loading() }
             else _paginationState.update { Paginator.State.Loading }
         },
         onRequest = { nextPage ->
-            getFavoriteCharacters.invoke(IGetFavoriteCharactersUseCase.Params(nextPage), Dispatchers.IO)
+            getFavoriteCharacters.invoke(
+                IGetFavoriteCharactersUseCase.Params(nextPage),
+                Dispatchers.IO
+            )
         },
         getNextKey = {
             currentPage += 1
@@ -70,38 +76,54 @@ class FavoritesViewModel @Inject constructor(
     )
 
 
-    fun onEvent(event: FavoritesScreenEvent) {
+    fun onEvent(event: FavoritesScreenEvent<List<CharacterVo>>) {
         when (event) {
             is FavoritesScreenEvent.OnLoadData -> {
                 job?.cancel()
                 job = viewModelScope.launch { pagination.loadNextData() }
             }
 
-            is FavoritesScreenEvent.OnListFound ->
-                _favoritesState.update { FavoritesScreenState.Success(event.newCharacters) }
+            is FavoritesScreenEvent.OnScreenState -> {
+                when (event.screenStateEvent) {
+                    is ScreenStateEvent.OnError -> {
+                        _favoritesState.update {
+                            ScreenState.Error(event.screenStateEvent.error, null)
+                        }
+                    }
+
+                    is ScreenStateEvent.OnSuccess -> {
+                        _favoritesState.update {
+                            ScreenState.Success(event.screenStateEvent.data)
+                        }
+                    }
+                }
+            }
 
             is FavoritesScreenEvent.OnListEmpty ->
                 _favoritesState.update {
-                    FavoritesScreenState.Empty(UiText.StringResources(R.string.empty_favorite_list))
+                    ScreenState.Empty(UiText.StringResources(R.string.empty_favorite_list))
                 }
 
-            is FavoritesScreenEvent.OnError ->
-                _favoritesState.update { FavoritesScreenState.Error(event.errorMessage) }
-
-            is FavoritesScreenEvent.OnCancellCollectData -> {
+            is FavoritesScreenEvent.OnCancelCollectData -> {
                 job?.cancel()
             }
         }
     }
 
-    private fun onError(localError: Int) {
-        onEvent(FavoritesScreenEvent.OnError(UiText.StringResources(localError)))
+    private fun onError(localError: DomainUnifiedError) {
+        onEvent(FavoritesScreenEvent.OnScreenState(translateError(localError, null)))
     }
 
     private fun onSuccess(newCharacters: List<CharacterVo> = emptyList()) {
         if ((currentCharacterList + newCharacters).isNotEmpty()) {
             simulateLoading()
-            onEvent(FavoritesScreenEvent.OnListFound(currentCharacterList + newCharacters))
+            onEvent(
+                FavoritesScreenEvent.OnScreenState(
+                    ScreenStateEvent.OnSuccess(
+                        currentCharacterList + newCharacters
+                    )
+                )
+            )
             currentCharacterList.addAll(newCharacters)
         } else onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(R.string.empty_favorite_list)))
     }
@@ -116,17 +138,14 @@ class FavoritesViewModel @Inject constructor(
                 currentCharacterList.remove(currentCharacterList.find { it.id == characterId })
                 onSuccess()
             },
-            error = { error ->
-                (error as? DomainError.LocalError)?.let {
-                    onEvent(FavoritesScreenEvent.OnError(UiText.StringResources(it.error)))
-                }
+            error = { localError, _ ->
+                onEvent(FavoritesScreenEvent.OnScreenState(translateError(localError, null)))
             }
         )
     }
 
     private fun itemListHasPageSizeOrGrater() =
-        ((_favoritesState.value as? FavoritesScreenState.Success)?.favoriteCharacters?.size
-            ?: 0) >= PAGE_SIZE
+        ((_favoritesState.value as? ScreenState.Success)?.data?.size ?: 0) >= PAGE_SIZE
 
     private fun simulateLoading() {
         viewModelScope.launch {

@@ -17,10 +17,13 @@ import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterBo
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterDetailBo
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterNeighborBo
 import com.example.data_mapper.toCharacterNeighborBo
+import com.example.data_mapper.toDomainResource
+import com.example.data_mapper.toDomainUnifiedError
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.domain_model.character.CharacterBo
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
+import com.example.domain_model.resource.DomainResource
 import com.example.domain_repository.character.ICharacterRepository
 import com.example.paging.FeedRemoteMediator
 import com.example.preferences.datasource.ISharedPreferenceDataSource
@@ -29,6 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
 
@@ -54,7 +58,7 @@ class CharacterRepository @Inject constructor(
             }
         }
 
-    override fun getCharactersByIds(charactersIds: List<Int>): Flow<Resource<List<CharacterNeighborBo>>> =
+    override fun getCharactersByIds(charactersIds: List<Int>): Flow<DomainResource<List<CharacterNeighborBo>>> =
         apiDbBoundResource(
             fetchFromLocal = {
                 localDatabaseDatasource.getCharactersByIds(charactersIds)
@@ -78,10 +82,10 @@ class CharacterRepository @Inject constructor(
             mapLocalToDomain = { characterEntityList ->
                 characterEntityList.map { characterEntity -> characterEntity.toCharacterNeighborBo() }
             }
-        )
+        ).map { resource -> resource.toDomainResource() }
 
 
-    override fun getCharacter(characterId: Int): Flow<Resource<CharacterDetailBo>> {
+    override fun getCharacter(characterId: Int): Flow<DomainResource<CharacterDetailBo>> {
         return apiDbBoundResource(
             fetchFromLocal = { localDatabaseDatasource.getCharacterById(characterId) },
             shouldMakeNetworkRequest = { databaseResult ->
@@ -95,7 +99,7 @@ class CharacterRepository @Inject constructor(
             },
             mapApiToDomain = { characterDto -> characterDto.toCharacterDetailBo() },
             mapLocalToDomain = { characterEntity -> characterEntity.toCharacterDetailBo() }
-        )
+        ).map { resource -> resource.toDomainResource() }
     }
 
     override suspend fun updateCharacterIsFavorite(
@@ -104,22 +108,18 @@ class CharacterRepository @Inject constructor(
     ) = flowOf(
         when (val localResponse =
             localDatabaseDatasource.updateCharacterIsFavorite(isFavorite, characterId).first()) {
-            is DatabaseResponseSuccess -> Resource.success(Unit)
-            is DatabaseResponseError -> Resource.error(
-                localResponse.databaseUnifiedError.messageResource,
-                null
-            )
-
-            is DatabaseResponseEmpty -> Resource.successEmpty()
+            is DatabaseResponseSuccess -> DomainResource.success(Unit)
+            is DatabaseResponseError -> DomainResource.error(localResponse.localUnifiedError.toDomainUnifiedError())
+            is DatabaseResponseEmpty -> DomainResource.successEmpty()
         }
     )
 
-    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<Resource<List<CharacterBo>>> {
+    override fun getFavoriteCharacters(page: Int, offset: Int): Flow<DomainResource<List<CharacterBo>>> {
         return localResourceFlow(
             fetchFromLocal = { localDatabaseDatasource.getFavoriteCharacters(offset = page * offset) },
             mapLocalToDomain = { charactersEntity ->
                 charactersEntity.map { characterEntity -> characterEntity.toCharacterBo() }
             }
-        )
+        ).map { resource -> resource.toDomainResource() }
     }
 }

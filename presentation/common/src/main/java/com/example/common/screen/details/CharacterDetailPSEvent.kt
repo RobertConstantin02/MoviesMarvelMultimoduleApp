@@ -1,11 +1,8 @@
 package com.example.common.screen.details
 
-import com.example.presentation_model.CharacterPresentationScreenVO
+import com.example.common.screen.ScreenStateEvent
 
-sealed class CharacterDetailPSEvent {
-    data class Found(val characterPresentationScreen: CharacterPresentationScreenVO): CharacterDetailPSEvent()
-    //object NotFound: CharacterDetailPSEvent() ????
-    data class Error(val error: CharacterDetailPSState.Error): CharacterDetailPSEvent()
-
-    object OnGetCharacterDetails: CharacterDetailPSEvent()
+sealed class CharacterDetailPSEvent<T> {
+    data class OnScreenState<T>(val screenStateEvent: ScreenStateEvent<T>): CharacterDetailPSEvent<T>()
+    class OnGetCharacterDetails<T>: CharacterDetailPSEvent<T>()
 }

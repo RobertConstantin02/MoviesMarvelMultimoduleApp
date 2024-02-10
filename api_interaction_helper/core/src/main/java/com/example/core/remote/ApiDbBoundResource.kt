@@ -1,6 +1,5 @@
 package com.example.core.remote
 
-import android.util.Log
 import com.example.core.Resource
 import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
@@ -9,20 +8,15 @@ import com.example.core.local.DatabaseResponseSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 
 inline fun <BO, DB, API> apiDbBoundResource(
-    crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<DB>>, //Flow<DbResponse<DB>>
+    crossinline fetchFromLocal: suspend () -> Flow<DatabaseResponse<DB>>,
     crossinline shouldMakeNetworkRequest: suspend (DatabaseResponse<DB>) -> Boolean = { true },
-    crossinline localStorageStrategy: () -> Unit = {}, //if we applyed local strateguCache or not
+    crossinline localStorageStrategy: () -> Unit = {},
     crossinline makeNetworkRequest: suspend () -> ApiResponse<API>,
     crossinline processNetworkResponse: (response: ApiResponseSuccess<API>) -> Unit = { },
-    crossinline saveApiData: suspend (API) -> DatabaseResponse<Unit> = { _: API ->
-        DatabaseResponse.create(
-            Unit
-        )
-    },
-    crossinline onNetworkRequestFailed: (unifiedError: UnifiedError) -> Unit = { _: UnifiedError -> },
+    crossinline saveApiData: suspend (API) -> DatabaseResponse<Unit> = { _: API -> DatabaseResponse.create(Unit) },
+    crossinline onNetworkRequestFailed: (apiUnifiedError: ApiUnifiedError) -> Unit = { _: ApiUnifiedError -> },
     crossinline mapApiToDomain: (API) -> BO,
     crossinline mapLocalToDomain: (DB) -> BO,
 ) = flow<Resource<BO>> {
@@ -74,14 +68,14 @@ inline fun <BO, DB, API> apiDbBoundResource(
             }
 
             is ApiResponseError -> {
-                onNetworkRequestFailed(response.unifiedError)
+                onNetworkRequestFailed(response.apiUnifiedError)
                 when (val localResponse = fetchFromLocal().first()) {
                     is DatabaseResponseSuccess -> {
                         //*5
-                        println("-----> 5 api error, local success with previous saved data -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data ${localResponse.data}")
+                        println("-----> 5 api error, local success with previous saved data -> @return  Resource.error with api error message:  ${response.apiUnifiedError.message} and local data ${localResponse.data}")
                         emit(
                             Resource.error(
-                                response.unifiedError.message,
+                                response.apiUnifiedError,
                                 mapLocalToDomain(localResponse.data)
                             )
                         )
@@ -89,10 +83,10 @@ inline fun <BO, DB, API> apiDbBoundResource(
 
                     is DatabaseResponseError -> {
                         //*6
-                        println("-----> 6 api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
+                        println("-----> 6 api error, local error -> @return  Resource.error with api error message:  ${response.apiUnifiedError.message} and local data: null")
                         emit(
                             Resource.error(
-                                response.unifiedError.message,
+                                response.apiUnifiedError,
                                 null
                             )
                         )
@@ -100,10 +94,10 @@ inline fun <BO, DB, API> apiDbBoundResource(
 
                     is DatabaseResponseEmpty -> {
                         //*7
-                        println("-----> 7 api error, local error -> @return  Resource.error with api error message:  ${response.unifiedError.message} and local data: null")
+                        println("-----> 7 api error, local error -> @return  Resource.error with api error message:  ${response.apiUnifiedError.message} and local data: null")
                         emit(
                             Resource.error(
-                                response.unifiedError.message,
+                                response.apiUnifiedError,
                                 null
                             )
                         )

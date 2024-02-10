@@ -52,7 +52,7 @@ class FeedRemoteMediator @Inject constructor(
                 insertCharacters(it)
                 MediatorResult.Success(endOfPaginationReached = it.results?.isEmpty() == true)
             },
-            error = { MediatorResult.Error(Throwable(it.apiError)) },
+            error = { MediatorResult.Error(Throwable()) },
             empty = { MediatorResult.Error(Throwable()) }
         )
 

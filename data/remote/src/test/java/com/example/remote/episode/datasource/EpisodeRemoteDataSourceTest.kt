@@ -6,7 +6,7 @@ import com.example.api.model.episode.EpisodeDto
 import com.example.api.network.RickAndMortyService
 import com.example.core.remote.ApiResponseError
 import com.example.core.remote.ApiResponseSuccess
-import com.example.core.remote.UnifiedError
+import com.example.core.remote.ApiUnifiedError
 import com.example.remote.extension.toRickAndMortyService
 import com.example.remote.fake.ApiErrorHandlerFake
 import com.example.test.character.CharacterUtil
@@ -95,10 +95,10 @@ class EpisodeRemoteDataSourceTest {
     @Test
     fun `service get episodes by ids, return ApiResponseError`() = runTest {
         //GIVEN
-        val expected = ApiResponseError<List<EpisodeDto>>(UnifiedError.Http.InternalError("Internal server error"))
+        val expected = ApiResponseError<List<EpisodeDto>>(ApiUnifiedError.Http.InternalErrorApi("Internal server error"))
         coEvery {
             service.getEpisodesByIds(BAD_EPISODES_IDS)
-        } returns ApiResponseError(UnifiedError.Http.InternalError("Internal server error"))
+        } returns ApiResponseError(ApiUnifiedError.Http.InternalErrorApi("Internal server error"))
         //When
         val result = episodeRemoteDataSource.getEpisodesByIds(BAD_EPISODES_IDS)
         //Then

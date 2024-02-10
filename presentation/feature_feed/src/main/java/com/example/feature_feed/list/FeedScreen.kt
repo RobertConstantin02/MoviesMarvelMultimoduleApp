@@ -64,7 +64,7 @@ fun CharacterScreenListContent(
         is LoadState.Loading -> CircularLoadingBar(stringResource(id = R.string.character_list_loading))
         is LoadState.Error -> ErrorScreen(
             //UiText.StringResources(R.string.list_try_again).asString(context)
-            UiText.DynamicText(R.string.list_try_again, pagingState.error.message).asString(context)
+            UiText.DynamicText(R.string.list_try_again, null,pagingState.error.message).asString(context)
         ) { onRefresh() }
         else -> {
             if (items().itemCount == 0) {

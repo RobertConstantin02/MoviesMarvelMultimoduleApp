@@ -32,6 +32,7 @@ import com.example.common.component.CharacterCard
 import com.example.common.component.CircularLoadingBar
 import com.example.common.component.EmptyScreen
 import com.example.common.component.RemoveAlertDialog
+import com.example.common.screen.ScreenState
 import com.example.feature_favorites.paginator.Paginator
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
@@ -55,10 +56,10 @@ fun FavoritesScreen(
         }
     }
 
-    RememberLifeCycleEvent { viewModel.onEvent(FavoritesScreenEvent.OnCancellCollectData) }
+    RememberLifeCycleEvent { viewModel.onEvent(FavoritesScreenEvent.OnCancelCollectData()) }
 
     LaunchedEffect(key1 = shouldStartPaginate.value) {
-        if (shouldStartPaginate.value) viewModel.onEvent(FavoritesScreenEvent.OnLoadData)
+        if (shouldStartPaginate.value) viewModel.onEvent(FavoritesScreenEvent.OnLoadData())
     }
 
     FavoritesScreenContent(
@@ -72,7 +73,7 @@ fun FavoritesScreen(
                 characterId,
             )
         },
-        onLoadMoreCharacters = { viewModel.onEvent(FavoritesScreenEvent.OnLoadData) },
+        onLoadMoreCharacters = { viewModel.onEvent(FavoritesScreenEvent.OnLoadData()) },
         emptyListMessage = R.string.empty_favorite_list,
         modifier = Modifier
     )
@@ -81,7 +82,7 @@ fun FavoritesScreen(
 @Composable
 fun FavoritesScreenContent(
     lazyColumState: () -> LazyListState,
-    favoritesState: () -> FavoritesScreenState,
+    favoritesState: () -> ScreenState<List<CharacterVo>>,
     pagingState: () -> Paginator.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onRemoveCharacter: (isFavorite: Boolean, characterId: Int) -> Unit,
@@ -92,25 +93,25 @@ fun FavoritesScreenContent(
 
     val context = LocalContext.current
     when (val state = favoritesState()) {
-        is FavoritesScreenState.Loading -> {
+        is ScreenState.Loading -> {
             CircularLoadingBar(stringResource(id = R.string.character_list_loading))
         }
 
-        is FavoritesScreenState.Error -> {
+        is ScreenState.Error -> {
             emptyListMessage?.let {
                 EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
             }
         }
-        is FavoritesScreenState.Empty -> {
+        is ScreenState.Empty -> {
             emptyListMessage?.let {
                 EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
             }
         }
 
-        is FavoritesScreenState.Success -> {
+        is ScreenState.Success -> {
             FavoritesScreenListSuccessContent(
                 lazyColumState = lazyColumState,
-                items = { state.favoriteCharacters },
+                items = { state.data },
                 pagingState = pagingState,
                 onItemClick = onItemClick,
                 onRemoveCharacter = onRemoveCharacter,

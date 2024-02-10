@@ -1,6 +1,8 @@
 package com.example.feature_favorites.paginator
 
 import com.example.core.Resource
+import com.example.domain_model.error.DomainUnifiedError
+import com.example.domain_model.resource.DomainResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.takeWhile
@@ -8,10 +10,10 @@ import kotlinx.coroutines.flow.takeWhile
 class Paginator<Key, Item>(
     private val initialKey: Key,
     private inline val onLoading: () -> Unit,
-    private inline val onRequest: suspend (nextPage: Key) -> Flow<Resource<List<Item>>>,
+    private inline val onRequest: suspend (nextPage: Key) -> Flow<DomainResource<List<Item>>>,
     private inline val getNextKey: () -> Key,
     private inline val onSuccess: (items: List<Item>) -> Unit,
-    private inline val onError: (localError: Int) -> Unit = {},
+    private inline val onError: (localError: DomainUnifiedError) -> Unit = {},
     private inline val onEmpty: () -> Unit = {}
 ) : IPaginator {
 
@@ -23,9 +25,9 @@ class Paginator<Key, Item>(
         onLoading()
         (onRequest(getNextKey()).takeWhile { !stopCollecting }
             .collectLatest { newItems ->
-                newItems.state.fold(
+                newItems.domainState.fold(
                     success = { onSuccess(it) },
-                    error = { onError(it.localError ?: -1) },
+                    error = { onError(it.error) },
                     empty = { onEmpty() }
                 )
             })

@@ -6,7 +6,7 @@ import com.example.core.remote.ApiResponse
 import com.example.core.remote.ApiResponseEmpty
 import com.example.core.remote.ApiResponseError
 import com.example.core.remote.ApiResponseSuccess
-import com.example.core.remote.UnifiedError
+import com.example.core.remote.ApiUnifiedError
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
 
@@ -41,15 +41,15 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
     }
 
     private fun <T> getApiError(): ApiResponseError<T> =
-        when (remoteError?.unifiedError) {
-            is UnifiedError.Connectivity.HostUnreachable -> ApiResponseError(UnifiedError.Connectivity.HostUnreachable("Hos Unreachable"))
-            is UnifiedError.Connectivity.NoConnection -> ApiResponseError(UnifiedError.Connectivity.NoConnection("No connection"))
-            is UnifiedError.Connectivity.TimeOut -> ApiResponseError(UnifiedError.Connectivity.TimeOut("Time out"))
-            is UnifiedError.Http.BadRequest -> ApiResponseError(UnifiedError.Http.BadRequest("Bad request"))
-            is UnifiedError.Http.EmptyResponse -> ApiResponseError(UnifiedError.Http.EmptyResponse("Empty response"))
-            is UnifiedError.Http.InternalError -> ApiResponseError(UnifiedError.Http.InternalError("Internal error"))
-            is UnifiedError.Http.NotFound -> ApiResponseError(UnifiedError.Http.NotFound("Not found"))
-            is UnifiedError.Http.Unauthorized -> ApiResponseError(UnifiedError.Http.Unauthorized("Unauthorized"))
-            else -> ApiResponseError(UnifiedError.Generic("Generic error"))
+        when (remoteError?.apiUnifiedError) {
+            is ApiUnifiedError.Connectivity.HostUnreachable -> ApiResponseError(ApiUnifiedError.Connectivity.HostUnreachable("Hos Unreachable"))
+            is ApiUnifiedError.Connectivity.NoConnection -> ApiResponseError(ApiUnifiedError.Connectivity.NoConnection("No connection"))
+            is ApiUnifiedError.Connectivity.TimeOut -> ApiResponseError(ApiUnifiedError.Connectivity.TimeOut("Time out"))
+            is ApiUnifiedError.Http.BadRequest -> ApiResponseError(ApiUnifiedError.Http.BadRequest("Bad request"))
+            is ApiUnifiedError.Http.EmptyResponse -> ApiResponseError(ApiUnifiedError.Http.EmptyResponse("Empty response"))
+            is ApiUnifiedError.Http.InternalErrorApi -> ApiResponseError(ApiUnifiedError.Http.InternalErrorApi("Internal error"))
+            is ApiUnifiedError.Http.NotFound -> ApiResponseError(ApiUnifiedError.Http.NotFound("Not found"))
+            is ApiUnifiedError.Http.Unauthorized -> ApiResponseError(ApiUnifiedError.Http.Unauthorized("Unauthorized"))
+            else -> ApiResponseError(ApiUnifiedError.Generic("Generic error"))
         }
 }

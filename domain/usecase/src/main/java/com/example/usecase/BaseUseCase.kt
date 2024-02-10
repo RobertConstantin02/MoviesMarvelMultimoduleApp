@@ -1,6 +1,8 @@
 package com.example.usecase
 
-import com.example.core.Resource
+import com.example.domain_model.error.CoroutineError
+import com.example.domain_model.error.DomainUnifiedError
+import com.example.domain_model.resource.DomainResource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,20 +12,16 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import com.example.core.R
-import com.example.domain_model.error.DomainError
-import kotlin.Error
 
 interface UseCase<Input, Output> {
-
-    suspend fun run(input: Input): Flow<Resource<Output>>
+    suspend fun run(input: Input): Flow<DomainResource<Output>>
 
     operator fun invoke(
         input: Input,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         coroutineScope: CoroutineScope? = null,
         success: (Output) -> Unit = {},
-        error: (e: DomainError<Output>) -> Unit = { _ ->},
+        error: (e: DomainUnifiedError, data: Output?) -> Unit = { _,_ ->},
         empty: () -> Unit = {}
     ) {
         coroutineScope?.let { scope ->
@@ -31,24 +29,23 @@ interface UseCase<Input, Output> {
             scope.launch(Dispatchers.Main) {
                 try {
                     job.await().also { flow ->
-                        flow.catch { e -> error(e) }.collectLatest {
-                            when(val resource = it.state) {
-                                is Resource.State.Success -> { success(resource.data) }
-                                is Resource.State.Error ->
-                                    resource.apiError?.let { apiError ->
-                                        error(DomainError.ApiError(apiError, resource.data))
-                                    } ?: error(DomainError.LocalError<Unit>(resource.localError ?: R.string.error_generic))
-                                is Resource.State.SuccessEmpty -> empty()
+                        flow.catch { e -> error(e.toDomainError(), null) }.collectLatest {
+                            when(val resource = it.domainState) {
+                                is DomainResource.DomainState.Success -> { success(resource.data) }
+                                is DomainResource.DomainState.Error -> error(resource.error, resource.data)
+                                is DomainResource.DomainState.SuccessEmpty -> empty()
                             }
                         }
                     }
-                } catch (e: Exception) { error(e) }
+                } catch (e: Exception) { error(e.toDomainError(), null) }
             }
         }
     }
 
     interface Input
 }
+
+private fun Throwable.toDomainError(): DomainUnifiedError = CoroutineError(message)
 
 interface UseCaseNoOutput<Input> {
     suspend fun run(input: Input)

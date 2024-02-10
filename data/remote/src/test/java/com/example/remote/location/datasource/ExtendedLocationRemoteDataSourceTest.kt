@@ -6,7 +6,7 @@ import com.example.api.model.location.ExtendedLocationDto
 import com.example.api.network.RickAndMortyService
 import com.example.core.remote.ApiResponseError
 import com.example.core.remote.ApiResponseSuccess
-import com.example.core.remote.UnifiedError
+import com.example.core.remote.ApiUnifiedError
 import com.example.remote.extension.toRickAndMortyService
 import com.example.remote.fake.ApiErrorHandlerFake
 import com.example.test.character.CharacterUtil
@@ -79,26 +79,26 @@ class ExtendedLocationRemoteDataSourceTest {
     @Test
     fun `service get location, return ApiResponseError`() = runTest {
         //GIVEN
-        val expectedErrorMessage = UnifiedError.Http.NotFound(message = "Location not found")
+        val expectedErrorMessage = ApiUnifiedError.Http.NotFound(message = "Location not found")
         coEvery {
             service.getLocation(any())
-        } returns ApiResponseError(UnifiedError.Http.NotFound(message = "Location not found"))
+        } returns ApiResponseError(ApiUnifiedError.Http.NotFound(message = "Location not found"))
         //When
         val result = extendedLocationRemoteDataSource.getLocation(-1)
         //Then
-        assertThat((result as? ApiResponseError)?.unifiedError?.message).isEqualTo(expectedErrorMessage.message)
+        assertThat((result as? ApiResponseError)?.apiUnifiedError?.message).isEqualTo(expectedErrorMessage.message)
     }
 
     @Test
     fun `service get location, return ApiResponseError mockWebServer`() = runTest {
         //GIVEN
-        apiErrorHandler.unifiedError = UnifiedError.Http.NotFound(message = "Client Error")
+        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.NotFound(message = "Client Error")
         mockWebServer.enqueue(
             MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND)
         )
         //When
         val result = extendedLocationRemoteDataSource.getLocation(-1)
         //Then
-        assertThat((result as? ApiResponseError)?.unifiedError).isEqualTo(UnifiedError.Http.NotFound(message = "Client Error"))
+        assertThat((result as? ApiResponseError)?.apiUnifiedError).isEqualTo(ApiUnifiedError.Http.NotFound(message = "Client Error"))
     }
 }

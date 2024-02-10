@@ -37,19 +37,44 @@
     <string name="detail_unknown">Unknown</string>
 
     <!-- Error Messages-->
-    <string name="list_try_again">Ups!!! Something when wrong while fetching characters. Error: %s</string>
-    <string name="detail_try_again">Ups!!! Something when wrong while fetching character details</string>
+        <string name="list_try_again">Ups!!! Something when wrong while fetching characters. Error: %s</string>
+    <!--    <string name="detail_try_again">Ups!!! Something when wrong while fetching character details</string>-->
 
-    <string name="remote_connectivity_error">Ups! Something went wrong with your connection</string>
-    <string name="remote_server_error">Server error happened - %s</string>
-    <string name="remote_unknown_error">Unknown error happened - %s</string>
+    <!--    <string name="remote_connectivity_error">Ups! Something went wrong with your connection</string>-->
+    <!--    <string name="remote_server_error">Server error happened - %s</string>-->
+    <!--    <string name="remote_unknown_error">Unknown error happened - %s</string>-->
 
+    <!--    <string name="error_network_connection">There is an issue with the network connection</string>-->
+    <!--
+    <!-    <string name="error_time_out">Connection with server is taking too long</string>-->
 
+    <!-- Http -->
+    <string name="http_error_unauthorized">Unable to access. Error: %s with code: %s. Please check your credentials and try again.</string>
+    <string name="http_error_not_found">We could not find the item you are looking for. Error: %s with code: %s. Please try again later.</string>
+    <string name="http_error_internal">Oops, something went wrong with our servers. Error: %s with code: %s. Please try again later.</string>
+    <string name="http_error_bad_request">There seems to be a problem with the request we made. Error: %s with code: %s. Please try again.</string>
+    <string name="http_error_empty_response">We did not receive any data. Error: %s with code: %s. Please check your network and try again..</string>
+    <!-- I/O Connectivity -->
+    <string name="connectivity_error_host_unreachable">We can not reach the service right now. Error: %s. Try checking your connection and give it another try!</string>
+    <string name="connectivity_error_timeout">It seems like your request is taking a bit longer than expected. Error: %s. Can you try again in a little while?</string>
+    <string name="connectivity_error_no_connection">Oh! It appears you are not connected to the internet. Error: %s. Check your connection and try again.</string>
+    <!-- Generic -->
+    <string name="error_generic">Something went wrong</string>-->
+
+    <!-- Database errors-->
+    <string name="local_db_empty_result">No data gathered</string>
+    <string name="local_db_item_not_found">Item not found</string>
+    <string name="local_db_insertion_error">Data could not be saved properly</string>
+    <string name="local_db_deletion_error">Data could have not been deleted properly</string>
+    <string name="local_db_update_error">Error while updating data</string>
+    <string name="local_db_unknown_error">Unknown error</string>
+    <string name="local_db_read_error">Error while reading local file. Error: %s</string>
 
     <!-- Dialog Texts -->
     <string name="dialog_remove_character"> Are you sure to remove this character? </string>
     <!-- Info Messages -->
     <string name="empty_favorite_list">You do not have favorites yet..</string>
     <string name="end_of_pagination">End of content</string>
+
 
 </resources>

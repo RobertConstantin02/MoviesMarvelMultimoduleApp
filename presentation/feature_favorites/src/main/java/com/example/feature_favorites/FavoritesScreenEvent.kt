@@ -1,12 +1,11 @@
 package com.example.feature_favorites
 
-import com.example.presentation_model.CharacterVo
+import com.example.common.screen.ScreenStateEvent
 import com.example.resources.UiText
 
-sealed class FavoritesScreenEvent {
-    object OnLoadData: FavoritesScreenEvent()
-    data class OnListFound(val newCharacters: List<CharacterVo>): FavoritesScreenEvent()
-    data class OnListEmpty(val messageInfo: UiText): FavoritesScreenEvent()
-    data class OnError(val errorMessage: UiText): FavoritesScreenEvent()
-    object OnCancellCollectData: FavoritesScreenEvent()
+sealed class FavoritesScreenEvent<T> {
+    class OnLoadData<T>: FavoritesScreenEvent<T>()
+    data class OnScreenState<T>(val screenStateEvent: ScreenStateEvent<T>): FavoritesScreenEvent<T>()
+    data class OnListEmpty<T>(val messageInfo: UiText): FavoritesScreenEvent<T>()
+    class OnCancelCollectData<T>: FavoritesScreenEvent<T>()
 }

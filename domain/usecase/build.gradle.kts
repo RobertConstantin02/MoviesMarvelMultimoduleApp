@@ -18,7 +18,6 @@ kapt {
 dependencies {
     implementation(project(":domain:domain_repository"))
     implementation(project(":domain:domain_model"))
-    implementation(project(":toplevel:resources"))
 
     //Unit test
     testImplementation(kotlin("test"))

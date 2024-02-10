@@ -2,8 +2,8 @@ package com.example.core.local
 
 sealed class DatabaseResponse<T> {
     companion object {
-        fun <T> create(databaseUnifiedError: DatabaseUnifiedError): DatabaseResponseError<T> =
-            DatabaseResponseError(databaseUnifiedError)
+        fun <T> create(localUnifiedError: LocalUnifiedError): DatabaseResponseError<T> =
+            DatabaseResponseError(localUnifiedError)
 
         fun <T> create(databaseResponse: T?): DatabaseResponse<T> =
             databaseResponse?.let {
@@ -18,4 +18,4 @@ sealed class DatabaseResponse<T> {
 
 data class DatabaseResponseSuccess<T>(val data: T): DatabaseResponse<T>()
 class DatabaseResponseEmpty<T> : DatabaseResponse<T>()
-data class DatabaseResponseError<T> (val databaseUnifiedError: DatabaseUnifiedError): DatabaseResponse<T>()
+data class DatabaseResponseError<T> (val localUnifiedError: LocalUnifiedError): DatabaseResponse<T>()

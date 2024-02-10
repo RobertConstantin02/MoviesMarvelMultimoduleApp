@@ -6,8 +6,8 @@ import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 sealed class ApiResponse<T> {
 
     companion object {
-        fun <T> create(unifiedError: UnifiedError): ApiResponseError<T> =
-            ApiResponseError(unifiedError)
+        fun <T> create(apiUnifiedError: ApiUnifiedError): ApiResponseError<T> =
+            ApiResponseError(apiUnifiedError)
 
         fun <T> create(response: Response<T>, httpException: () -> ApiResponse<T>): ApiResponse<T> =
             if (response.isSuccessful) {
@@ -23,6 +23,6 @@ sealed class ApiResponse<T> {
 
 data class ApiResponseSuccess<T>(val body: T) : ApiResponse<T>()
 class ApiResponseEmpty<T> : ApiResponse<T>()
-data class ApiResponseError<T>(val unifiedError: UnifiedError) : ApiResponse<T>()
+data class ApiResponseError<T>(val apiUnifiedError: ApiUnifiedError) : ApiResponse<T>()
 
 

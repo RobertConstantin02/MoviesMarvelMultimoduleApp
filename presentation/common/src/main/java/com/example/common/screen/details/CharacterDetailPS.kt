@@ -3,7 +3,6 @@ package com.example.common.screen.details
 import android.annotation.SuppressLint
 import android.os.Build
 import android.view.animation.OvershootInterpolator
-import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
@@ -50,13 +49,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,6 +65,7 @@ import com.example.common.component.ExpandButton
 import com.example.common.component.ExpandableContent
 import com.example.common.component.ImageFromUrlDraw
 import com.example.common.component.ImageFromUrlFullWidth
+import com.example.common.screen.ScreenState
 import com.example.common.util.drawGradient
 import com.example.designsystem.icon.AppIcons
 import com.example.designsystem.theme.Dimensions
@@ -82,27 +80,34 @@ fun DetailPresentationScreen(
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val characterDetailState by viewModel.characterDetailState.collectAsStateWithLifecycle()
-    viewModel.onEvent(CharacterDetailPSEvent.OnGetCharacterDetails)
+    viewModel.onEvent(CharacterDetailPSEvent.OnGetCharacterDetails())
     DetailPresentationScreenContent(characterDetail = { characterDetailState })
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun DetailPresentationScreenContent(
-    characterDetail: () -> CharacterDetailPSState
+    characterDetail: () -> ScreenState<CharacterPresentationScreenVO>
 ) {
     val context = LocalContext.current
     when (val state = characterDetail()) {
-        is CharacterDetailPSState.Loading ->
+        is ScreenState.Loading ->
             CircularLoadingBar(stringResource(id = R.string.character_detail_loading))
 
-        is CharacterDetailPSState.Success ->
-            DetailSuccess(characterDetail = { state.characterDetail })
+        is ScreenState.Success ->
+            DetailSuccess(characterDetail = { state.data })
 
-        is CharacterDetailPSState.Error ->
-            ErrorScreen(state.apiError ?: state.localError?.let { context.getString(it) } ?: context.getString(R.string.detail_unknown)) { // TODO: refactor 
+        is ScreenState.Error ->
+            state.data?.let {
+                DetailSuccess(characterDetail = { state.data })
+                // TODO: toast info for user
+            } ?: ErrorScreen(state.message.asString(context)) { // TODO: refactor
                 // TODO: retry and ask data again
             }
+
+        is ScreenState.Empty -> {
+            // TODO: handle Empty state
+        }
     }
 }
 
