@@ -1,31 +1,21 @@
 package com.example.retrofit.api_error_handler
 
-import android.content.Context
-import androidx.test.platform.app.InstrumentationRegistry
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.example.core.R
 import com.example.core.remote.ApiUnifiedError
+import com.example.test.GsonAdapterExt.toJson
 import okhttp3.ResponseBody
-import okhttp3.internal.EMPTY_RESPONSE
-
-import org.junit.jupiter.api.Assertions.*
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import retrofit2.HttpException
 import retrofit2.Response
-import java.net.ConnectException
 import java.net.HttpURLConnection
-import java.net.ProtocolException
 import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 
 const val TEST_ERROR_MESSAGE = "Error Message"
 
-class ApiErrorHandlerImplTest{
+class ApiErrorHandlerImplTest {
     private lateinit var apiErrorHandlerImpl: ApiErrorHandlerImpl
 
     @BeforeEach
@@ -40,103 +30,83 @@ class ApiErrorHandlerImplTest{
      */
     @Test
     fun `api error handler, return IOException SocketTimeoutException`() {
-        val expectedError = ApiUnifiedError.Connectivity.TimeOut("Error Test")
-
-        val resultError = apiErrorHandlerImpl.invoke(SocketTimeoutException("Error Test"))
-
-        assertThat(resultError).isEqualTo(expectedError)
+        testIoException(ApiUnifiedError.Connectivity.TimeOut("Error Test"))
     }
 
     @Test
     fun `api error handler, return IOException ConnectException`() {
-        val expectedError = ApiUnifiedError.Connectivity.NoConnection("Error Test")
-
-        val resultError = apiErrorHandlerImpl.invoke(ConnectException("Error Test"))
-
-        assertThat(resultError).isEqualTo(expectedError)
+        testIoException(ApiUnifiedError.Connectivity.NoConnection("Error Test"))
     }
 
     @Test
     fun `api error handler, return IOException UnknownHostException`() {
-        val expectedError = ApiUnifiedError.Connectivity.HostUnreachable("Error Test")
-
-        val resultError = apiErrorHandlerImpl.invoke(UnknownHostException("Error Test"))
-
-        assertThat(resultError).isEqualTo(expectedError)
+        testIoException(ApiUnifiedError.Connectivity.HostUnreachable("Error Test"))
     }
 
     @Test
     fun `api error handler, return IOException Generic`() {
-        val expectedError = ApiUnifiedError.Generic("Error Test")
-
-        val resultError = apiErrorHandlerImpl.invoke(ProtocolException("Error Test"))
-
-        assertThat(resultError).isEqualTo(expectedError)
+        testIoException(ApiUnifiedError.Generic("Error Test"))
     }
 
-//    @Test
-//    fun `api error handler, return HttpException HTTP_UNAUTHORIZED`() {
-//        val currentError = HttpException(Response.error<ResponseBody>(HttpURLConnection.HTTP_UNAUTHORIZED, EMPTY_RESPONSE))
-//
-//        val expectedApiUnifiedError = ApiUnifiedError.Http.Unauthorized()
-//
-//        val unifiedError = apiErrorHandlerImpl.invoke(currentError)
-//
-//        assertThat(unifiedError).isEqualTo(expectedApiUnifiedError)
-//    }
-//
-//    @Test
-//    fun `api error handler, return HttpException HTTP_NOT_FOUND`() {
-//        val currentError = HttpException(Response.error<ResponseBody>(HttpURLConnection.HTTP_NOT_FOUND, EMPTY_RESPONSE))
-//
-//        val expectedApiUnifiedError = ApiUnifiedError.Http.NotFound()
-//
-//        val unifiedError = apiErrorHandlerImpl.invoke(currentError)
-//
-//        assertThat(unifiedError).isEqualTo(expectedApiUnifiedError)
-//    }
-//
-//    @Test
-//    fun `api error handler, return HttpException HTTP_INTERNAL_ERROR`() {
-//        val currentError = HttpException(Response.error<ResponseBody>(HttpURLConnection.HTTP_INTERNAL_ERROR, EMPTY_RESPONSE))
-//
-//        val expectedApiUnifiedError = ApiUnifiedError.Http.InternalErrorApi()
-//
-//        val unifiedError = apiErrorHandlerImpl.invoke(currentError)
-//
-//        assertThat(unifiedError).isEqualTo(expectedApiUnifiedError)
-//    }
-//
-//    @Test
-//    fun `api error handler, return HttpException HTTP_BAD_REQUEST`() {
-//        val currentError = HttpException(Response.error<ResponseBody>(HttpURLConnection.HTTP_BAD_REQUEST, EMPTY_RESPONSE))
-//
-//        val expectedApiUnifiedError = ApiUnifiedError.Http.BadRequest()
-//
-//        val unifiedError = apiErrorHandlerImpl.invoke(currentError)
-//
-//        assertThat(unifiedError).isEqualTo(expectedApiUnifiedError)
-//    }
-//
-//    @Test
-//    fun `api error handler, return HttpException HTTP_NO_CONTENT`() {
-//        val currentError = HttpException(Response.error<ResponseBody>(HttpURLConnection.HTTP_NO_CONTENT, EMPTY_RESPONSE))
-//
-//        val expectedApiUnifiedError = ApiUnifiedError.Http.EmptyResponse()
-//
-//        val unifiedError = apiErrorHandlerImpl.invoke(currentError)
-//
-//        assertThat(unifiedError).isEqualTo(expectedApiUnifiedError)
-//    }
-//
-//    @Test
-//    fun `api error handler, return HttpException HTTP_NOT_ACCEPTABLE`() {
-//        val currentError = HttpException(Response.error<ResponseBody>(HttpURLConnection.HTTP_NOT_ACCEPTABLE, EMPTY_RESPONSE))
-//
-//        val expectedApiUnifiedError = ApiUnifiedError.Generic(message = TEST_ERROR_MESSAGE)
-//
-//        val unifiedError = apiErrorHandlerImpl.invoke(currentError)
-//
-//        assertThat(unifiedError).isEqualTo(expectedApiUnifiedError)
-//    }
+    @Test
+    fun `api error handler, return HttpException HTTP_UNAUTHORIZED`() {
+        testHttpException(
+            ApiUnifiedError.Http.Unauthorized(
+                TEST_ERROR_MESSAGE,
+                HttpURLConnection.HTTP_UNAUTHORIZED
+            ), HttpURLConnection.HTTP_UNAUTHORIZED
+        )
+    }
+
+    //
+    @Test
+    fun `api error handler, return HttpException HTTP_NOT_FOUND`() {
+        testHttpException(
+            ApiUnifiedError.Http.NotFound(
+                TEST_ERROR_MESSAGE,
+                HttpURLConnection.HTTP_NOT_FOUND
+            ), HttpURLConnection.HTTP_NOT_FOUND
+        )
+    }
+
+    @Test
+    fun `api error handler, return HttpException HTTP_INTERNAL_ERROR`() {
+        testHttpException(
+            ApiUnifiedError.Http.InternalErrorApi(
+                TEST_ERROR_MESSAGE,
+                HttpURLConnection.HTTP_INTERNAL_ERROR
+            ), HttpURLConnection.HTTP_INTERNAL_ERROR
+        )
+    }
+
+    @Test
+    fun `api error handler, return HttpException HTTP_BAD_REQUEST`() {
+        testHttpException(
+            ApiUnifiedError.Http.BadRequest(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_BAD_REQUEST),
+            HttpURLConnection.HTTP_BAD_REQUEST
+        )
+    }
+
+    @Test
+    fun `api error handler, return Generic error`() {
+        testHttpException(
+            ApiUnifiedError.Generic(TEST_ERROR_MESSAGE),
+            HttpURLConnection.HTTP_CLIENT_TIMEOUT
+        )
+    }
+
+    private fun testHttpException(expectedApiUnifiedError: ApiUnifiedError, errorCode: Int) {
+        val responseBody =
+            ApiErrorModel(errorMessage = TEST_ERROR_MESSAGE).toJson().toResponseBody()
+        val throwable = HttpException(
+            Response.error<ResponseBody>(errorCode, responseBody)
+        )
+        val resultApiUnifiedError = apiErrorHandlerImpl.invoke(throwable)
+        assertThat(resultApiUnifiedError).isEqualTo(expectedApiUnifiedError)
+    }
+
+    private fun testIoException(expectedApiUnifiedError: ApiUnifiedError) {
+        val resultApiUnifiedError = apiErrorHandlerImpl.invoke(SocketTimeoutException("Error Test"))
+        assertThat(resultApiUnifiedError).isEqualTo(expectedApiUnifiedError)
+    }
 }

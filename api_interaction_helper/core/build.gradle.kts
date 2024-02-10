@@ -10,16 +10,6 @@ android {
     namespace = "com.example.core"
     compileSdk = 34
 
-    defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    testOptions {
-        unitTests {
-            isIncludeAndroidResources = true // Robolectric config: https://robolectric.org/getting-started
-        }
-    }
-
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
     }
@@ -28,7 +18,6 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-
     libs.bundles.apply {
         implementation(hilt)
         implementation(network)

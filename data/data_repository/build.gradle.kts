@@ -33,9 +33,6 @@ dependencies {
     api(project(":domain:usecase"))
 
     api(project(":api_interaction_helper:retrofit"))
-    api(project(":api_interaction_helper:core"))
-
-    implementation(project(":test"))
 
     //Unit test
     testImplementation(kotlin("test"))

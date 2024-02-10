@@ -17,16 +17,10 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-
-//    api(project(":featureFeed:feed_domain"))
-//    implementation(project(":toplevel:resources"))
-//    implementation(project(":toplevel:database"))
-    api(project(":api_interaction_helper:retrofit"))
     api(project(":api_interaction_helper:core"))
 
     implementation(libs.bundles.hilt)
     implementation(libs.retrofit)
     implementation(libs.gson)
     kapt(libs.hilt.compiler)
-
 }

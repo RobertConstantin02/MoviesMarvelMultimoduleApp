@@ -22,19 +22,13 @@ android {
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
-
-    testOptions {
-        unitTests {
-            isIncludeAndroidResources = true // Robolectric config: https://robolectric.org/getting-started
-        }
-    }
 }
 kapt {
     correctErrorTypes = true
 }
 dependencies {
     implementation(project(":api_interaction_helper:core"))
+    implementation(project(":test"))
     libs.bundles.apply {
         implementation(hilt)
         implementation(network)

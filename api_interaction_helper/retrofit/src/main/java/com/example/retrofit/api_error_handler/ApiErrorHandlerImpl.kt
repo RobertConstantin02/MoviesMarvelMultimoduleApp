@@ -48,7 +48,6 @@ class ApiErrorHandlerImpl : IApiErrorHandler {
                 HttpURLConnection.HTTP_NOT_FOUND -> ApiUnifiedError.Http.NotFound(message = apiErrorMessage, code)
                 HttpURLConnection.HTTP_INTERNAL_ERROR -> ApiUnifiedError.Http.InternalErrorApi(message = apiErrorMessage, code)
                 HttpURLConnection.HTTP_BAD_REQUEST -> ApiUnifiedError.Http.BadRequest(message = apiErrorMessage, code)
-                HttpURLConnection.HTTP_NO_CONTENT -> ApiUnifiedError.Http.EmptyResponse(message = apiErrorMessage, code)
                 else -> ApiUnifiedError.Generic(apiErrorMessage)
             }
         }
