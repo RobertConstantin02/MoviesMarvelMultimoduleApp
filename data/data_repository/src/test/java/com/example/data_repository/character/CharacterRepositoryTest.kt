@@ -8,7 +8,6 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
 import assertk.assertions.support.expected
 import assertk.assertions.support.show
-import com.example.core.Resource
 import com.example.core.local.DatabaseResponseEmpty
 import com.example.core.local.DatabaseResponseError
 import com.example.core.local.LocalUnifiedError
@@ -25,6 +24,9 @@ import com.example.database.entities.CharacterEntity
 import com.example.domain_model.character.CharacterBo
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
+import com.example.domain_model.error.DomainApiUnifiedError
+import com.example.domain_model.error.DomainLocalUnifiedError
+import com.example.domain_model.resource.DomainResource
 import com.example.preferences.datasource.ISharedPreferenceDataSource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
@@ -40,9 +42,11 @@ import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.net.HttpURLConnection
 
 const val CHARACTER_ID = 2
 const val OFFSET = 10
+const val TEST_ERROR_MESSAGE = "Test Error"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CharacterRepositoryTest {
@@ -126,7 +130,7 @@ class CharacterRepositoryTest {
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
+                assertThat(result.domainState.unwrap().orEmpty()).isExpectedNeighbors(expected)
             }
         }
 
@@ -147,7 +151,7 @@ class CharacterRepositoryTest {
             )
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
+                assertThat(result.domainState.unwrap().orEmpty()).isExpectedNeighbors(expected)
             }
         }
 
@@ -168,7 +172,7 @@ class CharacterRepositoryTest {
             )
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
+                assertThat(result.domainState.unwrap().orEmpty()).isExpectedNeighbors(expected)
             }
         }
 
@@ -190,12 +194,12 @@ class CharacterRepositoryTest {
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
+                assertThat(result.domainState.unwrap().orEmpty()).isExpectedNeighbors(expected)
             }
         }
 
     @Test
-    fun `getCharactersByIds call, returns Resource Error with local data if local is success`() =
+    fun `getCharactersByIds call, returns Resource Error with local data when api error and local success`() =
         runTest {
             //Given
             val expected =
@@ -209,16 +213,17 @@ class CharacterRepositoryTest {
                 } ?: emptyList()
 
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
-                ApiResponseError(ApiUnifiedError.Generic("Generic error"))
+                ApiResponseError(ApiUnifiedError.Generic(TEST_ERROR_MESSAGE))
 
             (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
             every { sharedPref.getTime() } returns 0L
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
+                val apiErrorMessage =
+                    (result.domainState as? DomainResource.DomainState.Error)?.error
                 //Then
-                assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
-                assertThat(apiErrorMessage).isEqualTo(ApiUnifiedError.Generic("Generic error").message)
+                assertThat(result.domainState.unwrap().orEmpty()).isExpectedNeighbors(expected)
+                assertThat(apiErrorMessage).isEqualTo(DomainApiUnifiedError.Generic(TEST_ERROR_MESSAGE))
             }
         }
 
@@ -233,10 +238,11 @@ class CharacterRepositoryTest {
                 DatabaseResponseError(LocalUnifiedError.Reading)
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
+                val apiErrorMessage =
+                    (result.domainState as? DomainResource.DomainState.Error)?.error
                 //Then
                 assertThat(apiErrorMessage).isEqualTo(expectedError.message)
-                assertThat(result.state.unwrap()).isNull()
+                assertThat(result.domainState.unwrap()).isNull()
             }
         }
 
@@ -245,8 +251,8 @@ class CharacterRepositoryTest {
         runTest {
             //Then
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
-                assertThat(result.state).isInstanceOf(Resource.State.SuccessEmpty::class.java)
-                assertThat(result.state.unwrap()).isNull()
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.SuccessEmpty::class.java)
+                assertThat(result.domainState.unwrap()).isNull()
             }
         }
 
@@ -270,7 +276,7 @@ class CharacterRepositoryTest {
 
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap().orEmpty()).isExpectedNeighbors(expected)
+                assertThat(result.domainState.unwrap().orEmpty()).isExpectedNeighbors(expected)
             }
         }
 
@@ -279,7 +285,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                Resource.State.Success(
+                DomainResource.DomainState.Success(
                     CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
@@ -292,8 +298,8 @@ class CharacterRepositoryTest {
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
-                assertThat(result.state).isInstanceOf(Resource.State.Success::class.java)
+                assertThat(result.domainState.unwrap()).isExpectedCharacter(expected.data?.id)
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Success::class.java)
             }
         }
 
@@ -302,7 +308,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                Resource.State.Success(
+                DomainResource.DomainState.Success(
                     CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
@@ -317,8 +323,8 @@ class CharacterRepositoryTest {
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
-                assertThat(result.state).isInstanceOf(Resource.State.Success::class.java)
+                assertThat(result.domainState.unwrap()).isExpectedCharacter(expected.data?.id)
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Success::class.java)
             }
         }
 
@@ -327,7 +333,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                Resource.State.Success(
+                DomainResource.DomainState.Success(
                     CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
@@ -342,8 +348,8 @@ class CharacterRepositoryTest {
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
-                assertThat(result.state).isInstanceOf(Resource.State.Success::class.java)
+                assertThat(result.domainState.unwrap()).isExpectedCharacter(expected.data?.id)
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Success::class.java)
             }
         }
 
@@ -352,7 +358,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                Resource.State.Success(
+                DomainResource.DomainState.Success(
                     CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
@@ -367,8 +373,8 @@ class CharacterRepositoryTest {
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
-                assertThat(result.state).isInstanceOf(Resource.State.Success::class.java)
+                assertThat(result.domainState.unwrap()).isExpectedCharacter(expected.data?.id)
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Success::class.java)
             }
         }
 
@@ -377,14 +383,14 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                Resource.State.Error(
-                    "Generic error",
-                    null,
+                DomainResource.DomainState.Error(
+                    DomainApiUnifiedError.Http.Unauthorized(
+                        TEST_ERROR_MESSAGE,
+                        HttpURLConnection.HTTP_UNAUTHORIZED
+                    ),
                     CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
-                    }?.first { character ->
-                        character.id == CHARACTER_ID
-                    }
+                    }?.first { character -> character.id == CHARACTER_ID }
                 )
 
 
@@ -394,41 +400,61 @@ class CharacterRepositoryTest {
                 } ?: emptyList()
 
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
-                ApiResponseError(ApiUnifiedError.Generic("Generic error"))
+                ApiResponseError(
+                    ApiUnifiedError.Http.Unauthorized(
+                        TEST_ERROR_MESSAGE,
+                        HttpURLConnection.HTTP_UNAUTHORIZED
+                    )
+                )
 
             (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
             every { sharedPref.getTime() } returns 0L
 
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
+                val apiError =
+                    (result.domainState as? DomainResource.DomainState.Error)?.error
                 //Then
-                assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
-                assertThat(result.state).isInstanceOf(Resource.State.Error::class.java)
-                assertThat(apiErrorMessage).isEqualTo("Generic error")
+                assertThat(result.domainState.unwrap()).isExpectedCharacter(expected.data?.id)
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Error::class.java)
+                assertThat(apiError).isEqualTo( DomainApiUnifiedError.Http.Unauthorized(
+                    TEST_ERROR_MESSAGE,
+                    HttpURLConnection.HTTP_UNAUTHORIZED
+                ))
             }
         }
 
     @Test
-    fun `getCharacter call, returns Resource error with message and null data when api error and local success`() =
+    fun `getCharacter call, returns Resource error with message and null data when api error and local error`() =
         runTest {
             //Given
-            val expectedErrorState =
-                Resource.State.Error("Generic error", null, null)
+            val expected =
+                DomainResource.DomainState.Error(
+                    DomainApiUnifiedError.Http.Unauthorized(
+                        TEST_ERROR_MESSAGE,
+                        HttpURLConnection.HTTP_UNAUTHORIZED
+                    ), null
+                )
 
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
-                ApiResponseError(ApiUnifiedError.Generic("Generic Error"))
+                ApiResponseError(
+                    ApiUnifiedError.Http.Unauthorized(
+                        TEST_ERROR_MESSAGE,
+                        HttpURLConnection.HTTP_UNAUTHORIZED
+                    )
+                )
             (localDatasource as CharacterLocalDataSourceFake).readError =
                 DatabaseResponseError(LocalUnifiedError.Reading)
 
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
+                val apiErrorMessage =
+                    (result.domainState as? DomainResource.DomainState.Error)?.error
                 //Then
-                assertThat(result.state.unwrap()).isNull()
-                assertThat(result.state).isInstanceOf(Resource.State.Error::class.java)
-                assertThat(result.state).isEqualTo(expectedErrorState)
-                assertThat(apiErrorMessage).isEqualTo(expectedErrorState.apiErrorData)
+                assertThat(result.domainState.unwrap()).isNull()
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Error::class.java)
+                assertThat(result.domainState).isEqualTo(expected)
+                assertThat(apiErrorMessage).isEqualTo(expected.error)
             }
         }
 
@@ -436,15 +462,34 @@ class CharacterRepositoryTest {
     fun `getCharacter call, returns Resource error with message and null data when api error and local empty`() =
         runTest {
             //Given
-            val expectedErrorState = Resource.State.SuccessEmpty
+            val expected =
+                DomainResource.DomainState.Error(
+                    DomainApiUnifiedError.Http.Unauthorized(
+                        TEST_ERROR_MESSAGE,
+                        HttpURLConnection.HTTP_UNAUTHORIZED
+                    ), null
+                )
+            (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
+                ApiResponseError(
+                    ApiUnifiedError.Http.Unauthorized(
+                        TEST_ERROR_MESSAGE,
+                        HttpURLConnection.HTTP_UNAUTHORIZED
+                    )
+                )
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
-                val apiErrorMessage = (result.state as? Resource.State.Error)?.apiErrorData
+                val apiErrorMessage =
+                    (result.domainState as? DomainResource.DomainState.Error)?.error
                 //Then
-                assertThat(result.state.unwrap()).isNull()
-                assertThat(result.state).isInstanceOf(Resource.State.SuccessEmpty::class.java)
-                assertThat(result.state).isEqualTo(expectedErrorState)
-                assertThat(apiErrorMessage).isNull()
+                assertThat(result.domainState.unwrap()).isNull()
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Error::class.java)
+                assertThat(result.domainState).isEqualTo(expected)
+                assertThat(apiErrorMessage).isEqualTo(
+                    DomainApiUnifiedError.Http.Unauthorized(
+                        TEST_ERROR_MESSAGE,
+                        HttpURLConnection.HTTP_UNAUTHORIZED
+                    )
+                )
             }
         }
 
@@ -453,7 +498,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                Resource.State.Success(
+                DomainResource.DomainState.Success(
                     CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
@@ -469,8 +514,8 @@ class CharacterRepositoryTest {
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
                 //Then
-                assertThat(result.state.unwrap()).isExpectedCharacter(expected.data?.id)
-                assertThat(result.state).isInstanceOf(Resource.State.Success::class.java)
+                assertThat(result.domainState.unwrap()).isExpectedCharacter(expected.data?.id)
+                assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Success::class.java)
             }
         }
 
@@ -485,7 +530,7 @@ class CharacterRepositoryTest {
         (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
         //Then
         repository.updateCharacterIsFavorite(true, 2).collectLatest { result ->
-            assertThat(result.state).isEqualTo(Resource.State.Success(Unit))
+            assertThat(result.domainState).isEqualTo(DomainResource.DomainState.Success(Unit))
         }
     }
 
@@ -503,12 +548,8 @@ class CharacterRepositoryTest {
         //When
         repository.updateCharacterIsFavorite(true, 2).collectLatest { result ->
             //Then
-            assertThat(result.state).isEqualTo(
-                Resource.State.Error(
-                    null,
-                    LocalUnifiedError.Update.messageResource,
-                    null
-                )
+            assertThat(result.domainState).isEqualTo(
+                DomainResource.DomainState.Error(DomainLocalUnifiedError.Update, null)
             )
         }
     }
@@ -529,7 +570,7 @@ class CharacterRepositoryTest {
         (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
         //Then
         repository.getFavoriteCharacters(0, OFFSET).collectLatest { result ->
-            assertThat(result.state.unwrap().orEmpty()).isExpectedCharacters(expected)
+            assertThat(result.domainState.unwrap().orEmpty()).isExpectedCharacters(expected)
         }
     }
 
@@ -541,8 +582,8 @@ class CharacterRepositoryTest {
         //When
         repository.getFavoriteCharacters(1, OFFSET).collectLatest { result ->
             //Then
-            assertThat(result.state.unwrap()).isNull()
-            assertThat(result.state).isInstanceOf(Resource.State.Error::class.java)
+            assertThat(result.domainState.unwrap()).isNull()
+            assertThat(result.domainState).isInstanceOf(DomainResource.DomainState.Error::class.java)
         }
     }
 
@@ -567,8 +608,6 @@ class CharacterRepositoryTest {
     private fun Assert<List<CharacterBo>>.isExpectedCharacters(
         expected: List<CharacterBo>
     ) = given { actual ->
-        println("-----> actual size: ${actual.size}")
-        println("-----> expected size: ${expected.size}")
         if (expected.size == actual.size && expected.zip(actual).all { (actual, expected) ->
                 actual.id == expected.id
             }) return

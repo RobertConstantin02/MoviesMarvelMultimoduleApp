@@ -10,7 +10,6 @@ sealed class ApiUnifiedError(open val message: String?, open val code: Int?): Un
         data class NotFound(override val message: String, val errorCode: Int) : Http( message, errorCode)
         data class InternalErrorApi(override val message: String, val errorCode: Int) : Http(message, errorCode)
         data class BadRequest(override val message: String, val errorCode: Int) : Http(message, errorCode)
-        data class EmptyResponse(override val message: String, val errorCode: Int) : Http(message, errorCode)
     }
 
     sealed class Connectivity(message: String?) : ApiUnifiedError(message, null) {

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection
 
 private const val LOCATION_ID = 3
+const val TEST_ERROR_MESSAGE = "Error Test"
 class ExtendedLocationRemoteDataSourceTest {
 //    private lateinit var extendedLocationRemoteDataSource: ExtendedLocationRemoteDataSource
 //    private lateinit var service: RickAndMortyService
@@ -79,10 +80,10 @@ class ExtendedLocationRemoteDataSourceTest {
     @Test
     fun `service get location, return ApiResponseError`() = runTest {
         //GIVEN
-        val expectedErrorMessage = ApiUnifiedError.Http.NotFound(message = "Location not found")
+        val expectedErrorMessage = ApiUnifiedError.Http.NotFound(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_NOT_FOUND)
         coEvery {
             service.getLocation(any())
-        } returns ApiResponseError(ApiUnifiedError.Http.NotFound(message = "Location not found"))
+        } returns ApiResponseError(ApiUnifiedError.Http.NotFound(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_NOT_FOUND))
         //When
         val result = extendedLocationRemoteDataSource.getLocation(-1)
         //Then
@@ -92,13 +93,13 @@ class ExtendedLocationRemoteDataSourceTest {
     @Test
     fun `service get location, return ApiResponseError mockWebServer`() = runTest {
         //GIVEN
-        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.NotFound(message = "Client Error")
+        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.NotFound(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_NOT_FOUND)
         mockWebServer.enqueue(
             MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND)
         )
         //When
         val result = extendedLocationRemoteDataSource.getLocation(-1)
         //Then
-        assertThat((result as? ApiResponseError)?.apiUnifiedError).isEqualTo(ApiUnifiedError.Http.NotFound(message = "Client Error"))
+        assertThat((result as? ApiResponseError)?.apiUnifiedError).isEqualTo(ApiUnifiedError.Http.NotFound(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_NOT_FOUND))
     }
 }

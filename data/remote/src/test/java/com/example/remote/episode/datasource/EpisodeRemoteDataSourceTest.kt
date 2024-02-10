@@ -7,21 +7,23 @@ import com.example.api.network.RickAndMortyService
 import com.example.core.remote.ApiResponseError
 import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.ApiUnifiedError
-import com.example.remote.extension.toRickAndMortyService
 import com.example.remote.fake.ApiErrorHandlerFake
+import com.example.test.FileUtil
 import com.example.test.character.CharacterUtil
 import com.example.test.character.EPISODES_BY_ID_JSON
-import com.example.test.FileUtil
 import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.net.HttpURLConnection
 
 private val EPISODES_IDS = listOf(1, 2, 3)
 private val BAD_EPISODES_IDS = listOf(1, 2, 3)
+const val TEST_ERROR_MESSAGE = "Error Test"
 class EpisodeRemoteDataSourceTest {
     private lateinit var episodeRemoteDataSource: EpisodeRemoteDataSource
     private lateinit var mockWebServer: MockWebServer
@@ -30,15 +32,15 @@ class EpisodeRemoteDataSourceTest {
 
     @BeforeEach
     fun setUp() {
-//        service = mockk()
-//        episodeRemoteDataSource = EpisodeRemoteDataSource(service)
+        service = mockk()
+        episodeRemoteDataSource = EpisodeRemoteDataSource(service)
 
         //Testing success url call
         mockWebServer = MockWebServer()
         mockWebServer.start()
         apiErrorHandler = ApiErrorHandlerFake()
-        service = mockWebServer.toRickAndMortyService(apiErrorHandler)
-        episodeRemoteDataSource = EpisodeRemoteDataSource(service)
+//        service = mockWebServer.toRickAndMortyService(apiErrorHandler)
+//        episodeRemoteDataSource = EpisodeRemoteDataSource(service)
     }
 
     //Testing success url call
@@ -95,10 +97,10 @@ class EpisodeRemoteDataSourceTest {
     @Test
     fun `service get episodes by ids, return ApiResponseError`() = runTest {
         //GIVEN
-        val expected = ApiResponseError<List<EpisodeDto>>(ApiUnifiedError.Http.InternalErrorApi("Internal server error"))
+        val expected = ApiResponseError<List<EpisodeDto>>(ApiUnifiedError.Http.InternalErrorApi(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_INTERNAL_ERROR))
         coEvery {
             service.getEpisodesByIds(BAD_EPISODES_IDS)
-        } returns ApiResponseError(ApiUnifiedError.Http.InternalErrorApi("Internal server error"))
+        } returns ApiResponseError(ApiUnifiedError.Http.InternalErrorApi(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_INTERNAL_ERROR))
         //When
         val result = episodeRemoteDataSource.getEpisodesByIds(BAD_EPISODES_IDS)
         //Then

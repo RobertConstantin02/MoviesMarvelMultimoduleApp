@@ -34,7 +34,7 @@ private const val BAD_TEST_PAGE = -1
 private const val CHARACTER_ID_TEST = 1
 private const val PAGE_PARAMETER = "page"
 private const val PAGE_PARAMETER_PLUS_VALUE = "page=2"
-
+const val TEST_ERROR_MESSAGE = "Error Test"
 class CharacterRemoteDataSourceTest {
     private lateinit var mockWebServer: MockWebServer
     private lateinit var apiErrorHandler: ApiErrorHandlerFake
@@ -168,7 +168,8 @@ class CharacterRemoteDataSourceTest {
 
     @Test
     fun `rick and morty service, get characters is HTTP_UNAUTHORIZED`() = runTest {
-        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.Unauthorized(message = "Client Error")
+
+        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.Unauthorized(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_UNAUTHORIZED)
 
         val mockResponse = MockResponse().setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED)
         mockWebServer.enqueue(mockResponse)
@@ -176,13 +177,13 @@ class CharacterRemoteDataSourceTest {
         val charactersResult = characterRemoteDataSource.getAllCharacters(TEST_PAGE)
 
         assertThat(charactersResult).isInstanceOf(ApiResponseError::class.java)
-        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.Unauthorized(message = "Client Error")))
-        assertThat((charactersResult as ApiResponseError).apiUnifiedError).isEqualTo(ApiUnifiedError.Http.Unauthorized(message = "Client Error"))
+        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.Unauthorized(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_UNAUTHORIZED)))
+        assertThat((charactersResult as ApiResponseError).apiUnifiedError).isEqualTo(ApiUnifiedError.Http.Unauthorized(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_UNAUTHORIZED))
     }
 
     @Test
     fun `rick and morty service, get characters returns HTTP_NOT_FOUND`() = runTest {
-        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.NotFound(message = "Client Error")
+        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.NotFound(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_NOT_FOUND)
 
         val mockResponse = MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND)
         mockWebServer.enqueue(mockResponse)
@@ -190,50 +191,36 @@ class CharacterRemoteDataSourceTest {
         val charactersResult = characterRemoteDataSource.getAllCharacters(TEST_PAGE)
 
         assertThat(charactersResult).isInstanceOf(ApiResponseError::class.java)
-        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.NotFound(message = "Client Error")))
+        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.NotFound(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_NOT_FOUND)))
         assertThat((charactersResult as ApiResponseError).apiUnifiedError).isInstanceOf(ApiUnifiedError.Http.NotFound::class.java)
     }
 
     @Test
     fun `rick and morty service, get characters returns HTTP_INTERNAL_ERROR`() = runTest {
-        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.InternalErrorApi(message = "Client Error")
+        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.InternalErrorApi(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_INTERNAL_ERROR)
 
         val mockResponse = MockResponse().setResponseCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
         mockWebServer.enqueue(mockResponse)
 
         val charactersResult = characterRemoteDataSource.getAllCharacters(TEST_PAGE)
 
-        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.InternalErrorApi(message = "Client Error")))
+        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.InternalErrorApi(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_INTERNAL_ERROR)))
         assertThat(charactersResult).isInstanceOf(ApiResponseError::class.java)
         assertThat((charactersResult as ApiResponseError).apiUnifiedError).isInstanceOf(ApiUnifiedError.Http.InternalErrorApi::class.java)
     }
 
     @Test
     fun `rick and morty service, get characters returns HTTP_BAD_REQUEST`() = runTest {
-        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.BadRequest(message = "Client Error")
+        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.BadRequest(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_BAD_REQUEST)
 
         val mockResponse = MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
         mockWebServer.enqueue(mockResponse)
 
         val charactersResult = characterRemoteDataSource.getAllCharacters(TEST_PAGE)
 
-        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.BadRequest(message = "Client Error")))
+        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.BadRequest(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_BAD_REQUEST)))
         assertThat(charactersResult).isInstanceOf(ApiResponseError::class.java)
         assertThat((charactersResult as ApiResponseError).apiUnifiedError).isInstanceOf(ApiUnifiedError.Http.BadRequest::class.java)
-    }
-
-    @Test
-    fun `rick and morty service, get characters returns HTTP_NO_CONTENT`() = runTest {
-        apiErrorHandler.apiUnifiedError = ApiUnifiedError.Http.EmptyResponse(message = "Client Error")
-
-        val mockResponse = MockResponse().setResponseCode(HttpURLConnection.HTTP_NO_CONTENT)
-        mockWebServer.enqueue(mockResponse)
-
-        val charactersResult = characterRemoteDataSource.getAllCharacters(TEST_PAGE)
-
-        assertThat(charactersResult).isEqualTo(ApiResponseError(ApiUnifiedError.Http.EmptyResponse(message = "Client Error")))
-        assertThat(charactersResult).isInstanceOf(ApiResponseError::class.java)
-        assertThat((charactersResult as ApiResponseError).apiUnifiedError).isInstanceOf(ApiUnifiedError.Http.EmptyResponse::class.java)
     }
 
     @Test

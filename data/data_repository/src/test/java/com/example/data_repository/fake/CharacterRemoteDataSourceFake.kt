@@ -9,7 +9,9 @@ import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.ApiUnifiedError
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
+import java.net.HttpURLConnection
 
+const val TEST_ERROR_MESSAGE = "Test Error"
 class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
 
     private var characters: MutableList<CharacterDto> = mutableListOf()
@@ -19,12 +21,12 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
         this.characters = characters.toMutableList()
     }
     override suspend fun getAllCharacters(page: Int): ApiResponse<FeedCharacterDto> {
-        remoteError?.let { return getApiError<FeedCharacterDto>() }
+        remoteError?.let { return getApiError() }
         return ApiResponseSuccess(CharacterUtil.expectedSuccessCharacters)
     }
 
     override suspend fun getCharacterById(characterId: Int): ApiResponse<CharacterDto> {
-        remoteError?.let { return getApiError<CharacterDto>() }
+        remoteError?.let { return getApiError() }
         return characters.find { characterDto ->
             characterDto.id == characterId
         }?.let { ApiResponseSuccess(it) } ?: ApiResponseEmpty()
@@ -42,14 +44,13 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
 
     private fun <T> getApiError(): ApiResponseError<T> =
         when (remoteError?.apiUnifiedError) {
-            is ApiUnifiedError.Connectivity.HostUnreachable -> ApiResponseError(ApiUnifiedError.Connectivity.HostUnreachable("Hos Unreachable"))
-            is ApiUnifiedError.Connectivity.NoConnection -> ApiResponseError(ApiUnifiedError.Connectivity.NoConnection("No connection"))
-            is ApiUnifiedError.Connectivity.TimeOut -> ApiResponseError(ApiUnifiedError.Connectivity.TimeOut("Time out"))
-            is ApiUnifiedError.Http.BadRequest -> ApiResponseError(ApiUnifiedError.Http.BadRequest("Bad request"))
-            is ApiUnifiedError.Http.EmptyResponse -> ApiResponseError(ApiUnifiedError.Http.EmptyResponse("Empty response"))
-            is ApiUnifiedError.Http.InternalErrorApi -> ApiResponseError(ApiUnifiedError.Http.InternalErrorApi("Internal error"))
-            is ApiUnifiedError.Http.NotFound -> ApiResponseError(ApiUnifiedError.Http.NotFound("Not found"))
-            is ApiUnifiedError.Http.Unauthorized -> ApiResponseError(ApiUnifiedError.Http.Unauthorized("Unauthorized"))
-            else -> ApiResponseError(ApiUnifiedError.Generic("Generic error"))
+            is ApiUnifiedError.Connectivity.HostUnreachable -> ApiResponseError(ApiUnifiedError.Connectivity.HostUnreachable(TEST_ERROR_MESSAGE))
+            is ApiUnifiedError.Connectivity.NoConnection -> ApiResponseError(ApiUnifiedError.Connectivity.NoConnection(TEST_ERROR_MESSAGE))
+            is ApiUnifiedError.Connectivity.TimeOut -> ApiResponseError(ApiUnifiedError.Connectivity.TimeOut(TEST_ERROR_MESSAGE))
+            is ApiUnifiedError.Http.BadRequest -> ApiResponseError(ApiUnifiedError.Http.BadRequest(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_BAD_REQUEST))
+            is ApiUnifiedError.Http.InternalErrorApi -> ApiResponseError(ApiUnifiedError.Http.InternalErrorApi(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_INTERNAL_ERROR))
+            is ApiUnifiedError.Http.NotFound -> ApiResponseError(ApiUnifiedError.Http.NotFound(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_NOT_FOUND))
+            is ApiUnifiedError.Http.Unauthorized -> ApiResponseError(ApiUnifiedError.Http.Unauthorized(TEST_ERROR_MESSAGE, HttpURLConnection.HTTP_UNAUTHORIZED))
+            else -> ApiResponseError(ApiUnifiedError.Generic(TEST_ERROR_MESSAGE))
         }
 }

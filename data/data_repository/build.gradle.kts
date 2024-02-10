@@ -33,7 +33,7 @@ dependencies {
     api(project(":domain:usecase"))
 
     api(project(":api_interaction_helper:retrofit"))
-
+    implementation(project(":test"))
     //Unit test
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)

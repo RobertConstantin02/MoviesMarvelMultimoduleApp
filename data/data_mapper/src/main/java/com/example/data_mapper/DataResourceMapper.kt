@@ -26,7 +26,6 @@ fun UnifiedError.toDomainUnifiedError(): DomainUnifiedError =
         is ApiUnifiedError.Http.NotFound -> DomainApiUnifiedError.Http.NotFound(unifiedError.message, unifiedError.code!!)
         is ApiUnifiedError.Http.InternalErrorApi -> DomainApiUnifiedError.Http.InternalErrorApi(unifiedError.message, unifiedError.code!!)
         is ApiUnifiedError.Http.BadRequest -> DomainApiUnifiedError.Http.BadRequest(unifiedError.message, unifiedError.code!!)
-        is ApiUnifiedError.Http.EmptyResponse -> DomainApiUnifiedError.Http.EmptyResponse(unifiedError.message, unifiedError.code!!)
         is ApiUnifiedError.Connectivity.HostUnreachable -> DomainApiUnifiedError.Connectivity.HostUnreachable(unifiedError.message)
         is ApiUnifiedError.Connectivity.TimeOut -> DomainApiUnifiedError.Connectivity.TimeOut(unifiedError.message)
         is ApiUnifiedError.Connectivity.NoConnection -> DomainApiUnifiedError.Connectivity.NoConnection(unifiedError.message)
