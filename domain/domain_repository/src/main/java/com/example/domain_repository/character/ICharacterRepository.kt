@@ -1,7 +1,6 @@
 package com.example.domain_repository.character
 
 import androidx.paging.PagingData
-import com.example.core.Resource
 import com.example.domain_model.character.CharacterBo
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo

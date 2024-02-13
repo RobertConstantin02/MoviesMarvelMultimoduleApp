@@ -27,7 +27,7 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-    implementation(project(":api_interaction_helper:core"))
+    api(project(":api_interaction_helper:core"))
     implementation(project(":test"))
     libs.bundles.apply {
         implementation(hilt)

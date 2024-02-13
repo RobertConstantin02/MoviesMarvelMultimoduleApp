@@ -19,6 +19,7 @@ kapt {
 }
 dependencies {
     implementation(project(":data:api"))
+    implementation(project(":data:database"))
     //Unit test
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)

@@ -17,9 +17,7 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-
     implementation(project(":data:database"))
     implementation(project(":data:api"))
     implementation(project(":domain:domain_model"))
-
 }

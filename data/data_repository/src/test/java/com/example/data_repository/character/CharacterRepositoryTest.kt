@@ -17,8 +17,6 @@ import com.example.data_mapper.DtoToCharacterDetailBoMapper.toCharacterDetailBo
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.data_mapper.EntityToCharacterBoMapper.toCharacterBo
 import com.example.data_mapper.toCharacterNeighborBo
-import com.example.data_repository.fake.CharacterLocalDataSourceFake
-import com.example.data_repository.fake.CharacterRemoteDataSourceFake
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.database.entities.CharacterEntity
 import com.example.domain_model.character.CharacterBo
@@ -30,6 +28,8 @@ import com.example.domain_model.resource.DomainResource
 import com.example.preferences.datasource.ISharedPreferenceDataSource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.test.character.CharacterUtil
+import com.example.database.detasource.character.fake.CharacterLocalDataSourceFake
+import com.example.remote.character.datasource.fake.CharacterRemoteDataSourceFake
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +43,18 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.net.HttpURLConnection
+
+// TODO: make shared module for testing and for implementation where interfaces are placed
+/**
+ * You can create a new shared module and move your common interfaces and classes which are used
+ * in both application code and test code from main to this shared module. And then you can use
+ * implementation project(':shared') in application code and testImplementation project(':shared') in test classes to include them.
+ *
+ * For example, if you have interfaces like DataSource implemented in both production code
+ * (like RealDataSource: DataSource) and test code (like FakeDataSource: DataSource), DataSource
+ * should be defined in the shared module's main sourceset, RealDataSource should be in your main
+ * sourceset, and FakeDataSource should be in your test sourceset.
+ */
 
 const val CHARACTER_ID = 2
 const val OFFSET = 10
@@ -72,7 +84,7 @@ class CharacterRepositoryTest {
     @Test
     fun `getAllCharacters, PagingSource load success`() = runTest {
         val fakeLocalData =
-            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+            CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.map {
                 it.toCharacterEntity()
             } ?: emptyList()
         (localDatasource as CharacterLocalDataSourceFake).setCharacters(fakeLocalData)
@@ -93,7 +105,7 @@ class CharacterRepositoryTest {
     @Test
     fun `getAllCharacters, PagingSource load failure`() = runTest {
         val fakeLocalData =
-            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+            CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.map {
                 it.toCharacterEntity()
             } ?: emptyList()
 
@@ -119,13 +131,13 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
             (localDatasource as CharacterLocalDataSourceFake).readError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
@@ -139,7 +151,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
             (localDatasource as CharacterLocalDataSourceFake).readError =
@@ -147,7 +159,7 @@ class CharacterRepositoryTest {
             (localDatasource as CharacterLocalDataSourceFake).insertError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
@@ -160,7 +172,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
             (localDatasource as CharacterLocalDataSourceFake).databaseEmpty =
@@ -168,7 +180,7 @@ class CharacterRepositoryTest {
             (localDatasource as CharacterLocalDataSourceFake).insertError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
                 //Then
@@ -181,7 +193,7 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
             (localDatasource as CharacterLocalDataSourceFake).readError = null
@@ -189,7 +201,7 @@ class CharacterRepositoryTest {
                 DatabaseResponseError(LocalUnifiedError.Insertion)
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError = null
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             //When
             repository.getCharactersByIds(listOf(1, 2, 3)).collectLatest { result ->
@@ -203,12 +215,12 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
 
             val fakeLocalData =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterEntity()
                 } ?: emptyList()
 
@@ -261,12 +273,12 @@ class CharacterRepositoryTest {
         runTest {
             //Given
             val expected =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterNeighborBo()
                 } ?: emptyList()
 
             val fakeLocalData =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterEntity()
                 } ?: emptyList()
             every { sharedPref.getTime() } returns System.currentTimeMillis()
@@ -286,14 +298,14 @@ class CharacterRepositoryTest {
             //Given
             val expected =
                 DomainResource.DomainState.Success(
-                    CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
                         character.id == CHARACTER_ID
                     })
 
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
@@ -309,7 +321,7 @@ class CharacterRepositoryTest {
             //Given
             val expected =
                 DomainResource.DomainState.Success(
-                    CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
                         character.id == CHARACTER_ID
@@ -318,7 +330,7 @@ class CharacterRepositoryTest {
             (localDatasource as CharacterLocalDataSourceFake).readError =
                 DatabaseResponseError(LocalUnifiedError.Reading)
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
@@ -334,7 +346,7 @@ class CharacterRepositoryTest {
             //Given
             val expected =
                 DomainResource.DomainState.Success(
-                    CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
                         character.id == CHARACTER_ID
@@ -343,7 +355,7 @@ class CharacterRepositoryTest {
             (localDatasource as CharacterLocalDataSourceFake).databaseEmpty =
                 DatabaseResponseEmpty()
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
@@ -359,7 +371,7 @@ class CharacterRepositoryTest {
             //Given
             val expected =
                 DomainResource.DomainState.Success(
-                    CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
                         character.id == CHARACTER_ID
@@ -368,7 +380,7 @@ class CharacterRepositoryTest {
             (localDatasource as CharacterLocalDataSourceFake).insertError =
                 DatabaseResponseError(LocalUnifiedError.Insertion)
             (remoteDataSource as CharacterRemoteDataSourceFake).setCharacters(
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull() ?: listOf()
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull() ?: listOf()
             )
             //When
             repository.getCharacter(CHARACTER_ID).collectLatest { result ->
@@ -388,14 +400,14 @@ class CharacterRepositoryTest {
                         TEST_ERROR_MESSAGE,
                         HttpURLConnection.HTTP_UNAUTHORIZED
                     ),
-                    CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character -> character.id == CHARACTER_ID }
                 )
 
 
             val fakeLocalData =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterEntity()
                 } ?: emptyList()
 
@@ -499,13 +511,13 @@ class CharacterRepositoryTest {
             //Given
             val expected =
                 DomainResource.DomainState.Success(
-                    CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                    CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                         it.toCharacterDetailBo()
                     }?.first { character ->
                         character.id == CHARACTER_ID
                     })
             val fakeLocalData =
-                CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.take(3)?.map {
+                CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.take(3)?.map {
                     it.toCharacterEntity()
                 } ?: emptyList()
 
@@ -523,7 +535,7 @@ class CharacterRepositoryTest {
     fun `updateCharactersIsFavorite, update is success`() = runTest {
         //Given
         val fakeLocalData =
-            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+            CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.map {
                 it.toCharacterEntity()
             } ?: emptyList()
         //When
@@ -538,7 +550,7 @@ class CharacterRepositoryTest {
     fun `updateCharactersIsFavorite, update is error`() = runTest {
         //Given
         val fakeLocalData =
-            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+            CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.map {
                 it.toCharacterEntity()
             } ?: emptyList()
 
@@ -558,12 +570,12 @@ class CharacterRepositoryTest {
     fun `getFavoriteCharacters, returns local success`() = runTest {
         //Given
         val fakeLocalData =
-            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.map {
+            CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.map {
                 it.toCharacterEntity().copy(isFavorite = true)
             } ?: emptyList()
 
         val expected =
-            CharacterUtil.expectedSuccessCharacters.results?.filterNotNull()?.subList(0, 10)?.map {
+            CharacterUtil.expectedSuccessCharactersFirstPage.results?.filterNotNull()?.subList(0, 10)?.map {
                 it.toCharacterEntity().copy(isFavorite = true).toCharacterBo()
             } ?: emptyList()
         //When

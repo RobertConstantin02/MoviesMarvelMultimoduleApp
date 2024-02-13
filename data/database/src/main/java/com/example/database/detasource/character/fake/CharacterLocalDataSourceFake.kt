@@ -1,4 +1,4 @@
-package com.example.data_repository.fake
+package com.example.database.detasource.character.fake
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

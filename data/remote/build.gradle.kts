@@ -20,8 +20,6 @@ kapt {
 dependencies {
 
     implementation(project(":data:api"))
-    implementation(project(":toplevel:resources"))
-    implementation(project(":toplevel:resources"))
     implementation(project(":test"))
     api(project("::api_interaction_helper:retrofit"))
 

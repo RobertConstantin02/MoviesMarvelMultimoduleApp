@@ -19,11 +19,13 @@ kapt {
 }
 dependencies {
 
-    implementation(project(":data:api"))
-    implementation(project(":data:database"))
-    implementation(project(":data:remote"))
-    implementation(project(":data:data_mapper"))
+    api(project(":data:api"))
+    api(project(":data:database"))
+    api(project(":data:remote"))
+    api(project(":data:data_mapper"))
     implementation(project(":api_interaction_helper:core"))
+
+    testImplementation(project(":test"))
 
     libs.bundles.apply {
         implementation(hilt)

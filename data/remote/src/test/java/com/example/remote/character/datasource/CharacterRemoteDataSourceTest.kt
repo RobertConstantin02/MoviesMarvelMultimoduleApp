@@ -13,7 +13,7 @@ import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.ApiUnifiedError
 import com.example.remote.extension.toRickAndMortyService
 import com.example.remote.fake.ApiErrorHandlerFake
-import com.example.test.character.ALL_CHARACTERS_JSON
+import com.example.test.character.ALL_CHARACTERS_FIRST_PAGE_JSON
 import com.example.test.character.CharacterUtil
 import com.example.test.character.EMPTY_JSON
 import com.example.test.FileUtil
@@ -65,7 +65,7 @@ class CharacterRemoteDataSourceTest {
     @Test
     fun `rick and morty service, get characters is success request`() = runTest {
         //given
-        val getAllCharactersJson = FileUtil.getJson(ALL_CHARACTERS_JSON)
+        val getAllCharactersJson = FileUtil.getJson(ALL_CHARACTERS_FIRST_PAGE_JSON)
         mockWebServer.enqueue(
             MockResponse().setResponseCode(200).setBody(getAllCharactersJson.orEmpty())
         )
@@ -83,7 +83,7 @@ class CharacterRemoteDataSourceTest {
             assertThat(this?.size).isEqualTo(1)
             assertThat(this?.get(0)).isEqualTo("page")
         }
-        assertThat(characters).isEqualTo(ApiResponseSuccess(CharacterUtil.expectedSuccessCharacters))
+        assertThat(characters).isEqualTo(ApiResponseSuccess(CharacterUtil.expectedSuccessCharactersFirstPage))
     }
 
     /**
@@ -123,8 +123,8 @@ class CharacterRemoteDataSourceTest {
     @Test
     fun `rick and morty service, get characters with wrong page number is ApiResponseSuccess`() = runTest {
         //Given
-        val expected: ApiResponse<FeedCharacterDto> = ApiResponseSuccess(CharacterUtil.expectedSuccessCharacters)
-        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(FileUtil.getJson(ALL_CHARACTERS_JSON).orEmpty()))
+        val expected: ApiResponse<FeedCharacterDto> = ApiResponseSuccess(CharacterUtil.expectedSuccessCharactersFirstPage)
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(FileUtil.getJson(ALL_CHARACTERS_FIRST_PAGE_JSON).orEmpty()))
         //When
         val result = characterRemoteDataSource.getAllCharacters(BAD_TEST_PAGE)
         //Then

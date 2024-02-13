@@ -20,11 +20,11 @@ kapt {
 dependencies {
 
 //    api(project(":featureFeed:feed_domain"))
-    implementation(project(":toplevel:resources"))
+//    implementation(project(":toplevel:resources"))
 //    implementation(project(":toplevel:database"))
 //    implementation(project(":toplevel:network"))
 
-    api(project(":api_interaction_helper:core"))
+    implementation(project(":api_interaction_helper:core"))
 
     libs.bundles.apply {
         implementation(hilt)

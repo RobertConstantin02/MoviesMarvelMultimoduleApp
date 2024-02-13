@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-// TODO: Refactor with database error
-
 class CharacterLocalDatasource @Inject constructor(
     private val characterDao: ICharacterDao,
     private val pagingKeysDao: IPagingKeysDao,
