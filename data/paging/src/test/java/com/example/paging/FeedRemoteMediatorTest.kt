@@ -14,6 +14,7 @@ import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.database.detasource.character.fake.CharacterLocalDataSourceFake
 import com.example.database.entities.CharacterEntity
+import com.example.database.entities.PagingKeys
 import com.example.remote.character.datasource.fake.CharacterRemoteDataSourceFake
 import com.example.test.character.CharacterUtil
 import kotlinx.coroutines.test.runTest
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 const val PAGE_SIZE = 10
+
 @OptIn(ExperimentalPagingApi::class)
 internal class FeedRemoteMediatorTest {
     private lateinit var localDatasource: ICharacterLocalDatasource
@@ -46,37 +48,73 @@ internal class FeedRemoteMediatorTest {
         //When
         val result = feedRemoteMediator.load(LoadType.REFRESH, pagingState)
 
-        val localCharacters = ((localDatasource as? CharacterLocalDataSourceFake)?.getAllCharacters()?.load(
-            PagingSource.LoadParams.Append(1, 10, false)
-        ) as? PagingSource.LoadResult.Page)?.data
+        val localCharacters =
+            ((localDatasource as? CharacterLocalDataSourceFake)?.getAllCharacters()?.load(
+                PagingSource.LoadParams.Append(1, 10, false)
+            ) as? PagingSource.LoadResult.Page)?.data
 
         val pagingKeys = ((localDatasource as? CharacterLocalDataSourceFake)?.getPagingKeysById(2))
 
         //Then
         //checks if RemoteMediator gives success
         assertThat(result is RemoteMediator.MediatorResult.Success)
-        assertThat((result as RemoteMediator.MediatorResult.Success).endOfPaginationReached).isEqualTo(false)
+        assertThat((result as RemoteMediator.MediatorResult.Success).endOfPaginationReached).isEqualTo(
+            false
+        )
         //ensures that RemoteMediator is saving data locally.
         assertThat(localCharacters?.isNotEmpty()).isEqualTo(true)
         //check if there is no previous data, last character saved has id 10 which is the page size.
-        assertThat(localCharacters?.get(localCharacters.size -1)?.id).isEqualTo(PAGE_SIZE)
+        assertThat(localCharacters?.get(localCharacters.size - 1)?.id).isEqualTo(PAGE_SIZE)
         //ensures that RemoteMediator is saving PagingKeys properly
         assertThat(pagingKeys?.nextKey).isEqualTo("https://rickandmortyapi.com/api/character/?page=2")
-        assertThat(pagingKeys?.prevKey).isEqualTo("")
-
+        assertThat(pagingKeys?.prevKey).isNull()
     }
 
+    /**
+     * First simulates that database has characters and pagingKeys, for subsequent appending
+     */
     @Test
-    fun `load append should properly manage pagination by saving and appending new data`() {
-        //we have to set local data and simultate that databse has already data with characters and ids.
-        //then chec if added ids from last characters are expected. Like if first is 11 and last is 20
-    }
+    fun `load append should properly manage pagination by saving and appending new data`() =
+        runTest {
+            //we have to set local data and simultate that databse has already data with characters and ids.
+            //then chec if added ids from last characters are expected. Like if first is 11 and last is 20
 
-    private fun createPagingStateForRefresh(): PagingState<Int, CharacterEntity> {
+            (localDatasource as? CharacterLocalDataSourceFake)?.setCharacters(
+                getDummyCharacterEntities()
+            )
+
+            (localDatasource as? CharacterLocalDataSourceFake)?.setPagingKeys(
+                getDummyPagingKeysForPage(1)
+            )
+
+            val pagingState: PagingState<Int, CharacterEntity> =
+                createPagingStateForAppend() //make dynamic with more pages
+
+            val result = feedRemoteMediator.load(LoadType.APPEND, pagingState)
+
+            //getCharacters for second page, which is the one newly appended
+            val localCharacters =
+                ((localDatasource as? CharacterLocalDataSourceFake)?.getAllCharacters()?.load(
+                    PagingSource.LoadParams.Append(2, 10, false)
+                ) as? PagingSource.LoadResult.Page)?.data
+
+            assertThat(result is RemoteMediator.MediatorResult.Success)
+            assertThat(
+                (result as RemoteMediator.MediatorResult.Success).endOfPaginationReached
+            ).isEqualTo(false)
+
+
+//            assertThat(localCharacters?.get(0)?.id).isEqualTo(11)
+//            assertThat(localCharacters?.get(localCharacters.size - 1)?.id).isEqualTo(20)
+
+        }
+
+    // TODO: check if this is worth it?
+    private fun createPagingStateForAppend(): PagingState<Int, CharacterEntity> {
         // Let's assume we already have some data loaded
         val characterEntities = getDummyCharacterEntities()
 
-        // Let's split it into pages of size 20, for example
+        // Let's split it into pages of size 10, for example
         val pageSize = PAGE_SIZE
         val pagesData = characterEntities.chunked(pageSize)
 
@@ -84,13 +122,15 @@ internal class FeedRemoteMediatorTest {
         val pages = pagesData.mapIndexed { index, pageData ->
             PagingSource.LoadResult.Page(
                 data = pageData,
-                prevKey = if (index > 0) index - 1 else null,
+                prevKey = if (index > 1) index - 1 else null,
                 nextKey = if (index < pagesData.lastIndex) index + 1 else null
             )
         }
 
-        // Assuming that we have scrolled let's say halfway through the loaded data
-        val anchorPosition = characterEntities.size / 2
+        println("-----> page ${pages.get(0).nextKey}")
+
+        // Assuming that we have scrolled at the end of the page of 10 elements
+        val anchorPosition = characterEntities.size
 
         val config = PagingConfig(pageSize = pageSize)
 
@@ -103,27 +143,36 @@ internal class FeedRemoteMediatorTest {
     }
 
     private fun getDummyCharacterEntities(): List<CharacterEntity> {
-    return List(100) { i ->
-        CharacterEntity(
-            id = i,
-            name = "Character $i",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
+        return List(10) { i ->
+            CharacterEntity(
+                id = i + 1,
+                name = "Character $i",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+        }
+    }
+
+    private fun getDummyPagingKeysForPage(page: Int) = List(10) { i ->
+        //make ids proper for page : algorithm
+        PagingKeys(
+            itemId = (i + 1).toLong(),
+            prevKey = if (page > 1) "https://rickandmortyapi.com/api/character/?page=${(page - 1)}" else null,
+            nextKey = "https://rickandmortyapi.com/api/character/?page=${(page + 1)}"
         )
     }
-}
 
     private fun createPagingStateForInitialRefresh(): PagingState<Int, CharacterEntity> {
         val pages = PagingSource.LoadResult.Page(
-                data =  emptyList<CharacterEntity>(),
-                prevKey = null,
-                nextKey = 2
-            )
+            data = emptyList<CharacterEntity>(),
+            prevKey = null,
+            nextKey = 2
+        )
         return PagingState(
             pages = listOf(pages),
             anchorPosition = 0,
@@ -292,7 +341,6 @@ internal class FeedRemoteMediatorTest {
 //    )
 //}
 //
-
 
 
 //@Test

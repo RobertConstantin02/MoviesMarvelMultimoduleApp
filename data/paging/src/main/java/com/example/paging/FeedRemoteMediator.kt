@@ -14,6 +14,7 @@ import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
+import java.net.URI
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
@@ -37,7 +38,10 @@ class FeedRemoteMediator @Inject constructor(
                     ?: return MediatorResult.Success(
                         endOfPaginationReached = remoteKeys != null
                     )
-                Uri.parse(nextPage).getQueryParameter(PAGE_PARAMETER)?.toInt()
+                //Uri.parse(nextPage).getQueryParameter(PAGE_PARAMETER)?.toInt()
+                println("----- append ${URI(nextPage).rawQuery.split("=").last()}")
+                URI(nextPage).rawQuery.split("=").last().toInt() //important for testing
+
             }
         }
         return handleCacheSystem(page ?: 1)
@@ -59,7 +63,7 @@ class FeedRemoteMediator @Inject constructor(
     private suspend fun insertPagingKeys(response: FeedCharacterDto) = with(response) {
         results?.filterNotNull()?.mapNotNull { character ->
             character.id?.toLong()?.let { id ->
-                PagingKeys(id, info?.prev.orEmpty(), info?.next.orEmpty())
+                PagingKeys(id, info?.prev, info?.next)
             }
         }?.also { localDataSource.insertPagingKeys(it) }
     }
@@ -86,5 +90,8 @@ class FeedRemoteMediator @Inject constructor(
         state.pages.lastOrNull {
             it.data.isNotEmpty()
         }?.data?.lastOrNull()
-            ?.let { item -> localDataSource.getPagingKeysById(item.id.toLong()) }
+            ?.let { item ->
+                println("-----> getPaginKeysLastItem : ${ localDataSource.getPagingKeysById(item.id.toLong())}")
+                localDataSource.getPagingKeysById(item.id.toLong())
+            }
 }

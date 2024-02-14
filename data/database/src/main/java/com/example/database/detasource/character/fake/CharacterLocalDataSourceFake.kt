@@ -14,12 +14,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlin.math.min
 
+const val PAGE_SIZE = 10
 class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
 
     private val characters = MutableStateFlow<List<CharacterEntity>?>(emptyList())
 
-    private val pagingKeys: MutableList<PagingKeys> = mutableListOf()
+    private var pagingKeys: MutableList<PagingKeys> = mutableListOf()
 
     //errors for remote and local
     var readError: DatabaseResponseError<Unit>? = null
@@ -38,16 +40,29 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
             if (paginationError) {
                 return LoadResult.Error(Exception("pagination test error", Throwable("test")))
             }
+
+            val page = params.key ?: 1
+            val startIndex = (page - 1) * PAGE_SIZE
+            val endIndex = min(startIndex + PAGE_SIZE, this@CharacterLocalDataSourceFake.characters.value?.size ?: 0)
+            println("-----> load original : ${this@CharacterLocalDataSourceFake.characters.value}")
+            println("-----> startIndex : ${startIndex}")
+            println("-----> endindex : ${endIndex}")
+            val dataForThisPage = this@CharacterLocalDataSourceFake.characters.value?.subList(startIndex, endIndex).orEmpty()
+            println("-----> load after : ${this@CharacterLocalDataSourceFake.characters.value?.subList(startIndex, endIndex)}")
             return LoadResult.Page(
-                data = this@CharacterLocalDataSourceFake.characters.value?.take(params.loadSize).orEmpty(),
-                prevKey = 0,
-                nextKey = 0
+                data = dataForThisPage,
+                prevKey = if (page > 1) page -1 else null,
+                nextKey = if (endIndex < (this@CharacterLocalDataSourceFake.characters.value?.size ?: 0)) page + 1 else null
             )
         }
     }
 
     fun setCharacters(characters: List<CharacterEntity>?) {
         this.characters.value = characters
+    }
+
+    fun setPagingKeys(keys: List<PagingKeys>) {
+        pagingKeys = keys.toMutableList()
     }
 
     override fun getAllCharacters(): PagingSource<Int, CharacterEntity> = pagingSource

@@ -25,6 +25,7 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
 
     override suspend fun getAllCharacters(page: Int): ApiResponse<FeedCharacterDto> {
         remoteError?.let { return getApiError() }
+        println("-----> getAllChara : ${generateCharacterDtoPage(page)}")
         return ApiResponseSuccess(generateCharacterDtoPage(page))
     }
 
