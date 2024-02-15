@@ -9,20 +9,22 @@ import androidx.paging.RemoteMediator
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
-import assertk.assertions.isNullOrEmpty
 import com.example.database.detasource.character.ICharacterLocalDatasource
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import com.example.database.detasource.character.fake.CharacterLocalDataSourceFake
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.PagingKeys
 import com.example.remote.character.datasource.fake.CharacterRemoteDataSourceFake
-import com.example.test.character.CharacterUtil
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-const val PAGE_SIZE = 10
+const val API_PAGE_SIZE = 20
+const val FAKE_PAGES = 3
+const val FAKE_LOAD = 4
+const val LOAD_SIZE = 10
 
+const val QUERY_PAGE = "https://rickandmortyapi.com/api/character/?page="
 @OptIn(ExperimentalPagingApi::class)
 internal class FeedRemoteMediatorTest {
     private lateinit var localDatasource: ICharacterLocalDatasource
@@ -64,38 +66,68 @@ internal class FeedRemoteMediatorTest {
         //ensures that RemoteMediator is saving data locally.
         assertThat(localCharacters?.isNotEmpty()).isEqualTo(true)
         //check if there is no previous data, last character saved has id 10 which is the page size.
-        assertThat(localCharacters?.get(localCharacters.size - 1)?.id).isEqualTo(PAGE_SIZE)
+        assertThat(localCharacters?.get(localCharacters.size - 1)?.id).isEqualTo(API_PAGE_SIZE)
         //ensures that RemoteMediator is saving PagingKeys properly
         assertThat(pagingKeys?.nextKey).isEqualTo("https://rickandmortyapi.com/api/character/?page=2")
         assertThat(pagingKeys?.prevKey).isNull()
     }
 
     /**
-     * First simulates that database has characters and pagingKeys, for subsequent appending
+     * Api pagination : data chunked by 20.
+     * Steps before assertion
+     *
+     *      1- Get expected first index from next loaded page
+     *      2- Get expected last index from next loaded page.
+     *          Example: 3 pages already in database and 4 page is appended ->
+     *              api gives: 61...80 characters
+     *                 if real load size to screen is 10: expectedLastIndex = 70 because 61
+     *                 is already an item to count.
+     *
+     *      3- Simulate that database has proper characters for "X" pages. Example:
+     *      getDummyCharacterEntitiesForPages(3) -> 1...20...40...60 characters
+     *      4- Simulate that database has proper page keys for last twenty characters
+     *      getDummyPagingKeysForPages(3) -> 40...60 page keys.
+     *      In that way, when load calls getPagingKeysForLastItem(state) will find last page
+     *      of characters (41...60) and will get las page (60)
+     *
+     *      5- Simulate load state for appending. Gives PagingState with chunked data by
+     *      pages. [[1...20], [21...40], [41...60]]
+     *      6-Call load from remoteMediator. Will fetch next page of data to be appended.
+     *      Take into account: api pagination is 20 by 20. So in local db will be saved in
+     *      chunks by 20.
+     *
+     *      7- Simulate a 10 new appended characters data from local corresponding to next
+     *      page.
+     *          If last fetch page is 4: fetched data is 61...80 but 61...70 wil be loaded
+     *          from local
+     *
+     * Assertions
+     *      1- Check remoteMediator is success for append
+     *      2- Check if new data has been appended / saved locally by checking first and last
+     *      item to be presented into the screen.  Our real load size is 10.
+     *
      */
     @Test
     fun `load append should properly manage pagination by saving and appending new data`() =
         runTest {
-            //we have to set local data and simultate that databse has already data with characters and ids.
-            //then chec if added ids from last characters are expected. Like if first is 11 and last is 20
+            val expectedFirstIndex = (FAKE_LOAD -1) * API_PAGE_SIZE + 1
+            val expectedLastIndex = (expectedFirstIndex + LOAD_SIZE) -1
+            val dummyLocalCharacter = getDummyCharacterEntitiesForPages()
 
-            (localDatasource as? CharacterLocalDataSourceFake)?.setCharacters(
-                getDummyCharacterEntities()
-            )
+            (localDatasource as? CharacterLocalDataSourceFake)?.setCharacters(dummyLocalCharacter)
 
             (localDatasource as? CharacterLocalDataSourceFake)?.setPagingKeys(
-                getDummyPagingKeysForPage(1)
+                getDummyPagingKeysForPages(FAKE_PAGES)
             )
 
             val pagingState: PagingState<Int, CharacterEntity> =
-                createPagingStateForAppend() //make dynamic with more pages
+                createPagingStateForAppend(dummyLocalCharacter)
 
             val result = feedRemoteMediator.load(LoadType.APPEND, pagingState)
 
-            //getCharacters for second page, which is the one newly appended
             val localCharacters =
                 ((localDatasource as? CharacterLocalDataSourceFake)?.getAllCharacters()?.load(
-                    PagingSource.LoadParams.Append(2, 10, false)
+                    PagingSource.LoadParams.Append(FAKE_LOAD, LOAD_SIZE, false)
                 ) as? PagingSource.LoadResult.Page)?.data
 
             assertThat(result is RemoteMediator.MediatorResult.Success)
@@ -103,22 +135,34 @@ internal class FeedRemoteMediatorTest {
                 (result as RemoteMediator.MediatorResult.Success).endOfPaginationReached
             ).isEqualTo(false)
 
-
-//            assertThat(localCharacters?.get(0)?.id).isEqualTo(11)
-//            assertThat(localCharacters?.get(localCharacters.size - 1)?.id).isEqualTo(20)
+            assertThat(localCharacters?.get(0)?.id).isEqualTo(expectedFirstIndex)
+            assertThat(localCharacters?.get(localCharacters.size - 1)?.id).isEqualTo(expectedLastIndex)
 
         }
 
-    // TODO: check if this is worth it?
-    private fun createPagingStateForAppend(): PagingState<Int, CharacterEntity> {
-        // Let's assume we already have some data loaded
-        val characterEntities = getDummyCharacterEntities()
+    private fun createPagingStateForInitialRefresh(): PagingState<Int, CharacterEntity> {
+        val pages = PagingSource.LoadResult.Page(
+            data = emptyList<CharacterEntity>(),
+            prevKey = null,
+            nextKey = 2
+        )
+        return PagingState(
+            pages = listOf(pages),
+            anchorPosition = 0,
+            config = PagingConfig(pageSize = API_PAGE_SIZE),
+            leadingPlaceholderCount = 0
+        )
+    }
 
-        // Let's split it into pages of size 10, for example
-        val pageSize = PAGE_SIZE
-        val pagesData = characterEntities.chunked(pageSize)
-
-        // Now let's construct pages from the data
+    /**
+     * return : simulation of PagingState for appending event
+     * The algorithm have the following considerations
+     *      1- Assumes we already have some data loaded and split it into pages of size 20 which
+     *      simulates api
+     *      2- Construct list of chucked pages from the data
+     */
+    private fun createPagingStateForAppend(fakeLoadedData: List<CharacterEntity>): PagingState<Int, CharacterEntity> {
+        val pagesData = fakeLoadedData.chunked(API_PAGE_SIZE)
         val pages = pagesData.mapIndexed { index, pageData ->
             PagingSource.LoadResult.Page(
                 data = pageData,
@@ -126,27 +170,19 @@ internal class FeedRemoteMediatorTest {
                 nextKey = if (index < pagesData.lastIndex) index + 1 else null
             )
         }
-
-        println("-----> page ${pages.get(0).nextKey}")
-
-        // Assuming that we have scrolled at the end of the page of 10 elements
-        val anchorPosition = characterEntities.size
-
-        val config = PagingConfig(pageSize = pageSize)
-
         return PagingState(
             pages = pages,
-            anchorPosition = anchorPosition,
-            config = config,
+            anchorPosition = 0,
+            config = PagingConfig(pageSize = API_PAGE_SIZE),
             leadingPlaceholderCount = 0
         )
     }
 
-    private fun getDummyCharacterEntities(): List<CharacterEntity> {
-        return List(10) { i ->
+    private fun getDummyCharacterEntitiesForPages(): List<CharacterEntity> {
+        return List(API_PAGE_SIZE * FAKE_PAGES) { i ->
             CharacterEntity(
                 id = i + 1,
-                name = "Character $i",
+                name = "Character ${i + 1}",
                 null,
                 null,
                 null,
@@ -158,59 +194,34 @@ internal class FeedRemoteMediatorTest {
         }
     }
 
-    private fun getDummyPagingKeysForPage(page: Int) = List(10) { i ->
-        //make ids proper for page : algorithm
-        PagingKeys(
-            itemId = (i + 1).toLong(),
-            prevKey = if (page > 1) "https://rickandmortyapi.com/api/character/?page=${(page - 1)}" else null,
-            nextKey = "https://rickandmortyapi.com/api/character/?page=${(page + 1)}"
-        )
+    /**
+     * Simulates having stored in database the last set of pages corresponding to last
+     * 20 characters.
+     * Algorithm calculates the start and end index corresponding to specific page
+     * and gives paging keys with proper prev and next key.
+     * Example: if already have 3 pages of characters loaded. 1...60
+     * create PagingKeys for last twenty because remote mediator will use last character from
+     * last page to fetch the next page to fetch and store.
+     *      startIndex = (3 - 1) * 20 = 40
+     *      endIndex = 3 * 20 = 60
+     *      creates PagingKeys from 40 to 60 with corresponding id matching last twenty characters
+     *      in the database.
+     */
+    private fun getDummyPagingKeysForPages(page: Int): List<PagingKeys>{
+        val keyList = mutableListOf<PagingKeys>()
+        val startIndex = (page -1) * API_PAGE_SIZE
+        val enIndex = API_PAGE_SIZE * page
+        for(id in startIndex..enIndex) {
+            keyList.add(
+                PagingKeys(
+                    itemId = id.toLong(),
+                    prevKey = if (page > 1) "$QUERY_PAGE${(page - 1)}" else null,
+                    nextKey = "$QUERY_PAGE${(page + 1)}"
+                )
+            )
+        }
+        return keyList
     }
-
-    private fun createPagingStateForInitialRefresh(): PagingState<Int, CharacterEntity> {
-        val pages = PagingSource.LoadResult.Page(
-            data = emptyList<CharacterEntity>(),
-            prevKey = null,
-            nextKey = 2
-        )
-        return PagingState(
-            pages = listOf(pages),
-            anchorPosition = 0,
-            config = PagingConfig(pageSize = PAGE_SIZE),
-            leadingPlaceholderCount = 0
-        )
-    }
-
-//    private fun createPagingStateForInitialRefresh(): PagingState<Int, CharacterEntity> {
-//        // Let's assume we don't have some data loaded
-//        val characterEntities = emptyList<CharacterEntity>()
-//
-//        // Let's split it into pages of size 20 for example
-//        val pageSize = 10
-//        val pagesData = characterEntities.chunked(pageSize)
-//
-//        // Now let's construct pages from the data
-//        val pages = pagesData.mapIndexed { index, characters ->
-//            PagingSource.LoadResult.Page(
-//                data = characters,
-//                prevKey = if (index > 0) index -1 else null,
-//                nextKey = if (index < pagesData.lastIndex) index + 1 else null
-//            )
-//        }
-//
-//        return PagingState(
-//            pages = pages,
-//            anchorPosition = 0,
-//            config = PagingConfig(pageSize = pageSize),
-//            leadingPlaceholderCount = 0
-//        )
-//    }
-
-//    private fun getDummyCharacterEntities(): List<CharacterEntity> {
-//        return List(100) { index ->
-//            CharacterEntity(id = index)
-//        }
-//    }
 }
 
 

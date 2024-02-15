@@ -35,9 +35,9 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
      */
     private fun generateCharacterDtoPage(page: Int): FeedCharacterDto {
         val properPage = if (page < 1) 1 else page
-        val start = (properPage - 1) * 10 + 1
+        val start = (properPage - 1) * 20 + 1
         val characters = mutableListOf<CharacterDto>()
-        for (i in start until start + 10) {
+        for (i in start until start + 20) {
             characters.add(
                 CharacterDto(
                     id = i,

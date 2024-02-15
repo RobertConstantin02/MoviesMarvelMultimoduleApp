@@ -44,7 +44,7 @@ class FeedRemoteMediator @Inject constructor(
 
             }
         }
-        return handleCacheSystem(page ?: 1)
+        return handleCacheSystem(page)
     }
 
     private suspend fun handleCacheSystem(page: Int): MediatorResult =
@@ -91,6 +91,7 @@ class FeedRemoteMediator @Inject constructor(
             it.data.isNotEmpty()
         }?.data?.lastOrNull()
             ?.let { item ->
+                println("----- getPaginKeys item : ${item}")
                 println("-----> getPaginKeysLastItem : ${ localDataSource.getPagingKeysById(item.id.toLong())}")
                 localDataSource.getPagingKeysById(item.id.toLong())
             }

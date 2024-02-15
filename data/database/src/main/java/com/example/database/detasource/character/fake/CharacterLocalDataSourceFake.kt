@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlin.math.min
 
-const val PAGE_SIZE = 10
+const val PAGE_SIZE = 20
 class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
 
     private val characters = MutableStateFlow<List<CharacterEntity>?>(emptyList())
@@ -36,6 +36,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
             return state.anchorPosition ?: 1
         }
 
+        //this will give me 10, from what i have saved in db locally. It doesnt matter that from remote it comes 20. I want from my locall to take 10 out of those 20.
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharacterEntity> {
             if (paginationError) {
                 return LoadResult.Error(Exception("pagination test error", Throwable("test")))
@@ -50,7 +51,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
             val dataForThisPage = this@CharacterLocalDataSourceFake.characters.value?.subList(startIndex, endIndex).orEmpty()
             println("-----> load after : ${this@CharacterLocalDataSourceFake.characters.value?.subList(startIndex, endIndex)}")
             return LoadResult.Page(
-                data = dataForThisPage,
+                data = dataForThisPage.take(params.loadSize),
                 prevKey = if (page > 1) page -1 else null,
                 nextKey = if (endIndex < (this@CharacterLocalDataSourceFake.characters.value?.size ?: 0)) page + 1 else null
             )
