@@ -9,10 +9,11 @@ import com.example.core.remote.ApiResponseError
 import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.ApiUnifiedError
 import com.example.remote.character.datasource.ICharacterRemoteDataSource
-import com.example.test.character.CharacterUtil
 import java.net.HttpURLConnection
 
+const val API_PAGE_SIZE = 20
 const val TEST_ERROR_MESSAGE = "Test Error"
+const val QUERY_PAGE = "https://rickandmortyapi.com/api/character/?page="
 
 class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
 
@@ -25,7 +26,6 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
 
     override suspend fun getAllCharacters(page: Int): ApiResponse<FeedCharacterDto> {
         remoteError?.let { return getApiError() }
-        println("-----> getAllChara : ${generateCharacterDtoPage(page)}")
         return ApiResponseSuccess(generateCharacterDtoPage(page))
     }
 
@@ -34,10 +34,9 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
      * @properPage -> needed because api returns first page with 0 for page
      */
     private fun generateCharacterDtoPage(page: Int): FeedCharacterDto {
-        val properPage = if (page < 1) 1 else page
-        val start = (properPage - 1) * 20 + 1
+        val start = (page - 1) * API_PAGE_SIZE + 1
         val characters = mutableListOf<CharacterDto>()
-        for (i in start until start + 20) {
+        for (i in start until start + API_PAGE_SIZE) {
             characters.add(
                 CharacterDto(
                     id = i,
@@ -55,8 +54,8 @@ class CharacterRemoteDataSourceFake : ICharacterRemoteDataSource {
         return FeedCharacterDto(
             info = CharacterInfoDto(
                 pages = 42,
-                next = "https://rickandmortyapi.com/api/character/?page=${properPage + 1}",
-                prev = if (page > 1) "https://rickandmortyapi.com/api/character/?page=${properPage - 1}" else null,
+                next = "$QUERY_PAGE${page + 1}",
+                prev = if (page > 1) "$QUERY_PAGE${page - 1}" else null,
                 count = 826
             ), results = characters
         )

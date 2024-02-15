@@ -37,15 +37,6 @@ class Resource<out T> private constructor(
 
         fun successEmpty() = Resource(State.SuccessEmpty)
 
-        //        fun <T> error(
-//            errorMessage: String?,
-//            data: T?
-//        ) = Resource(State.Error(errorMessage, null, data))
-//
-//        fun <T> error(
-//            errorResource: Int,
-//            data: T?
-//        ) = Resource(State.Error(null, errorResource, data))
         fun <T> error(
             apiError: ApiUnifiedError,
             data: T?,

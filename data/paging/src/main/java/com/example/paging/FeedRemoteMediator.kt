@@ -1,13 +1,12 @@
 package com.example.paging
 
-import android.net.Uri
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.example.api.model.character.FeedCharacterDto
-import com.example.api.network.PAGE_PARAMETER
 import com.example.core.local.localResource
+import com.example.core.remote.ApiUnifiedError
 import com.example.core.remote.networkResource
 import com.example.data_mapper.DtoToCharacterEntityMapper.toCharacterEntity
 import com.example.database.detasource.character.ICharacterLocalDatasource
@@ -17,6 +16,7 @@ import com.example.remote.character.datasource.ICharacterRemoteDataSource
 import java.net.URI
 import javax.inject.Inject
 
+const val SPLIT_CHARACTER_QUERY = "="
 @OptIn(ExperimentalPagingApi::class)
 class FeedRemoteMediator @Inject constructor(
     private val localDataSource: ICharacterLocalDatasource,
@@ -38,10 +38,7 @@ class FeedRemoteMediator @Inject constructor(
                     ?: return MediatorResult.Success(
                         endOfPaginationReached = remoteKeys != null
                     )
-                //Uri.parse(nextPage).getQueryParameter(PAGE_PARAMETER)?.toInt()
-                println("----- append ${URI(nextPage).rawQuery.split("=").last()}")
-                URI(nextPage).rawQuery.split("=").last().toInt() //important for testing
-
+                URI(nextPage).rawQuery.split(SPLIT_CHARACTER_QUERY).last().toInt()
             }
         }
         return handleCacheSystem(page)
@@ -56,7 +53,7 @@ class FeedRemoteMediator @Inject constructor(
                 insertCharacters(it)
                 MediatorResult.Success(endOfPaginationReached = it.results?.isEmpty() == true)
             },
-            error = { MediatorResult.Error(Throwable()) },
+            error = { MediatorResult.Error(Throwable((it.error as? ApiUnifiedError)?.message)) },
             empty = { MediatorResult.Error(Throwable()) }
         )
 
@@ -89,10 +86,5 @@ class FeedRemoteMediator @Inject constructor(
     private suspend fun getPagingKeysForLastItem(state: PagingState<Int, CharacterEntity>): PagingKeys? =
         state.pages.lastOrNull {
             it.data.isNotEmpty()
-        }?.data?.lastOrNull()
-            ?.let { item ->
-                println("----- getPaginKeys item : ${item}")
-                println("-----> getPaginKeysLastItem : ${ localDataSource.getPagingKeysById(item.id.toLong())}")
-                localDataSource.getPagingKeysById(item.id.toLong())
-            }
+        }?.data?.lastOrNull()?.let { item -> localDataSource.getPagingKeysById(item.id.toLong()) }
 }
