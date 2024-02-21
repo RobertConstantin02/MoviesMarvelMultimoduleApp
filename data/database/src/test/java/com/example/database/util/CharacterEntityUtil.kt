@@ -13,6 +13,7 @@ object CharacterEntityUtil {
         ?.fromJson<List<CharacterEntity>>() as List<CharacterEntity>
 
     fun createCharacters(number: Int) = List(number) {
+        val randomIsFav = (0..1).random()
         CharacterEntity(
             id = it + 1,
             name = "Character ${it +1}",
@@ -28,7 +29,8 @@ object CharacterEntityUtil {
                 "https://rickandmortyapi.com/api/episode/3",
                 "https://rickandmortyapi.com/api/episode/4",
                 "https://rickandmortyapi.com/api/episode/5"
-            )
+            ),
+            isFavorite = randomIsFav != 0
         )
     }
 

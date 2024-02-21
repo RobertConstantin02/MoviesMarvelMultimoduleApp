@@ -55,6 +55,8 @@ dependencies {
     testImplementation(libs.test.core.ktx)
     testImplementation(libs.test.core)
     testImplementation(libs.test.runner)
+    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.test)
 //
 
 //    androidTestImplementation(libs.junit.ext)
@@ -65,8 +67,8 @@ dependencies {
 //    androidTestImplementation(libs.test.robolectric)
 
     //testImplementation(kotlin("test"))
-    //testImplementation(libs.bundles.test)
-    //testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.bundles.test)
+//    testRuntimeOnly(libs.junit.jupiter.engine)
 
     libs.bundles.apply {
         implementation(hilt)

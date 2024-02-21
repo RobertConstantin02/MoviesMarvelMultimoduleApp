@@ -21,7 +21,7 @@ dependencies {
 
     implementation(project(":data:api"))
     implementation(project(":test"))
-    api(project("::api_interaction_helper:retrofit"))
+    api(project(":api_interaction_helper:retrofit"))
 
     libs.bundles.apply {
         implementation(hilt)

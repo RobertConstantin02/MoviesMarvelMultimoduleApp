@@ -20,10 +20,8 @@ kapt {
 dependencies {
     implementation(project(":data:api"))
     implementation(project(":data:database"))
-    //Unit test
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.test)
-    testRuntimeOnly(libs.junit.jupiter.engine)
+    implementation(libs.coroutines.test)
+    implementation(libs.junit.jupiter.api)
 
     implementation(libs.gson)
     libs.bundles.apply {

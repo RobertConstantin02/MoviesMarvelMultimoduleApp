@@ -6,7 +6,7 @@ import com.example.remote.di.NetworkModule.provideInterceptor
 import com.example.remote.di.NetworkModule.provideOkHttpClient
 import com.example.remote.di.NetworkModule.provideRickMortyService
 import com.example.remote.di.NetworkModule.provideService
-import com.example.retrofit.di.AdapterModule_ProvideCallAdapterFactoryFactory.provideCallAdapterFactory
+import com.example.retrofit.di.AdapterModule.provideCallAdapterFactory
 import okhttp3.mockwebserver.MockWebServer
 
 fun MockWebServer.toRickAndMortyService(

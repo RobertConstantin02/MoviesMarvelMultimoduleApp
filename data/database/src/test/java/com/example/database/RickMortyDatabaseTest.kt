@@ -10,8 +10,9 @@ import com.example.database.util.CharacterEntityUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -30,14 +31,16 @@ class RickMortyDatabaseTest {
 
     private lateinit var characterDao: ICharacterDao
     private lateinit var db: RickMortyDatabase
-    private val testDispatcher = TestCoroutineDispatcher()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(context, RickMortyDatabase::class.java).allowMainThreadQueries().build()
+        db = Room.inMemoryDatabaseBuilder(context, RickMortyDatabase::class.java)
+            .allowMainThreadQueries().build()
         characterDao = db.characterDao()
     }
 
@@ -47,17 +50,6 @@ class RickMortyDatabaseTest {
         Dispatchers.resetMain()
         db.close()
     }
-
-//    @Test
-//    fun `getAllCharacters, returns load data properly`() = runTest {
-//        val pagingSource = PagingSourceUtils(CharacterEntityUtil.expectedCharactersEntity).load(
-//            PagingSource.LoadParams.Append(
-//                1, 10, false
-//            )
-//        )
-//        val result = (pagingSource as? PagingSource.LoadResult.Page)?.data
-//        assertEquals(CharacterEntityUtil.expectedCharactersEntity.take(10), result)
-//    }
 
     @Test
     @Throws(Exception::class)
@@ -75,25 +67,61 @@ class RickMortyDatabaseTest {
     @Test
     @Throws(Exception::class)
     fun `write and read character`() = runTest {
+        //Given
         val expected = CharacterEntityUtil.createCharacter(3)
+        //When
         characterDao.insertCharacter(expected)
         val result = characterDao.getCharacterById(3)
         println("-----> $result")
+        //Then
         assertEquals(expected, result)
     }
 
     @Test
     @Throws(Exception::class)
     fun `write and read characters by id`() = runTest {
+        //Given
         val expected = CharacterEntityUtil.createCharacters(10)
         //When
         characterDao.insertCharacters(*expected.toTypedArray())
         val result = characterDao.getCharactersByIds(listOf(1, 2, 3))
         println("-----> $result")
+        //Then
         assertEquals(expected.filter { it.id in listOf(1, 2, 3) }, result)
     }
 
-    private fun <PaginationKey: Any, Model: Any>PagingSource<PaginationKey, Model>.getData(): List<Model> {
+    @Test
+    @Throws(Exception::class)
+    fun `update character`() =  runTest {
+        //Given
+        val expected = CharacterEntityUtil.createCharacters(10)
+        val characterToUpdate = expected[(1..10).random()]
+        println("-----> $characterToUpdate")
+        //When
+        characterDao.insertCharacters(*expected.toTypedArray())
+        characterDao.updateCharacterIsFavorite(characterToUpdate.isFavorite.not(), characterToUpdate.id)
+        val result = characterDao.getCharacterById(characterToUpdate.id)
+        println("-----> $result")
+        //Then
+        assertNotEquals(characterToUpdate.isFavorite, result?.isFavorite)
+
+    }
+
+    @Test
+    @Throws
+    fun `read favorite characters`() = runTest {
+        val fakeCharacters = CharacterEntityUtil.createCharacters(10)
+        val expected = fakeCharacters.filter { it.isFavorite }
+        println("-----> $expected")
+        //When
+        characterDao.insertCharacters(*expected.toTypedArray())
+        val result = characterDao.getFavoriteCharacters(0, 10).first()
+        println("-----> $result")
+        assertEquals(expected, result)
+
+    }
+
+    private fun <PaginationKey : Any, Model : Any> PagingSource<PaginationKey, Model>.getData(): List<Model> {
         val data = mutableListOf<Model>()
         val latch = CountDownLatch(1)
         val job = CoroutineScope(Dispatchers.Main).launch {
