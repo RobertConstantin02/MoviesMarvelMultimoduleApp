@@ -84,6 +84,22 @@ class RickMortyDatabaseTest {
         assertEquals(expected, result)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun `write and read character`() = runTest {
+        val expected = CharacterEntityUtil.createCharacter(3)
+        characterDao.insertCharacter(expected)
+        val result = characterDao.getCharacterById(3)
+        println("-----> $result")
+        assertEquals(expected, result)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `write and read characters by id`() {
+
+    }
+
     private fun <PaginationKey: Any, Model: Any>PagingSource<PaginationKey, Model>.getData(): List<Model> {
         val data = mutableListOf<Model>()
         val latch = CountDownLatch(1)

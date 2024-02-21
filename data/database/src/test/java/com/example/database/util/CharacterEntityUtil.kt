@@ -9,7 +9,8 @@ import com.example.test.GsonAdapterExt.fromJson
 const val ALL_CHARACTERS_ENTITY_JSON = "json/getAllCharactersEntity.json"
 
 object CharacterEntityUtil {
-    val expectedCharactersEntity = FileUtil.getJson(ALL_CHARACTERS_ENTITY_JSON)?.fromJson<List<CharacterEntity>>() as List<CharacterEntity>
+    val expectedCharactersEntity = FileUtil.getJson(ALL_CHARACTERS_ENTITY_JSON)
+        ?.fromJson<List<CharacterEntity>>() as List<CharacterEntity>
 
     fun createCharacters(number: Int) = List(number) {
         CharacterEntity(
@@ -30,4 +31,23 @@ object CharacterEntityUtil {
             )
         )
     }
+
+    fun createCharacter(id: Int) =
+        CharacterEntity(
+            id = id,
+            name = "Character $id",
+            "fake",
+            "fake",
+            LocationEntity("fake", "fake"),
+            OriginEntity("fake"),
+            "fake",
+            "fake",
+            listOf(
+                "https://rickandmortyapi.com/api/episode/1",
+                "https://rickandmortyapi.com/api/episode/2",
+                "https://rickandmortyapi.com/api/episode/3",
+                "https://rickandmortyapi.com/api/episode/4",
+                "https://rickandmortyapi.com/api/episode/5"
+            )
+        )
 }
