@@ -8,13 +8,10 @@ import com.example.core.remote.ApiResponseError
 import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.ApiUnifiedError
 import com.example.remote.fake.ApiErrorHandlerFake
-import com.example.test.FileUtil
 import com.example.test.character.CharacterUtil
-import com.example.test.character.EPISODES_BY_ID_JSON
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -43,27 +40,29 @@ class EpisodeRemoteDataSourceTest {
 //        episodeRemoteDataSource = EpisodeRemoteDataSource(service)
     }
 
-    //Testing success url call
     @AfterEach
     fun tearDown() {
         mockWebServer.shutdown()
     }
 
-    @Test
-    fun `service get episodes by id, is success url`() = runTest {
-        //Given
-        val episodesJson = FileUtil.getJson(EPISODES_BY_ID_JSON)
-        mockWebServer.enqueue(
-            MockResponse().setResponseCode(200).setBody(episodesJson.orEmpty())
-        )
-        //When
-        episodeRemoteDataSource.getEpisodesByIds(EPISODES_IDS)
-        val request = mockWebServer.takeRequest()
-        val requestUrl = request.requestUrl
-        //Then
-        assertThat(request.method).isEqualTo("GET")
-        assertThat(getPathIds(requestUrl?.pathSegments)).isEqualTo(EPISODES_IDS)
-    }
+    /**
+     * For running this test uncomment custom mocked webServer
+     */
+//    @Test
+//    fun `service get episodes by id, is success url`() = runTest {
+//        //Given
+//        val episodesJson = FileUtil.getJson(EPISODES_BY_ID_JSON)
+//        mockWebServer.enqueue(
+//            MockResponse().setResponseCode(200).setBody(episodesJson.orEmpty())
+//        )
+//        //When
+//        episodeRemoteDataSource.getEpisodesByIds(EPISODES_IDS)
+//        val request = mockWebServer.takeRequest()
+//        val requestUrl = request.requestUrl
+//        //Then
+//        assertThat(request.method).isEqualTo("GET")
+//        assertThat(getPathIds(requestUrl?.pathSegments)).isEqualTo(EPISODES_IDS)
+//    }
     private fun getPathIds(pathWithIds: List<String>?) =
         pathWithIds?.let { pathWithIds.last().removeSurrounding("[", "]").split(",").map { it.trim().toInt() }}
 

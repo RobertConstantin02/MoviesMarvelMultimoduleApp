@@ -10,8 +10,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
+import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.net.UnknownServiceException
 
 const val TEST_ERROR_MESSAGE = "Error Message"
 
@@ -30,22 +34,34 @@ class ApiErrorHandlerImplTest {
      */
     @Test
     fun `api error handler, return IOException SocketTimeoutException`() {
-        testIoException(ApiUnifiedError.Connectivity.TimeOut("Error Test"))
+        testIoException(
+            ApiUnifiedError.Connectivity.TimeOut("Error Test"),
+            SocketTimeoutException("Error Test")
+        )
     }
 
     @Test
     fun `api error handler, return IOException ConnectException`() {
-        testIoException(ApiUnifiedError.Connectivity.NoConnection("Error Test"))
+        testIoException(
+            ApiUnifiedError.Connectivity.NoConnection("Error Test"),
+            ConnectException("Error Test")
+        )
     }
 
     @Test
     fun `api error handler, return IOException UnknownHostException`() {
-        testIoException(ApiUnifiedError.Connectivity.HostUnreachable("Error Test"))
+        testIoException(
+            ApiUnifiedError.Connectivity.HostUnreachable("Error Test"),
+            UnknownHostException("Error Test")
+        )
     }
 
     @Test
     fun `api error handler, return IOException Generic`() {
-        testIoException(ApiUnifiedError.Generic("Error Test"))
+        testIoException(
+            ApiUnifiedError.Generic("Error Test"),
+            UnknownServiceException("Error Test")
+        )
     }
 
     @Test
@@ -105,8 +121,11 @@ class ApiErrorHandlerImplTest {
         assertThat(resultApiUnifiedError).isEqualTo(expectedApiUnifiedError)
     }
 
-    private fun testIoException(expectedApiUnifiedError: ApiUnifiedError) {
-        val resultApiUnifiedError = apiErrorHandlerImpl.invoke(SocketTimeoutException("Error Test"))
+    private fun testIoException(
+        expectedApiUnifiedError: ApiUnifiedError,
+        ioException: IOException
+    ) {
+        val resultApiUnifiedError = apiErrorHandlerImpl.invoke(ioException)
         assertThat(resultApiUnifiedError).isEqualTo(expectedApiUnifiedError)
     }
 }

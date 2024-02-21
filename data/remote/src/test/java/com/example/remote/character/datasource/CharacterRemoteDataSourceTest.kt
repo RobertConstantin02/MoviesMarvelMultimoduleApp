@@ -146,7 +146,7 @@ class CharacterRemoteDataSourceTest {
     @Test
     fun `rick and morty service, get characters with FeedCharacterDto results empty is ApiResponseSuccess`() = runTest {
         //Given
-        val expected: ApiResponse<FeedCharacterDto> = ApiResponseSuccess(CharacterUtil.expectedResultsEmptyResponse)
+        val expected: ApiResponse<FeedCharacterDto> = ApiResponseSuccess(CharacterUtil.expectedResultsEmpty)
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(FileUtil.getJson(RESULTS_EMPTY_JSON).orEmpty()))
         //When
         val result = characterRemoteDataSource.getAllCharacters(TEST_PAGE)
@@ -158,7 +158,7 @@ class CharacterRemoteDataSourceTest {
     @Test
     fun `rick and morty service, get characters with character episodes empty is ApiResponseSuccess`() = runTest {
         //Given
-        val expected: ApiResponse<FeedCharacterDto> = ApiResponseSuccess(CharacterUtil.expectedResultsEmptyResponse)
+        val expected: ApiResponse<FeedCharacterDto> = ApiResponseSuccess(CharacterUtil.expectedResultsEmptyEpisodes)
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(FileUtil.getJson(RESULTS_EMPTY_EPISODES_JSON).orEmpty()))
         //When
         val result = characterRemoteDataSource.getAllCharacters(TEST_PAGE)
@@ -235,10 +235,6 @@ class CharacterRemoteDataSourceTest {
         assertThat(charactersResult).isInstanceOf(ApiResponseError::class.java)
         assertThat((charactersResult as ApiResponseError).apiUnifiedError).isInstanceOf(ApiUnifiedError.Generic::class.java)
     }
-
-    /**
-     * ---------------------> Character test
-     */
 
     /**
      * Use of mockWebServer.

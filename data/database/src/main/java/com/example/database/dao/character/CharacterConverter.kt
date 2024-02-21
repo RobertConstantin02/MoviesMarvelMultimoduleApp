@@ -9,35 +9,35 @@ import com.google.gson.Gson
 class CharacterConverter {
 
     @TypeConverter
-    fun characterEntityToJson(characterEntity: CharacterEntity): String =
+    fun characterEntityToJson(characterEntity: CharacterEntity?): String? =
         Gson().toJson(characterEntity)
 
     @TypeConverter
-    fun jsonToCharacterEntity(string: String): CharacterEntity =
+    fun jsonToCharacterEntity(string: String?): CharacterEntity? =
         Gson().fromJson(string, CharacterEntity::class.java)
 
     @TypeConverter
-    fun originEntityToJson(originEntity: OriginEntity): String =
+    fun originEntityToJson(originEntity: OriginEntity?): String? =
         Gson().toJson(originEntity)
 
     @TypeConverter
-    fun jsonToOriginEntity(string: String): OriginEntity =
+    fun jsonToOriginEntity(string: String?): OriginEntity? =
         Gson().fromJson(string, OriginEntity::class.java)
 
     @TypeConverter
-    fun locationEntityToJson(locationEntity: LocationEntity): String =
+    fun locationEntityToJson(locationEntity: LocationEntity?): String? =
         Gson().toJson(locationEntity)
 
     @TypeConverter
-    fun jsonToLocationEntity(string: String): LocationEntity =
+    fun jsonToLocationEntity(string: String?): LocationEntity? =
         Gson().fromJson(string, LocationEntity::class.java)
 
     @TypeConverter
-    fun stringListToJson(stringList: List<String>): String =
+    fun stringListToJson(stringList: List<String>?): String =
         Gson().toJson(stringList)
 
     @TypeConverter
-    fun jsonToStringList(string: String): List<String> =
+    fun jsonToStringList(string: String?): List<String?> =
         Gson().fromJson(string, Array<String>::class.java).toList()
 
 

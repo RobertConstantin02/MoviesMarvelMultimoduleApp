@@ -1,6 +1,8 @@
 package com.example.udemycourseapp.navigation
 
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -24,6 +26,7 @@ class GoToFeedDetails(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun RickMortyNavHost(
     appState: RickAndMortyAppState,

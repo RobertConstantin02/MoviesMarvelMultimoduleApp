@@ -243,7 +243,6 @@ class CharacterRepositoryTest {
     fun `getCharactersByIds call, returns Resource Error with message and null data when api error and local error`() =
         runTest {
             //Given
-            val expectedError = ApiUnifiedError.Generic("Generic Error")
             (remoteDataSource as CharacterRemoteDataSourceFake).remoteError =
                 ApiResponseError(ApiUnifiedError.Generic("Generic Error"))
             (localDatasource as CharacterLocalDataSourceFake).readError =
@@ -253,7 +252,7 @@ class CharacterRepositoryTest {
                 val apiErrorMessage =
                     (result.domainState as? DomainResource.DomainState.Error)?.error
                 //Then
-                assertThat(apiErrorMessage).isEqualTo(expectedError.message)
+                assertThat(apiErrorMessage).isEqualTo(DomainApiUnifiedError.Generic(TEST_ERROR_MESSAGE))
                 assertThat(result.domainState.unwrap()).isNull()
             }
         }

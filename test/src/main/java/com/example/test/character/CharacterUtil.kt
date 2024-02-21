@@ -23,7 +23,8 @@ object CharacterUtil {
     val expectedSuccessCharactersSecondPage = FileUtil.getJson(ALL_CHARACTERS_SECOND_PAGE_JSON)?.fromJson<FeedCharacterDto>() as FeedCharacterDto
     val expectedEmptyCharacterResponse = FileUtil.getJson(EMPTY_JSON)?.fromJson<CharacterDto>() as CharacterDto
     val expectedResultsNullResponse = FileUtil.getJson(RESULTS_NULL_JSON)?.fromJson<FeedCharacterDto>() as FeedCharacterDto
-    val expectedResultsEmptyResponse = FileUtil.getJson(RESULTS_EMPTY_EPISODES_JSON)?.fromJson<FeedCharacterDto>() as FeedCharacterDto
+    val expectedResultsEmptyEpisodes = FileUtil.getJson(RESULTS_EMPTY_EPISODES_JSON)?.fromJson<FeedCharacterDto>() as FeedCharacterDto
+    val expectedResultsEmpty = FileUtil.getJson(RESULTS_EMPTY_JSON)?.fromJson<FeedCharacterDto>() as FeedCharacterDto
     //episode
     val expectedSuccessEpisodesByIds = FileUtil.getJson(EPISODES_BY_ID_JSON)?.fromJson<List<EpisodeDto>>() as List<EpisodeDto>
     //location

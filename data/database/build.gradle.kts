@@ -17,11 +17,21 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    testOptions {
-        unitTests {
-            testOptions.unitTests.isIncludeAndroidResources = true // Robolectric config: https://robolectric.org/getting-started
-        }
+    buildFeatures {
+        buildConfig = true
     }
+//    testOptions {
+//        unitTests {
+//            testOptions.unitTests.isIncludeAndroidResources = true // Robolectric config: https://robolectric.org/getting-started
+//        }
+//    }
+//    packagingOptions {
+//        resources {
+//            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+//            merges += "META-INF/LICENSE.md"
+//            merges += "META-INF/LICENSE-notice.md"
+//        }
+//    }
 }
 kapt {
     correctErrorTypes = true
@@ -35,12 +45,25 @@ dependencies {
 
     implementation(project(":api_interaction_helper:core"))
     testImplementation(project(":test"))
+    //androidTestImplementation(project(":test"))
 
     //Unit test
     testImplementation(libs.junit)
+    testImplementation(libs.junit.ext.ktx)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.test.robolectric)
     testImplementation(libs.test.core.ktx)
+    testImplementation(libs.test.core)
+    testImplementation(libs.test.runner)
+//
+
+//    androidTestImplementation(libs.junit.ext)
+//    androidTestImplementation(libs.junit)
+//    androidTestImplementation(libs.coroutines.test)
+//    androidTestImplementation(libs.test.core.ktx)
+//    androidTestImplementation(libs.test.runner)
+//    androidTestImplementation(libs.test.robolectric)
+
     //testImplementation(kotlin("test"))
     //testImplementation(libs.bundles.test)
     //testRuntimeOnly(libs.junit.jupiter.engine)
@@ -56,10 +79,10 @@ dependencies {
     kapt(libs.room.compiler)
     implementation(libs.androidx.paging)
 
-    tasks.withType<Test> {
-        useJUnitPlatform()
-        testLogging {
-            events("passed", "skipped", "failed")
-        }
-    }
+//    tasks.withType<Test> {
+//        useJUnitPlatform()
+//        testLogging {
+//            events("passed", "skipped", "failed")
+//        }
+//    }
 }

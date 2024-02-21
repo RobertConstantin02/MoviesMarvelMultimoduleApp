@@ -1,5 +1,7 @@
 package com.example.udemycourseapp.ui
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +18,7 @@ import com.example.udemycourseapp.navigation.component.RickAndMortyBottomBar
 import com.example.udemycourseapp.navigation.RickMortyNavHost
 import com.example.udemycourseapp.navigation.component.RickAndMortyNavigationRail
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RickAndMortyApp(

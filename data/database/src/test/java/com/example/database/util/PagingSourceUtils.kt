@@ -1,4 +1,4 @@
-package com.example.database.dao.util
+package com.example.database.util
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
