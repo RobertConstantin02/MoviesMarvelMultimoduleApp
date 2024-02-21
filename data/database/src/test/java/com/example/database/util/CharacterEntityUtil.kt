@@ -15,7 +15,7 @@ object CharacterEntityUtil {
     fun createCharacters(number: Int) = List(number) {
         CharacterEntity(
             id = it + 1,
-            name = "Character $1",
+            name = "Character ${it +1}",
             "asas",
             "null",
             LocationEntity("as", "as"),

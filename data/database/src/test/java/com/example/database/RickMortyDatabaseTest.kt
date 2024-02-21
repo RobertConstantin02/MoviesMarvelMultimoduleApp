@@ -2,31 +2,19 @@ package com.example.database
 
 import android.content.Context
 import android.os.Build.VERSION_CODES.Q
-import androidx.paging.AsyncPagingDataDiffer
-import androidx.paging.DifferCallback
-import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.database.dao.character.ICharacterDao
-import com.example.database.entities.CharacterEntity
 import com.example.database.util.CharacterEntityUtil
-import com.example.database.util.PagingSourceUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -96,8 +84,13 @@ class RickMortyDatabaseTest {
 
     @Test
     @Throws(Exception::class)
-    fun `write and read characters by id`() {
-
+    fun `write and read characters by id`() = runTest {
+        val expected = CharacterEntityUtil.createCharacters(10)
+        //When
+        characterDao.insertCharacters(*expected.toTypedArray())
+        val result = characterDao.getCharactersByIds(listOf(1, 2, 3))
+        println("-----> $result")
+        assertEquals(expected.filter { it.id in listOf(1, 2, 3) }, result)
     }
 
     private fun <PaginationKey: Any, Model: Any>PagingSource<PaginationKey, Model>.getData(): List<Model> {
