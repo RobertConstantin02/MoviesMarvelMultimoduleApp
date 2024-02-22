@@ -15,9 +15,11 @@ import com.example.database.util.CharacterEntityUtil
 import com.example.database.util.PagingSourceUtils
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -127,10 +129,11 @@ internal class CharacterLocalDatasourceTest {
             )
         } returns expected
 
-        characterLocalDatasource.getCharactersByIds(VALID_CHARACTER_IDS).collectLatest { databaseResponse ->
-            val result = (databaseResponse as? DatabaseResponseSuccess)?.data
-            assertEquals(expected, result)
-        }
+        characterLocalDatasource.getCharactersByIds(VALID_CHARACTER_IDS)
+            .collectLatest { databaseResponse ->
+                val result = (databaseResponse as? DatabaseResponseSuccess)?.data
+                assertEquals(expected, result)
+            }
     }
 
     @Test
@@ -153,22 +156,135 @@ internal class CharacterLocalDatasourceTest {
         val expected = DatabaseResponseEmpty<CharacterEntity>()
 
         coEvery {
-            characterDao.getCharactersByIds(any())
+            characterDao.getCharactersByIds(
+                match { ids -> ids.all { it in INVALID_CHARACTER_IDS } }
+            )
         } returns null
 
-        characterLocalDatasource.getCharacterById(INVALID_CHARACTER_ID).collectLatest { result ->
+        characterLocalDatasource.getCharactersByIds(INVALID_CHARACTER_IDS).collectLatest { result ->
             assertThat(result).isInstanceOf(expected::class.java)
         }
     }
 
     @Test
-    fun `getCharacterBysId returns DatabaseResponseError`() = runTest {
+    fun `getCharactersById returns DatabaseResponseError`() = runTest {
         val expected = DatabaseResponseError<CharacterEntity>(LocalUnifiedError.Reading)
         coEvery {
-            characterDao.getCharacterById(any())
+            characterDao.getCharactersByIds(any())
         } throws SQLiteException()
 
-        characterLocalDatasource.getCharacterById(VALID_CHARACTER_ID).collectLatest { result ->
+        characterLocalDatasource.getCharactersByIds(VALID_CHARACTER_IDS).collectLatest { result ->
+            assertThat(
+                (result as DatabaseResponseError).localUnifiedError
+            ).isInstanceOf(expected.localUnifiedError::class.java)
+        }
+    }
+
+    @Test
+    fun `insertCharacters returns DatabaseResponseSuccess`() = runTest {
+        val charactersFake = CharacterEntityUtil.createCharacters(10)
+
+        val expected = DatabaseResponseSuccess(Unit)
+
+        coEvery {
+            characterDao.insertCharacters(*anyVararg())
+        } returns charactersFake.map { it.id.toLong() }.toLongArray()
+
+        val result = characterLocalDatasource.insertCharacters(charactersFake)
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `insertCharacters returns insertion error `() = runTest {
+        val charactersFake = CharacterEntityUtil.createCharacters(10)
+
+        val expected = DatabaseResponseError<Unit>(LocalUnifiedError.Insertion)
+
+        coEvery {
+            characterDao.insertCharacters(*anyVararg())
+        } returns charactersFake.take(5).map { it.id.toLong() }.toLongArray()
+
+        val result =
+            (characterLocalDatasource.insertCharacters(charactersFake) as DatabaseResponseError).localUnifiedError
+
+        assertEquals(expected.localUnifiedError, result)
+    }
+
+    @Test
+    fun `insertCharacters returns read error `() = runTest {
+        val charactersFake = CharacterEntityUtil.createCharacters(10)
+
+        val expected = DatabaseResponseError<Unit>(LocalUnifiedError.Reading)
+
+        coEvery {
+            characterDao.insertCharacters(*anyVararg())
+        } throws SQLiteException()
+
+        val result =
+            (characterLocalDatasource.insertCharacters(charactersFake) as DatabaseResponseError).localUnifiedError
+
+        assertEquals(expected.localUnifiedError, result)
+    }
+
+    @Test
+    fun `updateCharacter is success`() = runTest {
+        val expected = DatabaseResponseSuccess(Unit)
+        coEvery {
+            characterDao.updateCharacterIsFavorite(any(), any())
+        } returns 1
+        characterLocalDatasource.updateCharacterIsFavorite(true, 1).collectLatest { result ->
+            assertThat(result).isInstanceOf(expected::class.java)
+        }
+    }
+
+    @Test
+    fun `updateCharacter returns update error`() = runTest {
+        val expected = DatabaseResponseError<Unit>(LocalUnifiedError.Update)
+        coEvery {
+            characterDao.updateCharacterIsFavorite(any(), any())
+        } returns -1
+        characterLocalDatasource.updateCharacterIsFavorite(true, 1).collectLatest { result ->
+            assertThat(
+                (result as DatabaseResponseError).localUnifiedError
+            ).isInstanceOf(expected.localUnifiedError::class.java)
+        }
+    }
+
+    @Test
+    fun `getFavoriteCharacters returns DatabaseResponseSuccess`() = runTest {
+        val expected = CharacterEntityUtil.createCharacters(10).filter { it.isFavorite }
+        coEvery {
+            characterDao.getFavoriteCharacters(match { offset -> offset >= 0 })
+        } returns flowOf(expected)
+
+        characterLocalDatasource.getFavoriteCharacters(0).collectLatest { result ->
+            assertEquals(expected, (result as? DatabaseResponseSuccess)?.data)
+        }
+    }
+
+    @Test
+    fun `getFavoriteCharacters returns DatabaseResponseEmpty`() = runTest {
+        val expected = DatabaseResponseEmpty<CharacterEntity>()
+
+        coEvery {
+            characterDao.getFavoriteCharacters(match { offset -> offset >= 0 })
+        } returns flowOf(listOf())
+
+        characterLocalDatasource.getFavoriteCharacters(0).collectLatest { result ->
+            assertThat(result).isInstanceOf(expected::class.java)
+        }
+    }
+
+    @Test
+    fun `getFavoriteCharacters returns read error`() = runTest {
+        val expected = DatabaseResponseError<CharacterEntity>(LocalUnifiedError.Reading)
+
+        coEvery {
+            characterDao.getFavoriteCharacters(match { offset -> offset >= 0 })
+        } throws SQLiteException()
+
+        characterLocalDatasource.getFavoriteCharacters(0).collectLatest { result ->
             assertThat(
                 (result as DatabaseResponseError).localUnifiedError
             ).isInstanceOf(expected.localUnifiedError::class.java)

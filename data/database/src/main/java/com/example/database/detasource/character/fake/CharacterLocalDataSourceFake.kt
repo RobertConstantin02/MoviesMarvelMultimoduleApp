@@ -36,20 +36,16 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
             return state.anchorPosition ?: 1
         }
 
-        //this will give me 10, from what i have saved in db locally. It doesnt matter that from remote it comes 20. I want from my locall to take 10 out of those 20.
+        //load will give me 10, from what i have saved in db locally. It doesn't matter that from
+        // remote it comes 20. I want from my local to take 10 out of those 20.
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharacterEntity> {
             if (paginationError) {
                 return LoadResult.Error(Exception("pagination test error", Throwable("test")))
             }
-
             val page = params.key ?: 1
             val startIndex = (page - 1) * PAGE_SIZE
             val endIndex = min(startIndex + PAGE_SIZE, this@CharacterLocalDataSourceFake.characters.value?.size ?: 0)
-            println("-----> load original : ${this@CharacterLocalDataSourceFake.characters.value}")
-            println("-----> startIndex : ${startIndex}")
-            println("-----> endindex : ${endIndex}")
             val dataForThisPage = this@CharacterLocalDataSourceFake.characters.value?.subList(startIndex, endIndex).orEmpty()
-            println("-----> load after : ${this@CharacterLocalDataSourceFake.characters.value?.subList(startIndex, endIndex)}")
             return LoadResult.Page(
                 data = dataForThisPage.take(params.loadSize),
                 prevKey = if (page > 1) page -1 else null,

@@ -1,4 +1,4 @@
-package com.example.test
+package com.example.test.util
 
 object FileUtil {
     fun getJson(file: String) =

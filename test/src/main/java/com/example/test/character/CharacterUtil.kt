@@ -4,7 +4,7 @@ import com.example.api.model.character.CharacterDto
 import com.example.api.model.character.FeedCharacterDto
 import com.example.api.model.episode.EpisodeDto
 import com.example.api.model.location.ExtendedLocationDto
-import com.example.test.FileUtil
+import com.example.test.util.FileUtil
 import com.example.test.GsonAdapterExt.fromJson
 
 const val ALL_CHARACTERS_FIRST_PAGE_JSON = "json/getAllCharactersFirstPage.json"

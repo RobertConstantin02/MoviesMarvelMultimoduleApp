@@ -11,9 +11,7 @@ sealed class DatabaseResponse<T> {
             } ?: run {
                 DatabaseResponseEmpty()
             }
-
     }
-
 }
 
 data class DatabaseResponseSuccess<T>(val data: T): DatabaseResponse<T>()

@@ -16,7 +16,7 @@ import com.example.remote.fake.ApiErrorHandlerFake
 import com.example.test.character.ALL_CHARACTERS_FIRST_PAGE_JSON
 import com.example.test.character.CharacterUtil
 import com.example.test.character.EMPTY_JSON
-import com.example.test.FileUtil
+import com.example.test.util.FileUtil
 import com.example.test.character.RESULTS_EMPTY_EPISODES_JSON
 import com.example.test.character.RESULTS_EMPTY_JSON
 import com.example.test.character.RESULTS_NULL_JSON

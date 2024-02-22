@@ -8,7 +8,7 @@ import com.example.core.remote.ApiResponseSuccess
 import com.example.core.remote.ApiUnifiedError
 import com.example.remote.extension.toRickAndMortyService
 import com.example.remote.fake.ApiErrorHandlerFake
-import com.example.test.FileUtil
+import com.example.test.util.FileUtil
 import com.example.test.character.CharacterUtil
 import com.example.test.character.EXTENDED_LOCATION
 import kotlinx.coroutines.test.runTest

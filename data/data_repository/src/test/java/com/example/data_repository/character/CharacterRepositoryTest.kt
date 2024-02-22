@@ -46,7 +46,7 @@ import java.net.HttpURLConnection
 
 // TODO: make shared module for testing and for implementation where interfaces are placed
 /**
- * You can create a new shared module and move your common interfaces and classes which are used
+ * I can create a new shared module and move your common interfaces and classes which are used
  * in both application code and test code from main to this shared module. And then you can use
  * implementation project(':shared') in application code and testImplementation project(':shared') in test classes to include them.
  *

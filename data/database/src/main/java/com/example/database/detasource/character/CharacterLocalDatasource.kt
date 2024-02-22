@@ -1,6 +1,7 @@
 package com.example.database.detasource.character
 
 import android.database.sqlite.SQLiteException
+import android.util.Log
 import androidx.paging.PagingSource
 import com.example.core.local.DatabaseResponse
 import com.example.core.local.DatabaseResponseEmpty
@@ -88,7 +89,9 @@ class CharacterLocalDatasource @Inject constructor(
     override fun getFavoriteCharacters(offset: Int) = flow {
         try {
             with(characterDao.getFavoriteCharacters(offset)) {
-                emit(DatabaseResponse.create(this.first()))
+                if (this.first()?.isEmpty() == true)
+                    emit(DatabaseResponseEmpty())
+                else emit(DatabaseResponse.create(this.first()))
             }
         }catch (e: SQLiteException) {
             emit(DatabaseResponse.create(LocalUnifiedError.Reading))

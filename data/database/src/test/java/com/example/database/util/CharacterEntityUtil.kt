@@ -3,7 +3,7 @@ package com.example.database.util
 import com.example.database.entities.CharacterEntity
 import com.example.database.entities.LocationEntity
 import com.example.database.entities.OriginEntity
-import com.example.test.FileUtil
+import com.example.test.util.FileUtil
 import com.example.test.GsonAdapterExt.fromJson
 
 const val ALL_CHARACTERS_ENTITY_JSON = "json/getAllCharactersEntity.json"
