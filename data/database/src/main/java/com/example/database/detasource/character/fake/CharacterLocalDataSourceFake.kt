@@ -73,7 +73,7 @@ class CharacterLocalDataSourceFake : ICharacterLocalDatasource {
         return characters.map { charactersEntity ->
             charactersEntity?.singleOrNull { characterEntity ->
                 characterEntity.id == characterId
-            }?.let { charactersById -> DatabaseResponseSuccess(charactersById) }
+            }?.let { character -> DatabaseResponseSuccess(character) }
                 ?: DatabaseResponseEmpty()
         }
     }

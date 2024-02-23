@@ -15,7 +15,8 @@ fun <T> Resource<T>.toDomainResource(): DomainResource<T> =
     when(val state = this.state) {
         is Resource.State.Success -> DomainResource.success(state.data)
         is Resource.State.Error ->
-            DomainResource.error(state.error.toDomainUnifiedError(), state.data)
+            if (state.error is ApiUnifiedError) DomainResource.error(state.error.toDomainUnifiedError(), state.data)
+            else DomainResource.error(state.error.toDomainUnifiedError())
         Resource.State.SuccessEmpty -> DomainResource.successEmpty()
     }
 
