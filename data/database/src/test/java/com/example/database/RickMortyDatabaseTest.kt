@@ -95,7 +95,8 @@ class RickMortyDatabaseTest {
     fun `update character`() =  runTest {
         //Given
         val expected = CharacterEntityUtil.createCharacters(10)
-        val characterToUpdate = expected[(1..10).random()]
+        println("-----> $expected")
+        val characterToUpdate = expected[(0..9).random()]
         println("-----> $characterToUpdate")
         //When
         characterDao.insertCharacters(*expected.toTypedArray())

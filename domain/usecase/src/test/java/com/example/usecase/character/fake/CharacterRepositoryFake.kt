@@ -41,8 +41,10 @@ class CharacterRepositoryFake: ICharacterRepository {
         return charactersDetailBo.map { characters ->
             characters?.singleOrNull { character ->
                 character.id == characterId
-            }?.let { character -> DomainResource.success(character) }
-                ?: DomainResource.successEmpty()
+            }?.let { character ->
+                //println("-----> getCharacter : ${character.toString()}")
+                DomainResource.success(character)
+            } ?: DomainResource.successEmpty()
         }
     }
 
@@ -55,8 +57,10 @@ class CharacterRepositoryFake: ICharacterRepository {
                 character.id in charactersIds
             }?.let { charactersByIds ->
                 if (charactersByIds.isEmpty()) {
+                    //println("-----> getCharactersByIds empty : ${charactersByIds.toString()}")
                     DomainResource.successEmpty()
                 } else {
+                    //println("-----> getCharactersByIds : ${charactersByIds.toString()}")
                     DomainResource.success(charactersByIds)
                 }
             } ?: DomainResource.successEmpty()

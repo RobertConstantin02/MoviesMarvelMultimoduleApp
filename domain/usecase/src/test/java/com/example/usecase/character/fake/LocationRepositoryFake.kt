@@ -16,15 +16,17 @@ class LocationRepositoryFake: ILocationRepository {
     var error: DomainUnifiedError? = null
     var databaseEmpty: DomainResource<Nothing>? = null
 
-    fun setExtendedLocation(characters: List<ExtendedLocationBo>?) {
-        this.extendedLocations.value = characters
+    fun setExtendedLocation(locations: List<ExtendedLocationBo>?) {
+        this.extendedLocations.value = locations
     }
     override fun getExtendedLocation(extendedLocationId: Int): Flow<DomainResource<ExtendedLocationBo>> {
         if (error != null) return flowOf(DomainResource.error(error!!, extendedLocations.value?.firstOrNull { location -> location.id == extendedLocationId }))
         if (databaseEmpty != null) return flowOf(DomainResource.successEmpty()) //skippable?
 
         return extendedLocations.map { locations ->
+            //println("-----> extendedLocations:  ${locations}")
             locations?.singleOrNull { location ->
+                //println("-----> extendedLocation:  ${location}")
                 location.id == extendedLocationId
             }?.let { DomainResource.success(it) }
                 ?: DomainResource.successEmpty()

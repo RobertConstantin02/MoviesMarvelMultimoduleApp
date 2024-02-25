@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "Citadel of Ricks",
+    "type": "Space station",
+    "dimension": "unknown",
+    "residents": [
+      "https://rickandmortyapi.com/api/character/1",
+      "https://rickandmortyapi.com/api/character/2",
+      "https://rickandmortyapi.com/api/character/3",
+      "https://rickandmortyapi.com/api/character/4"
+    ],
+    "url": "https://rickandmortyapi.com/api/location/3",
+    "created": "2017-11-10T13:08:13.191Z"
+  },
+  {
+    "id": 2,
+    "name": "Testicle Monster Dimension",
+    "type": "Dimension",
+    "dimension": "Testicle Monster Dimension",
+    "residents": [
+      "https://rickandmortyapi.com/api/character/1",
+      "https://rickandmortyapi.com/api/character/2",
+      "https://rickandmortyapi.com/api/character/3",
+      "https://rickandmortyapi.com/api/character/4"
+    ],
+    "url": "https://rickandmortyapi.com/api/location/21",
+    "created": "2017-11-18T19:41:01.605Z"
+  }
+]

@@ -1,6 +1,6 @@
 package com.example.usecase.character.implementation
 
-import android.net.Uri
+import android.util.Log
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
 import com.example.domain_model.resource.DomainResource
@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.transform
+import java.net.URI
 import javax.inject.Inject
 
 class GetCharacterDetailsUseCaseUseCase @Inject constructor(
@@ -31,6 +32,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
             characterResult.domainState.combineResources(
                 locationResult.domainState
             ) { character, location ->
+//                println("-----> run 1 : $character || $location")
                 CharacterWithLocation(
                     Pair(character, character?.episodes),
                     Pair(location, location?.residents)
@@ -40,15 +42,20 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
             val characterWithLocation = it.domainState.unwrap()
             combine(
                 characterRepository.getCharactersByIds(
-                    getIds(characterWithLocation?.characterMainDetail?.second)
+                    getIds(characterWithLocation?.extendedLocation?.second)
                 ),
                 episodesRepository.getEpisodes(
-                    getIds(characterWithLocation?.extendedLocation?.second)
+                    getIds(characterWithLocation?.characterMainDetail?.second)
                 )
             ) { residentsResult, episodesResult ->
                 emit(residentsResult.domainState.combineResources(
                     episodesResult.domainState
                 ) { residents, episodes ->
+                    println("-----> characterDetail: ${characterWithLocation?.characterMainDetail?.first}")
+                    println("-----> characterLocation: ${characterWithLocation?.extendedLocation?.first}")
+                    println("-----> characterLocation 2: ${characterWithLocation?.extendedLocation?.second}")
+                    println("-----> residents: $residents")
+                    println("-----> episodes: $episodes")
                     CharacterPresentationScreenBO(
                         characterWithLocation?.characterMainDetail?.first,
                         characterWithLocation?.extendedLocation?.first,
@@ -61,8 +68,7 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     }
 
     private fun getIds(urls: List<String?>?) =
-        urls?.mapNotNull {
-            Uri.parse(it).lastPathSegment?.toInt()
+        urls?.mapNotNull { url ->
+            url?.let { URI(it).path.split("/").last().toInt() }
         } ?: emptyList()
-
 }

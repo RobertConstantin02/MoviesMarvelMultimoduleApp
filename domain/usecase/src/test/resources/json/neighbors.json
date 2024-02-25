@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    }
+  },
+  {
+    "id": 2,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/2.jpeg"
+    }
+  },
+  {
+    "id": 3,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/3.jpeg"
+    }
+  },
+  {
+    "id": 4,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/4.jpeg"
+    }
+  }
+]

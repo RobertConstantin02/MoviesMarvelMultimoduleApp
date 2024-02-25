@@ -15,6 +15,4 @@ data class CharacterDetailBo(
     val episodes: List<String?>?,
 ) {
     val locationId = location?.locationId
-
-
 }

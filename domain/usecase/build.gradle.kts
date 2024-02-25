@@ -20,10 +20,10 @@ dependencies {
     implementation(project(":domain:domain_model"))
 
     //Unit test
-    testImplementation(project(":test"))
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
-    testRuntimeOnly(libs.junit.jupiter.engine)
+//    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.gson)
 
     libs.bundles.apply {
         implementation(hilt)

@@ -165,7 +165,7 @@ hilt = ["hilt-android", "hilt-android-testing"]
 lifecycle = ["androidx-lifecycle-livedata-ktx", "androidx-lifecycle-runtimeCompose", "androidx-lifecycle-viewModelCompose"]
 kotlin = ["jetbrains"]
 network = ["retrofit", "retrofit-converter-gson", "okhttp3", "okhttp3-logging-interceptor"]
-test = ["junit", "junit-ext", "mockk", "mockk-webserver" ,"coroutines-test", "junit-jupiter-api", "junit-jupiter-params", "assertK", "test-robolectric", "test-core-ktx", "test-runner", "test-core"]
+test = ["junit", "junit-ext", "mockk", "mockk-webserver" ,"coroutines-test", "junit-jupiter-api", "junit-jupiter-params", "assertK"]
 arrow = [ "arrow-core","arrow-fx-coroutines" ]
 [plugins]
 org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "org-jetbrains-kotlin-jvm" }

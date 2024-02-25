@@ -13,6 +13,7 @@ const val EMPTY_JSON = "json/empty.json"
 const val RESULTS_NULL_JSON = "json/getAllCharactersWithResultsNull.json"
 const val RESULTS_EMPTY_JSON = "json/getAllCharactersWithResultsEmpty.json"
 const val RESULTS_EMPTY_EPISODES_JSON = "json/getAllCharactersWithEmptyEpisodes.json"
+const val CHARACTERS_JSON = "json/characters.json"
 //Episodes
 const val EPISODES_BY_ID_JSON = "json/getEpisodesByIds.json"
 //Location
