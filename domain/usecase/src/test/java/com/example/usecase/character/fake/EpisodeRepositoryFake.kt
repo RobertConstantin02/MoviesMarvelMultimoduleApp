@@ -1,6 +1,7 @@
 package com.example.usecase.character.fake
 
 import com.example.domain_model.episode.EpisodeBo
+import com.example.domain_model.error.DomainApiUnifiedError
 import com.example.domain_model.error.DomainUnifiedError
 import com.example.domain_model.resource.DomainResource
 import com.example.domain_repository.episode.IEpisodeRepository
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
+private const val TEST_ERROR_MESSAGE  = "Error Test"
 class EpisodeRepositoryFake : IEpisodeRepository {
     private val episodes = MutableStateFlow<List<EpisodeBo>?>(emptyList())
 
@@ -25,20 +27,15 @@ class EpisodeRepositoryFake : IEpisodeRepository {
                 error!!,
                 episodes.value?.filter { location -> location.id in episodesIds })
         )
-        if (databaseEmpty != null) return flowOf(DomainResource.successEmpty()) //skippable?
+        if (databaseEmpty != null) return flowOf(DomainResource.successEmpty())
 
         return episodes.map { episodes ->
             episodes?.filter { episode ->
                 episode.id in episodesIds
             }?.let {
-                if (it.isEmpty()){
-                    //println("-----> episodes empty")
-                    DomainResource.successEmpty()
-                }
-                else {
-                    //println("-----> episodes: ${it}")
-                    DomainResource.success(it)
-                }
+                if (it.isEmpty())
+                    DomainResource.error(DomainApiUnifiedError.Generic(TEST_ERROR_MESSAGE),  null)
+                else DomainResource.success(it)
             } ?: DomainResource.successEmpty()
         }
     }

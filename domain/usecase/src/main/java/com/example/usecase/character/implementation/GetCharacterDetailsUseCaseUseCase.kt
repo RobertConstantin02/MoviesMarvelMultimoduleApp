@@ -1,6 +1,5 @@
 package com.example.usecase.character.implementation
 
-import android.util.Log
 import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.characterDetail.CharacterWithLocation
 import com.example.domain_model.resource.DomainResource
@@ -32,7 +31,6 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
             characterResult.domainState.combineResources(
                 locationResult.domainState
             ) { character, location ->
-//                println("-----> run 1 : $character || $location")
                 CharacterWithLocation(
                     Pair(character, character?.episodes),
                     Pair(location, location?.residents)
@@ -51,11 +49,6 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
                 emit(residentsResult.domainState.combineResources(
                     episodesResult.domainState
                 ) { residents, episodes ->
-                    println("-----> characterDetail: ${characterWithLocation?.characterMainDetail?.first}")
-                    println("-----> characterLocation: ${characterWithLocation?.extendedLocation?.first}")
-                    println("-----> characterLocation 2: ${characterWithLocation?.extendedLocation?.second}")
-                    println("-----> residents: $residents")
-                    println("-----> episodes: $episodes")
                     CharacterPresentationScreenBO(
                         characterWithLocation?.characterMainDetail?.first,
                         characterWithLocation?.extendedLocation?.first,

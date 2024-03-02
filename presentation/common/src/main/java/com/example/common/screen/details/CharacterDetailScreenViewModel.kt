@@ -29,11 +29,11 @@ class DetailViewModel @Inject constructor(
         MutableStateFlow<ScreenState<CharacterPresentationScreenVO>>(ScreenState.Loading())
     val characterDetailState: MutableStateFlow<ScreenState<CharacterPresentationScreenVO>> = _characterDetailState
 
-    fun onEvent(event: CharacterDetailPSEvent<CharacterPresentationScreenVO>) {
+    fun onEvent(event: CharacterDetailScreenEvent<CharacterPresentationScreenVO>) {
         when (event) {
-            is CharacterDetailPSEvent.OnGetCharacterDetails -> getCharacterDetails()
+            is CharacterDetailScreenEvent.OnGetCharacterDetails -> getCharacterDetails()
 
-            is CharacterDetailPSEvent.OnScreenState -> {
+            is CharacterDetailScreenEvent.OnScreenState -> {
                 when(event.screenStateEvent) {
                     is ScreenStateEvent.OnError -> {
                         _characterDetailState.update {
@@ -66,10 +66,10 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun onSuccess(characterPS: CharacterPresentationScreenBO) =
-        onEvent(CharacterDetailPSEvent.OnScreenState(ScreenStateEvent.OnSuccess(characterPS.toCharacterPresentationScreenVO())))
+        onEvent(CharacterDetailScreenEvent.OnScreenState(ScreenStateEvent.OnSuccess(characterPS.toCharacterPresentationScreenVO())))
 
     private fun onError(error: DomainUnifiedError, data: CharacterPresentationScreenBO?) {
-        onEvent(CharacterDetailPSEvent.OnScreenState(translateError(error, data?.toCharacterPresentationScreenVO())))
+        onEvent(CharacterDetailScreenEvent.OnScreenState(translateError(error, data?.toCharacterPresentationScreenVO())))
     }
 
     companion object {

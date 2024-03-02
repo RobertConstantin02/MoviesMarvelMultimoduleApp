@@ -80,7 +80,7 @@ fun DetailPresentationScreen(
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val characterDetailState by viewModel.characterDetailState.collectAsStateWithLifecycle()
-    viewModel.onEvent(CharacterDetailPSEvent.OnGetCharacterDetails())
+    viewModel.onEvent(CharacterDetailScreenEvent.OnGetCharacterDetails())
     DetailPresentationScreenContent(characterDetail = { characterDetailState })
 }
 

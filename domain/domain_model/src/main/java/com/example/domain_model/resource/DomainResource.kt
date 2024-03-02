@@ -17,16 +17,21 @@ class DomainResource<out T> private constructor(
             combineFunction: (T?, R?) -> U
         ): DomainResource<U> = when (this) {
             is Success -> when (other) {
-                is Success -> {
-                    DomainResource(Success(combineFunction(data, other.data)))
-                }
+                is Success -> DomainResource(Success(combineFunction(data, other.data)))
 
                 is SuccessEmpty -> DomainResource(SuccessEmpty)
+
                 is Error -> DomainResource(Error(other.error, combineFunction(data, other.data)))
             }
 
             is SuccessEmpty -> DomainResource(SuccessEmpty)
-            is Error -> DomainResource(Error(error, combineFunction(data, (other as? Error)?.data)))
+
+            is Error -> DomainResource(
+                Error(
+                    error,
+                    combineFunction(data, (other as? Error)?.data ?: (other as? Success)?.data)
+                )
+            )
         }
 
         inline fun <R> fold(

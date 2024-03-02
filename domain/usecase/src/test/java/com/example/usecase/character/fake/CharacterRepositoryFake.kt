@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.example.domain_model.character.CharacterBo
 import com.example.domain_model.character.CharacterNeighborBo
 import com.example.domain_model.characterDetail.CharacterDetailBo
+import com.example.domain_model.error.DomainApiUnifiedError
 import com.example.domain_model.error.DomainUnifiedError
 import com.example.domain_model.resource.DomainResource
 import com.example.domain_repository.character.ICharacterRepository
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-const val TEST_ERROR_MESSAGE  = "Error Test"
+private const val TEST_ERROR_MESSAGE  = "Error Test"
 class CharacterRepositoryFake: ICharacterRepository {
 
     private val charactersBo = MutableStateFlow<List<CharacterBo>>(emptyList())
@@ -20,7 +21,7 @@ class CharacterRepositoryFake: ICharacterRepository {
     private val charactersNeighborBo = MutableStateFlow<List<CharacterNeighborBo>?>(emptyList())
 
     var error: DomainUnifiedError? = null
-    var databaseEmpty: DomainResource<Nothing>? = null
+    var empty: DomainResource.DomainState.SuccessEmpty? = null
 
     fun setCharactersDetailBo(characters: List<CharacterDetailBo>?) {
         this.charactersDetailBo.value = characters
@@ -32,37 +33,32 @@ class CharacterRepositoryFake: ICharacterRepository {
 
 
     override fun getAllCharacters(): Flow<PagingData<CharacterBo>> =
-        flowOf(PagingData.from(charactersBo.value))// error?
+        flowOf(PagingData.from(charactersBo.value))
 
     override fun getCharacter(characterId: Int): Flow<DomainResource<CharacterDetailBo>> {
         if (error != null) return flowOf(DomainResource.error(error!!, charactersDetailBo.value?.firstOrNull { character -> character.id == characterId }))
-        if (databaseEmpty != null) return flowOf(DomainResource.successEmpty()) //skippable?
+        if (empty != null) return flowOf(DomainResource.successEmpty())
 
         return charactersDetailBo.map { characters ->
             characters?.singleOrNull { character ->
                 character.id == characterId
             }?.let { character ->
-                //println("-----> getCharacter : ${character.toString()}")
                 DomainResource.success(character)
-            } ?: DomainResource.successEmpty()
+            } ?: DomainResource.error(DomainApiUnifiedError.Generic(TEST_ERROR_MESSAGE),  null)
         }
     }
 
     override fun getCharactersByIds(charactersIds: List<Int>): Flow<DomainResource<List<CharacterNeighborBo>>> {
         if (error != null) return flowOf(DomainResource.error(error!!, charactersNeighborBo.value?.filter { character -> character.id in charactersIds }))
-        if (databaseEmpty != null) return flowOf(DomainResource.successEmpty()) //skippable?
+        if (empty != null) return flowOf(DomainResource.successEmpty())
 
         return charactersNeighborBo.map { characters->
             characters?.filter { character ->
                 character.id in charactersIds
             }?.let { charactersByIds ->
-                if (charactersByIds.isEmpty()) {
-                    //println("-----> getCharactersByIds empty : ${charactersByIds.toString()}")
-                    DomainResource.successEmpty()
-                } else {
-                    //println("-----> getCharactersByIds : ${charactersByIds.toString()}")
-                    DomainResource.success(charactersByIds)
-                }
+                if (charactersByIds.isEmpty())
+                    DomainResource.error(DomainApiUnifiedError.Generic(TEST_ERROR_MESSAGE),  null)
+                else DomainResource.success(charactersByIds)
             } ?: DomainResource.successEmpty()
         }
     }
