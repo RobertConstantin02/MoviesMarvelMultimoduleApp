@@ -10,6 +10,8 @@ import com.example.domain_repository.di.QLocationRepository
 import com.example.domain_repository.episode.IEpisodeRepository
 import com.example.domain_repository.location.ILocationRepository
 import com.example.usecase.character.IGetCharacterDetailsUseCase
+import com.example.usecase.di.DispatcherIO
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -21,9 +23,9 @@ class GetCharacterDetailsUseCaseUseCase @Inject constructor(
     @QCharacterRepository private val characterRepository: ICharacterRepository,
     @QLocationRepository private val locationRepository: ILocationRepository,
     @QEpisodesRepository private val episodesRepository: IEpisodeRepository,
-) : IGetCharacterDetailsUseCase {
-
-    override suspend fun run(input: IGetCharacterDetailsUseCase.Params): Flow<DomainResource<CharacterPresentationScreenBO>> {
+    @DispatcherIO dispatcher: CoroutineDispatcher
+) : IGetCharacterDetailsUseCase(dispatcher) {
+    override suspend fun run(input: Params): Flow<DomainResource<CharacterPresentationScreenBO>> {
         return combine(
             characterRepository.getCharacter(input.characterId),
             locationRepository.getExtendedLocation(input.locationId),

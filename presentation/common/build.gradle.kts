@@ -32,6 +32,11 @@ dependencies {
     api(project(":api_interaction_helper:retrofit"))
     api(project(":api_interaction_helper:core"))
 
+    testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.test)
+    testImplementation(libs.flow.test.turbine)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
     libs.bundles.apply {
         implementation(compose)
         implementation(hilt)
@@ -42,6 +47,4 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.paging.compose)
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.test)
 }

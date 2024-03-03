@@ -132,7 +132,6 @@ class FavoritesViewModel @Inject constructor(
         pagination.stopCollection() //for not duplicate data when removing
         updateCharacterIsFavorite.invoke(
             IUpdateCharacterIsFavoriteUseCase.Params(isFavorite, characterId),
-            Dispatchers.IO,
             viewModelScope,
             success = {
                 currentCharacterList.remove(currentCharacterList.find { it.id == characterId })

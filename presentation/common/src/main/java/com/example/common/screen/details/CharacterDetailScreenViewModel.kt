@@ -14,7 +14,6 @@ import com.example.presentation_model.CharacterPresentationScreenVO
 import com.example.usecase.character.IGetCharacterDetailsUseCase
 import com.example.usecase.di.GetCharacterDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
@@ -57,7 +56,6 @@ class DetailViewModel @Inject constructor(
                 savedStateHandle.get<String>(CHARACTER_ID)?.toInt() ?: 0,
                 savedStateHandle.get<String>(LOCATION_ID)?.toInt() ?: 0
             ),
-            Dispatchers.IO,
             viewModelScope,
             error = ::onError,
             success = ::onSuccess,

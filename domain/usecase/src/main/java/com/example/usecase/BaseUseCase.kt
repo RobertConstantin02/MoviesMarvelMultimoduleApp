@@ -13,30 +13,29 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
-interface UseCase<Input, Output> {
-    suspend fun run(input: Input): Flow<DomainResource<Output>>
+abstract class UseCase<Input, Output> (private val dispatcher: CoroutineDispatcher) {
+    abstract suspend fun run(input: Input): Flow<DomainResource<Output>>
 
     operator fun invoke(
         input: Input,
-        dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
+        //dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         coroutineScope: CoroutineScope? = null,
         success: (Output) -> Unit = {},
         error: (e: DomainUnifiedError, data: Output?) -> Unit = { _,_ ->},
         empty: () -> Unit = {}
     ) {
         coroutineScope?.let { scope ->
-            val job = scope.async(dispatcher) { run(input) }
             scope.launch(Dispatchers.Main) {
                 try {
-                    job.await().also { flow ->
-                        flow.catch { e -> error(e.toDomainError(), null) }.collectLatest {
+                    run(input).flowOn(dispatcher).catch { e ->
+                        error(e.toDomainError(), null)
+                    }.collectLatest {
                             when(val resource = it.domainState) {
                                 is DomainResource.DomainState.Success -> { success(resource.data) }
                                 is DomainResource.DomainState.Error -> error(resource.error, resource.data)
                                 is DomainResource.DomainState.SuccessEmpty -> empty()
                             }
                         }
-                    }
                 } catch (e: Exception) { error(e.toDomainError(), null) }
             }
         }
