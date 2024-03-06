@@ -6,6 +6,6 @@ import com.example.resources.UiText
 sealed class FavoritesScreenEvent<T> {
     class OnLoadData<T>: FavoritesScreenEvent<T>()
     data class OnScreenState<T>(val screenStateEvent: ScreenStateEvent<T>): FavoritesScreenEvent<T>()
-    data class OnListEmpty<T>(val messageInfo: UiText): FavoritesScreenEvent<T>()
+    data class OnRemoveFavorite<T>(val isFavorite: Boolean = false, val characterId: Int): FavoritesScreenEvent<T>()
     class OnCancelCollectData<T>: FavoritesScreenEvent<T>()
 }

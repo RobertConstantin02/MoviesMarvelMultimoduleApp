@@ -11,6 +11,7 @@ import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.error.DomainUnifiedError
 import com.example.presentation_mapper.BoToVoCharacterPresentationMapper.toCharacterPresentationScreenVO
 import com.example.presentation_model.CharacterPresentationScreenVO
+import com.example.resources.UiText
 import com.example.usecase.character.IGetCharacterDetailsUseCase
 import com.example.usecase.di.GetCharacterDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,13 +45,16 @@ class DetailViewModel @Inject constructor(
                             ScreenState.Success(event.screenStateEvent.data)
                         }
                     }
+
+                    is ScreenStateEvent.OnEmpty -> {
+
+                    }
                 }
             }
         }
     }
 
     private fun getCharacterDetails() {
-        // TODO: some character from list have null locartionId or characterId
         getCharacterDetails.invoke(
             IGetCharacterDetailsUseCase.Params(
                 savedStateHandle.get<String>(CHARACTER_ID)?.toInt() ?: 0,

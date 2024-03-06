@@ -31,6 +31,12 @@ dependencies {
     implementation(project(":domain:domain_model"))
     implementation(project(":domain:usecase"))
 
+    testImplementation(kotlin("test"))
+    testImplementation(project(":test"))
+    testImplementation(libs.bundles.test)
+    testImplementation(libs.flow.test.turbine)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
     libs.bundles.apply {
         implementation(compose)
         implementation(hilt)
@@ -43,6 +49,11 @@ dependencies {
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.paging)
     implementation(libs.androidx.paging.common)
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.test)
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
 }

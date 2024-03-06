@@ -20,6 +20,8 @@ kapt {
 dependencies {
     implementation(project(":data:api"))
     implementation(project(":data:database"))
+    implementation(project(":presentation:presentation_model"))
+    implementation(project(":domain:domain_model"))
     implementation(libs.coroutines.test)
     implementation(libs.junit.jupiter.api)
 

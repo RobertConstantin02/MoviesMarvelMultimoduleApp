@@ -33,7 +33,7 @@ import com.example.common.component.CircularLoadingBar
 import com.example.common.component.EmptyScreen
 import com.example.common.component.RemoveAlertDialog
 import com.example.common.screen.ScreenState
-import com.example.feature_favorites.paginator.Paginator
+import com.example.feature_favorites.paginator.FavoritePaginator
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
 
@@ -68,9 +68,11 @@ fun FavoritesScreen(
         pagingState = { paginationState },
         onItemClick = onItemClick,
         onRemoveCharacter = { isFavorite, characterId ->
-            viewModel.updateCharacter(
-                isFavorite,
-                characterId,
+            viewModel.onEvent(
+                FavoritesScreenEvent.OnRemoveFavorite(
+                    isFavorite,
+                    characterId
+                )
             )
         },
         onLoadMoreCharacters = { viewModel.onEvent(FavoritesScreenEvent.OnLoadData()) },
@@ -83,7 +85,7 @@ fun FavoritesScreen(
 fun FavoritesScreenContent(
     lazyColumState: () -> LazyListState,
     favoritesState: () -> ScreenState<List<CharacterVo>>,
-    pagingState: () -> Paginator.State,
+    pagingState: () -> FavoritePaginator.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onRemoveCharacter: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
@@ -102,6 +104,7 @@ fun FavoritesScreenContent(
                 EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
             }
         }
+
         is ScreenState.Empty -> {
             emptyListMessage?.let {
                 EmptyScreen(message = UiText.StringResources(emptyListMessage).asString(context))
@@ -126,7 +129,7 @@ fun FavoritesScreenContent(
 private fun FavoritesScreenListSuccessContent(
     lazyColumState: () -> LazyListState,
     items: () -> List<CharacterVo>,
-    pagingState: () -> Paginator.State,
+    pagingState: () -> FavoritePaginator.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onRemoveCharacter: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
@@ -168,19 +171,19 @@ private fun FavoritesScreenListSuccessContent(
 
 @Composable
 fun HandleScreenState(
-    pagingState: () -> Paginator.State,
+    pagingState: () -> FavoritePaginator.State,
     boxScope: BoxScope,
     modifier: Modifier = Modifier
 ) = with(boxScope) {
     when (pagingState()) {
-        is Paginator.State.Idle -> {}
-        is Paginator.State.Loading ->
+        is FavoritePaginator.State.Idle -> {}
+        is FavoritePaginator.State.Loading ->
             CircularProgressIndicator(
                 modifier = modifier.align(Alignment.BottomCenter),
                 color = MaterialTheme.colorScheme.tertiary
             )
 
-        is Paginator.State.End ->
+        is FavoritePaginator.State.End ->
             // TODO: Custom toast with builder
             Toast.makeText(
                 LocalContext.current,
@@ -219,7 +222,7 @@ fun RememberLifeCycleEvent(
     with(LocalLifecycleOwner.current) {
         val lifeCycleObserver = remember {
             LifecycleEventObserver { _, event ->
-                when(event) {
+                when (event) {
                     Lifecycle.Event.ON_STOP -> onStop() //this is needed because if we swtich scren again then collect from pagiantor will continue collecting
                     else -> {}
                 }

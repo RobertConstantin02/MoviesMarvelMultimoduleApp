@@ -18,7 +18,6 @@ abstract class UseCase<Input, Output> (private val dispatcher: CoroutineDispatch
 
     operator fun invoke(
         input: Input,
-        //dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         coroutineScope: CoroutineScope? = null,
         success: (Output) -> Unit = {},
         error: (e: DomainUnifiedError, data: Output?) -> Unit = { _,_ ->},
@@ -69,10 +68,10 @@ interface UseCaseNoOutput<Input> {
     interface Input
 }
 
-interface FlowUseCase<Input, Output> {
-    fun run(input: Input): Flow<Output>
+abstract class FlowUseCase<Input, Output>(private val dispatcher: CoroutineDispatcher) {
+    abstract fun run(input: Input): Flow<Output>
     operator fun invoke(
         params: Input,
-        dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
+        //dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
     ) = run(params).flowOn(dispatcher)
 }

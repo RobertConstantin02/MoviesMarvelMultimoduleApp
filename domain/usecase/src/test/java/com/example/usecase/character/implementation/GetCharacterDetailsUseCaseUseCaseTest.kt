@@ -47,7 +47,7 @@ internal class GetCharacterDetailsUseCaseUseCaseTest {
         locationRepository = LocationRepositoryFake()
         episodesRepository = EpisodeRepositoryFake()
         getCharacterDetailsUseCaseUseCase = GetCharacterDetailsUseCaseUseCase(
-            characterRepository, locationRepository, episodesRepository
+            characterRepository, locationRepository, episodesRepository, testDispatcher
         )
         Dispatchers.setMain(testDispatcher)
     }

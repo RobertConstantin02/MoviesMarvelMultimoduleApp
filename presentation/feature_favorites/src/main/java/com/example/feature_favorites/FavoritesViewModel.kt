@@ -10,7 +10,9 @@ import com.example.common.screen.ScreenState
 import com.example.common.screen.ScreenStateEvent
 import com.example.common.util.translateError
 import com.example.domain_model.error.DomainUnifiedError
-import com.example.feature_favorites.paginator.Paginator
+import com.example.feature_favorites.paginator.FavoritePaginator
+import com.example.feature_favorites.paginator.PaginatorFactory
+import com.example.feature_favorites.paginator.Configuration
 import com.example.presentation_mapper.toCharacterVo
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
@@ -19,7 +21,6 @@ import com.example.usecase.character.IUpdateCharacterIsFavoriteUseCase
 import com.example.usecase.di.GetFavoriteCharacters
 import com.example.usecase.di.UpdateCharacterIsFavorite
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,14 +34,15 @@ const val LOADING_SIMULATION = 500L
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     @GetFavoriteCharacters private val getFavoriteCharacters: IGetFavoriteCharactersUseCase,
-    @UpdateCharacterIsFavorite private val updateCharacterIsFavorite: IUpdateCharacterIsFavoriteUseCase
+    @UpdateCharacterIsFavorite private val updateCharacterIsFavorite: IUpdateCharacterIsFavoriteUseCase,
+    paginationFactory: PaginatorFactory
 ) : ViewModel() {
 
     private val _favoritesState =
         MutableStateFlow<ScreenState<List<CharacterVo>>>(ScreenState.Loading())
     val favoritesState = _favoritesState.asStateFlow()
 
-    private val _paginationState = MutableStateFlow<Paginator.State>(Paginator.State.Idle)
+    private val _paginationState = MutableStateFlow<FavoritePaginator.State>(FavoritePaginator.State.Idle)
     val paginationState = _paginationState.asStateFlow()
 
     private var currentPage = PAGE_INITIALIZATION
@@ -50,29 +52,27 @@ class FavoritesViewModel @Inject constructor(
     var canPaginate by mutableStateOf(true)
         private set
 
-    private val pagination = Paginator(
-        initialKey = currentPage,
-        onLoading = {
-            if (currentPage == -1) _favoritesState.update { ScreenState.Loading() }
-            else _paginationState.update { Paginator.State.Loading }
-        },
-        onRequest = { nextPage ->
-            getFavoriteCharacters.invoke(
-                IGetFavoriteCharactersUseCase.Params(nextPage),
-                Dispatchers.IO
-            )
-        },
-        getNextKey = {
-            currentPage += 1
-            currentPage
-        },
-        onSuccess = { newCharacters ->
-            canPaginate = newCharacters.size == PAGE_SIZE
-            if (!canPaginate && itemListHasPageSizeOrGrater()) _paginationState.update { Paginator.State.End }
-            onSuccess(newCharacters.map { it.toCharacterVo() })
-        },
-        onError = ::onError,
-        onEmpty = { onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(R.string.empty_favorite_list))) }
+    private val pagination = paginationFactory.createPaginator(
+        configuration = Configuration(
+            initialKey = currentPage,
+            onLoading = {
+                if (currentPage != -1) _paginationState.update { FavoritePaginator.State.Loading }
+            },
+            onRequest = { nextPage ->
+                getFavoriteCharacters.invoke(IGetFavoriteCharactersUseCase.Params(nextPage))
+            },
+            getNextKey = {
+                currentPage += 1
+                currentPage
+            },
+            onSuccess = { newCharacters ->
+                canPaginate = newCharacters.size == PAGE_SIZE
+                if (!canPaginate && itemListHasPageSizeOrGrater()) _paginationState.update { FavoritePaginator.State.End }
+                onSuccess(newCharacters.map { it.toCharacterVo() })
+            },
+            onError = ::onError,
+            onEmpty = { onEvent(FavoritesScreenEvent.OnScreenState(ScreenStateEvent.OnEmpty(UiText.StringResources(R.string.empty_favorite_list))))  }
+        )
     )
 
 
@@ -96,13 +96,17 @@ class FavoritesViewModel @Inject constructor(
                             ScreenState.Success(event.screenStateEvent.data)
                         }
                     }
+
+                    is ScreenStateEvent.OnEmpty -> {
+                        _favoritesState.update {
+                            ScreenState.Empty(UiText.StringResources(R.string.empty_favorite_list))
+                        }
+                    }
                 }
             }
 
-            is FavoritesScreenEvent.OnListEmpty ->
-                _favoritesState.update {
-                    ScreenState.Empty(UiText.StringResources(R.string.empty_favorite_list))
-                }
+            is FavoritesScreenEvent.OnRemoveFavorite ->
+                removeFavoriteCharacter(event.isFavorite, event.characterId)
 
             is FavoritesScreenEvent.OnCancelCollectData -> {
                 job?.cancel()
@@ -125,10 +129,18 @@ class FavoritesViewModel @Inject constructor(
                 )
             )
             currentCharacterList.addAll(newCharacters)
-        } else onEvent(FavoritesScreenEvent.OnListEmpty(UiText.StringResources(R.string.empty_favorite_list)))
+        } else onEvent(FavoritesScreenEvent.OnScreenState(ScreenStateEvent.OnEmpty(UiText.StringResources(R.string.empty_favorite_list))))
     }
 
-    fun updateCharacter(isFavorite: Boolean, characterId: Int) {
+    private fun onSuccess() {
+        if (currentCharacterList.isNotEmpty()) {
+            onEvent(
+                FavoritesScreenEvent.OnScreenState(ScreenStateEvent.OnSuccess(currentCharacterList))
+            )
+        } else onEvent(FavoritesScreenEvent.OnScreenState(ScreenStateEvent.OnEmpty(UiText.StringResources(R.string.empty_favorite_list))))
+    }
+
+    private fun removeFavoriteCharacter(isFavorite: Boolean, characterId: Int) {
         pagination.stopCollection() //for not duplicate data when removing
         updateCharacterIsFavorite.invoke(
             IUpdateCharacterIsFavoriteUseCase.Params(isFavorite, characterId),
@@ -149,7 +161,7 @@ class FavoritesViewModel @Inject constructor(
     private fun simulateLoading() {
         viewModelScope.launch {
             delay(LOADING_SIMULATION)
-            _paginationState.update { Paginator.State.Idle }
+            _paginationState.update { FavoritePaginator.State.Idle }
         }
     }
 

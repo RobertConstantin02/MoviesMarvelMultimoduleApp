@@ -1,0 +1,180 @@
+[
+  {
+    "id": 1,
+    "locationId": 1,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Rick Sanchez",
+    "isFavorite": true
+  },
+  {
+    "id": 2,
+    "locationId": 2,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Morty Smith",
+    "isFavorite": true
+  },
+  {
+    "id": 2,
+    "locationId": 3,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Summer Smith",
+    "isFavorite": true
+  },
+  {
+    "id": 4,
+    "locationId": 4,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Beth Smith",
+    "isFavorite": true
+  },
+  {
+    "id": 5,
+    "locationId": 5,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Jerry Smith",
+    "isFavorite": true
+  },
+  {
+    "id": 6,
+    "locationId": 6,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Abadango Cluster Princess",
+    "isFavorite": true
+  },
+  {
+    "id": 7,
+    "locationId": 7,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Abradolf Lincler",
+    "isFavorite": true
+  },
+  {
+    "id": 8,
+    "locationId": 8,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Adjudicator Rick",
+    "isFavorite": true
+  },
+  {
+    "id": 9,
+    "locationId": 9,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Agency Director",
+    "isFavorite": true
+  },
+  {
+    "id": 10,
+    "locationId": 10,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Alan Rails",
+    "isFavorite": true
+  },
+  {
+    "id": 11,
+    "locationId": 11,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Rick Sanchez",
+    "isFavorite": true
+  },
+  {
+    "id": 12,
+    "locationId": 12,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Morty Smith",
+    "isFavorite": true
+  },
+  {
+    "id": 13,
+    "locationId": 13,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Rick Sanchez",
+    "isFavorite": true
+  },
+  {
+    "id": 14,
+    "locationId": 14,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Morty Smith",
+    "isFavorite": true
+  },
+  {
+    "id": 15,
+    "locationId": 15,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Rick Sanchez",
+    "isFavorite": true
+  },
+  {
+    "id": 16,
+    "locationId": 16,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Morty Smith",
+    "isFavorite": true
+  },{
+  "id": 17,
+  "locationId": 17,
+  "image": {
+    "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+  },
+  "name": "Rick Sanchez",
+  "isFavorite": true
+},
+  {
+    "id": 18,
+    "locationId": 18,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Morty Smith",
+    "isFavorite": true
+  },{
+  "id": 19,
+  "locationId": 19,
+  "image": {
+    "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+  },
+  "name": "Rick Sanchez",
+  "isFavorite": true
+},
+  {
+    "id": 20,
+    "locationId": 20,
+    "image": {
+      "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+    },
+    "name": "Morty Smith",
+    "isFavorite": true
+  }
+]

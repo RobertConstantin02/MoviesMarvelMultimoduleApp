@@ -27,10 +27,7 @@ class FeedViewModel @Inject constructor(
 ) : ViewModel() {
 
     val feedState: StateFlow<PagingData<CharacterVo>> =
-        getAllCharacters.invoke(
-            Unit,
-            Dispatchers.IO
-        ).map { pagingData ->
+        getAllCharacters.invoke(Unit).map { pagingData ->
             pagingData.map { character -> character.toCharacterVo()}
         }.cachedIn(viewModelScope).stateIn(
             scope = viewModelScope,

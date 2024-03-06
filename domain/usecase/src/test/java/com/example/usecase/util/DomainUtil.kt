@@ -14,7 +14,6 @@ const val EPISODES_JSON = "json/episodes.json"
 object DomainUtil {
     //character
     val charactersDetail = FileUtil.getJson(CHARACTERS_JSON)?.fromJson<Array<CharacterDetailBo>>() as Array<CharacterDetailBo>
-
     val extendedLocation = FileUtil.getJson(EXTENDED_LOCATION_JSON)?.fromJson<Array<ExtendedLocationBo>>() as Array<ExtendedLocationBo>
     val extendedLocationNullResidents = FileUtil.getJson(EXTENDED_LOCATION_NULL_RESIDENTS_JSON)?.fromJson<Array<ExtendedLocationBo>>() as Array<ExtendedLocationBo>
 
