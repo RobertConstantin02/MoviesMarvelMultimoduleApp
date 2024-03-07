@@ -6,9 +6,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import com.example.common.R
 import com.example.common.screen.ScreenState
-import com.example.domain_model.characterDetail.CharacterPresentationScreenBO
 import com.example.domain_model.error.DomainLocalUnifiedError
 import com.example.domain_model.resource.DomainResource
+import com.example.feature_favorites.paginator.FavoritePaginator
 import com.example.feature_favorites.paginator.PaginatorFactory
 import com.example.presentation_mapper.toCharacterVo
 import com.example.resources.UiText
@@ -34,8 +34,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private const val EMPTY_MESSAGE = "Empty Data"
-
+@OptIn(ExperimentalCoroutinesApi::class)
 class FavoritesViewModelTest {
     private lateinit var getFavoriteCharacters: IGetFavoriteCharactersUseCase
     private lateinit var updateChacterIsFavorite: IUpdateCharacterIsFavoriteUseCase
@@ -76,6 +75,7 @@ class FavoritesViewModelTest {
 
     @Test
     fun `given success OnLoadData events, when data base has data, then state success`() = runTest {
+        //Given
         val expected = CharacterUtil.favoriteCharacters.toList().map {
             it.toCharacterVo()
         }
@@ -172,12 +172,63 @@ class FavoritesViewModelTest {
 
             viewModel.onEvent(FavoritesScreenEvent.OnRemoveFavorite(false, 2))
             val removeEvent = awaitItem()
-            assertThat((removeEvent as? ScreenState.Success)?.data).isEqualTo(expected.first().toCharacterVo())
+            assertThat((removeEvent as? ScreenState.Success)?.data).isEqualTo(
+                listOf(
+                    expected.first().toCharacterVo()
+                )
+            )
         }
     }
 
+    /**
+     * @getFavoriteCharacters is called two times. First one simulates a full load and second one
+     * loads remaining characters triggering the end of pagination.
+     */
+    @Test
+    fun `given success OnLoadData events, when data base has no more data, then pagination state end`() =
+        runTest {
+            val expected = CharacterUtil.favoriteCharacters.toList().take(12).map {
+                it.toCharacterVo()
+            }
 
-    //PAGINATOR STATE IS HANDLED PORPERLY WITH SUCCESS LOADS
-    //PAGINATOR STATE END
-    //UPDATE CHARACTER REMOVE FROM FAVORITES
+            coEvery {
+                getFavoriteCharacters.invoke(match { it.page >= 0 })
+            } answers {
+                if (arg<IGetFavoriteCharactersUseCase.Params>(0).page == 0) {
+                    flowOf(
+                        DomainResource.success(
+                            CharacterUtil.favoriteCharacters.toList().take(10)
+                        )
+                    )
+                } else {
+                    flowOf(
+                        DomainResource.success(
+                            CharacterUtil.favoriteCharacters.toList().subList(10, 12)
+                        )
+                    )
+                }
+            }
+
+            viewModel.favoritesState.test {
+                //--- first load event ---
+                viewModel.onEvent(FavoritesScreenEvent.OnLoadData())
+                val firstLoading = awaitItem()
+                assertThat(firstLoading).isInstanceOf(ScreenState.Loading::class.java)
+                val initialAppend = awaitItem()
+                assertThat(initialAppend).isInstanceOf(ScreenState.Success::class.java)
+                assertThat((initialAppend as? ScreenState.Success)?.data).isEqualTo(expected.take(10))
+
+                //--- second load event ---
+                viewModel.onEvent(FavoritesScreenEvent.OnLoadData())
+                viewModel.paginationState.test {
+                    awaitItem() //skip idle
+                    awaitItem() //skip loading
+                    val paginationEnd = awaitItem()
+                    assertThat(paginationEnd).isInstanceOf(FavoritePaginator.State.End::class.java)
+                }
+                val secondAppend = awaitItem()
+                assertThat(secondAppend).isInstanceOf(ScreenState.Success::class.java)
+                assertThat((secondAppend as? ScreenState.Success)?.data).isEqualTo(expected)
+            }
+        }
 }
