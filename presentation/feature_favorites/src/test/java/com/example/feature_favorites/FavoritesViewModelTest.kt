@@ -5,11 +5,12 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import com.example.common.R
+import com.example.common.paginatorFactory.PaginationFactory
 import com.example.common.screen.ScreenState
 import com.example.domain_model.error.DomainLocalUnifiedError
 import com.example.domain_model.resource.DomainResource
-import com.example.feature_favorites.paginator.FavoritePaginator
-import com.example.feature_favorites.paginator.PaginatorFactory
+import com.example.feature_favorites.paginator.FavoritePagination
+import com.example.feature_favorites.paginator.FavoritePagingConfig
 import com.example.presentation_mapper.toCharacterVo
 import com.example.resources.UiText
 import com.example.test.character.CharacterUtil
@@ -38,7 +39,7 @@ import org.junit.jupiter.api.Test
 class FavoritesViewModelTest {
     private lateinit var getFavoriteCharacters: IGetFavoriteCharactersUseCase
     private lateinit var updateChacterIsFavorite: IUpdateCharacterIsFavoriteUseCase
-    private lateinit var paginationFactory: PaginatorFactory
+    private lateinit var paginationFactory: PaginationFactory<FavoritePagingConfig>
 
     private lateinit var viewModel: FavoritesViewModel
 
@@ -52,7 +53,7 @@ class FavoritesViewModelTest {
         getFavoriteCharacters = mockk()
         updateChacterIsFavorite = mockk()
 
-        paginationFactory = FavoritePaginatorFactoryFake()
+        paginationFactory = FavoritePaginationFactoryFake()
 
         mockkStatic(Dispatchers::class)
         every { Dispatchers.IO } returns testDispatcher
@@ -224,7 +225,7 @@ class FavoritesViewModelTest {
                     awaitItem() //skip idle
                     awaitItem() //skip loading
                     val paginationEnd = awaitItem()
-                    assertThat(paginationEnd).isInstanceOf(FavoritePaginator.State.End::class.java)
+                    assertThat(paginationEnd).isInstanceOf(FavoritePagination.State.End::class.java)
                 }
                 val secondAppend = awaitItem()
                 assertThat(secondAppend).isInstanceOf(ScreenState.Success::class.java)

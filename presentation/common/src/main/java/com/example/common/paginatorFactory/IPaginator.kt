@@ -1,4 +1,4 @@
-package com.example.feature_favorites.paginator
+package com.example.common.paginatorFactory
 
 interface IPaginator {
     suspend fun loadNextData()

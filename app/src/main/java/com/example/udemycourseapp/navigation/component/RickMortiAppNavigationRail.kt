@@ -20,10 +20,10 @@ fun RickAndMortyNavigationRail(
     onNavigate: (destination: RickMortiTopLevelDestination) -> Unit,
     modifier: Modifier = Modifier,
 ){
-    MarvelNavRail(modifier = modifier) {
+    RickAndMortyNavigationRail(modifier = modifier) {
         destinations.forEach { destination ->
             val itemSelected = currentDestination.isTopLevelDestinationInHierarchy(destination)
-            MarvelNavigationRailItem(
+            RickAndMortyNavigationRailItem(
                 selected = itemSelected,
                 onClick = { onNavigate(destination) },
                 icon = {
@@ -39,7 +39,7 @@ fun RickAndMortyNavigationRail(
 }
 
 @Composable
-fun MarvelNavRail(
+fun RickAndMortyNavigationRail(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -52,7 +52,7 @@ fun MarvelNavRail(
 }
 
 @Composable
-fun MarvelNavigationRailItem(
+fun RickAndMortyNavigationRailItem(
     selected: Boolean,
     onClick: () -> Unit,
     icon: @Composable () -> Unit,

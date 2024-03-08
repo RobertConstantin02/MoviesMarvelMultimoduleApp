@@ -25,16 +25,15 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.concurrent.CountDownLatch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Q])
 class RickMortyDatabaseTest {
 
     private lateinit var characterDao: ICharacterDao
     private lateinit var db: RickMortyDatabase
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -44,9 +43,8 @@ class RickMortyDatabaseTest {
         characterDao = db.characterDao()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @After
-    fun closeDb() {
+    fun tearDown() {
         Dispatchers.resetMain()
         db.close()
     }
@@ -59,7 +57,6 @@ class RickMortyDatabaseTest {
         //When
         characterDao.insertCharacters(*expected.toTypedArray())
         val result = characterDao.getAllCharacters().getData()
-        println("$-----> $result")
         //Then
         assertEquals(expected, result)
     }

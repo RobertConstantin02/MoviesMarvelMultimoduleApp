@@ -6,13 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.common.R
+import com.example.common.paginatorFactory.PaginationFactory
 import com.example.common.screen.ScreenState
 import com.example.common.screen.ScreenStateEvent
 import com.example.common.util.translateError
 import com.example.domain_model.error.DomainUnifiedError
-import com.example.feature_favorites.paginator.FavoritePaginator
-import com.example.feature_favorites.paginator.PaginatorFactory
-import com.example.feature_favorites.paginator.Configuration
+import com.example.feature_favorites.paginator.FavoritePagination
+import com.example.feature_favorites.paginator.FavoritePagingConfig
 import com.example.presentation_mapper.toCharacterVo
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
@@ -35,14 +35,14 @@ const val LOADING_SIMULATION = 500L
 class FavoritesViewModel @Inject constructor(
     @GetFavoriteCharacters private val getFavoriteCharacters: IGetFavoriteCharactersUseCase,
     @UpdateCharacterIsFavorite private val updateCharacterIsFavorite: IUpdateCharacterIsFavoriteUseCase,
-    paginationFactory: PaginatorFactory
+    paginationFactory: PaginationFactory<FavoritePagingConfig>
 ) : ViewModel() {
 
     private val _favoritesState =
         MutableStateFlow<ScreenState<List<CharacterVo>>>(ScreenState.Loading())
     val favoritesState = _favoritesState.asStateFlow()
 
-    private val _paginationState = MutableStateFlow<FavoritePaginator.State>(FavoritePaginator.State.Idle)
+    private val _paginationState = MutableStateFlow<FavoritePagination.State>(FavoritePagination.State.Idle)
     val paginationState = _paginationState.asStateFlow()
 
     private var currentPage = PAGE_INITIALIZATION
@@ -52,11 +52,11 @@ class FavoritesViewModel @Inject constructor(
     var canPaginate by mutableStateOf(true)
         private set
 
-    private val pagination = paginationFactory.createPaginator(
-        configuration = Configuration(
+    private val pagination = paginationFactory.createPagination(
+        configuration = FavoritePagingConfig(
             initialKey = currentPage,
             onLoading = {
-                if (currentPage != -1) _paginationState.update { FavoritePaginator.State.Loading }
+                if (currentPage != -1) _paginationState.update { FavoritePagination.State.Loading }
             },
             onRequest = { nextPage ->
                 getFavoriteCharacters.invoke(IGetFavoriteCharactersUseCase.Params(nextPage))
@@ -67,7 +67,7 @@ class FavoritesViewModel @Inject constructor(
             },
             onSuccess = { newCharacters ->
                 canPaginate = newCharacters.size == PAGE_SIZE
-                if (!canPaginate && itemListHasPageSizeOrGrater()) _paginationState.update { FavoritePaginator.State.End }
+                if (!canPaginate && itemListHasPageSizeOrGrater()) _paginationState.update { FavoritePagination.State.End }
                 onSuccess(newCharacters.map { it.toCharacterVo() })
             },
             onError = ::onError,
@@ -161,7 +161,7 @@ class FavoritesViewModel @Inject constructor(
     private fun simulateLoading() {
         viewModelScope.launch {
             delay(LOADING_SIMULATION)
-            _paginationState.update { FavoritePaginator.State.Idle }
+            _paginationState.update { FavoritePagination.State.Idle }
         }
     }
 

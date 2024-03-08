@@ -1,7 +1,8 @@
 package com.example.feature_favorites.paginator_module
 
-import com.example.feature_favorites.paginator.FavoritePaginatorFactory
-import com.example.feature_favorites.paginator.PaginatorFactory
+import com.example.common.paginatorFactory.PaginationFactory
+import com.example.feature_favorites.paginator.FavoritePaginationFactory
+import com.example.feature_favorites.paginator.FavoritePagingConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,5 +14,6 @@ import dagger.hilt.android.scopes.ViewModelScoped
 object PaginationModule {
     @Provides
     @ViewModelScoped
-    fun providePaginatorFactory(): PaginatorFactory = FavoritePaginatorFactory()
+    fun provideFavoritePaginationFactory(): PaginationFactory<FavoritePagingConfig> =
+        FavoritePaginationFactory()
 }

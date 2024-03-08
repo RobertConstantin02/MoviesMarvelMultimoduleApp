@@ -33,7 +33,7 @@ import com.example.common.component.CircularLoadingBar
 import com.example.common.component.EmptyScreen
 import com.example.common.component.RemoveAlertDialog
 import com.example.common.screen.ScreenState
-import com.example.feature_favorites.paginator.FavoritePaginator
+import com.example.feature_favorites.paginator.FavoritePagination
 import com.example.presentation_model.CharacterVo
 import com.example.resources.UiText
 
@@ -85,7 +85,7 @@ fun FavoritesScreen(
 fun FavoritesScreenContent(
     lazyColumState: () -> LazyListState,
     favoritesState: () -> ScreenState<List<CharacterVo>>,
-    pagingState: () -> FavoritePaginator.State,
+    pagingState: () -> FavoritePagination.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onRemoveCharacter: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
@@ -129,7 +129,7 @@ fun FavoritesScreenContent(
 private fun FavoritesScreenListSuccessContent(
     lazyColumState: () -> LazyListState,
     items: () -> List<CharacterVo>,
-    pagingState: () -> FavoritePaginator.State,
+    pagingState: () -> FavoritePagination.State,
     onItemClick: (itemId: Int, locationId: Int?) -> Unit,
     onRemoveCharacter: (isFavorite: Boolean, characterId: Int) -> Unit,
     onLoadMoreCharacters: () -> Unit,
@@ -171,19 +171,19 @@ private fun FavoritesScreenListSuccessContent(
 
 @Composable
 fun HandleScreenState(
-    pagingState: () -> FavoritePaginator.State,
+    pagingState: () -> FavoritePagination.State,
     boxScope: BoxScope,
     modifier: Modifier = Modifier
 ) = with(boxScope) {
     when (pagingState()) {
-        is FavoritePaginator.State.Idle -> {}
-        is FavoritePaginator.State.Loading ->
+        is FavoritePagination.State.Idle -> {}
+        is FavoritePagination.State.Loading ->
             CircularProgressIndicator(
                 modifier = modifier.align(Alignment.BottomCenter),
                 color = MaterialTheme.colorScheme.tertiary
             )
 
-        is FavoritePaginator.State.End ->
+        is FavoritePagination.State.End ->
             // TODO: Custom toast with builder
             Toast.makeText(
                 LocalContext.current,
