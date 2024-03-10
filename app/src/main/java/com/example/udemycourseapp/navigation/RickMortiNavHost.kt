@@ -4,21 +4,20 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.example.common.screen.details.detailsScreen
 import com.example.feature_favorites.favoritesGraph
 import com.example.feature_feed.feedGraph
-import com.example.navigationlogic.NavigationCommand
+import com.example.navigationlogic.Navigation
 import com.example.udemycourseapp.ui.RickAndMortyAppState
 import com.example.udemycourseapp.ui.RickMortyAppFeature
 
 private const val FEED_DETAILS = "feedDetail"
 
-class GoToFeedDetails(
+class FeedDetails(
     private val characterId: Int,
     private val locationId: Int?,
-    ) : NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED) {
+    ) : Navigation.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED) {
     override fun createRoute(): String {
         return super.createRoute().plus(
             "${Uri.encode(characterId.toString())}/${Uri.encode(locationId.toString())}"
@@ -30,7 +29,6 @@ class GoToFeedDetails(
 @Composable
 fun RickMortyNavHost(
     appState: RickAndMortyAppState,
-    modifier: Modifier = Modifier,
     startDestination: String = RickMortyAppFeature.RICK_MORTY_FEED.route
 ) {
     NavHost(
@@ -38,26 +36,26 @@ fun RickMortyNavHost(
         startDestination = startDestination
     ) {
         feedGraph(
-            command = NavigationCommand.GoToMain(RickMortyAppFeature.RICK_MORTY_FEED),
+            command = Navigation.GoToMain(RickMortyAppFeature.RICK_MORTY_FEED),
             onItemClick = { itemId, locationId ->
                 appState.navController.navigate(
-                    GoToFeedDetails(
+                    FeedDetails(
                         itemId, locationId
                     ).createRoute()
                 )
             },
             nestedGraphs = {
-                detailsScreen(NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))
+                detailsScreen(Navigation.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))
             }
         )
 
         favoritesGraph(
-            command = NavigationCommand.GoToMain(RickMortyAppFeature.FAVORITES),
+            command = Navigation.GoToMain(RickMortyAppFeature.FAVORITES),
             onItemClick = { itemId, locationId ->
-                appState.navController.navigate(GoToFeedDetails(itemId, locationId).createRoute())
+                appState.navController.navigate(FeedDetails(itemId, locationId).createRoute())
             },
             nestedGraphs = {
-                detailsScreen(NavigationCommand.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))
+                detailsScreen(Navigation.GoToDetail(RickMortyAppFeature.RICK_MORTY_FEED))
             }
         )
     }

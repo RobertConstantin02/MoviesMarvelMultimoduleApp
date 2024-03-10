@@ -1,12 +1,12 @@
 package com.example.navigationlogic
 
-import android.net.Uri
-import android.util.Log
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
-interface Feature { val route: String }
+interface Feature {
+    val route: String
+}
 
 interface Command {
     fun getRoute(): String
@@ -14,16 +14,18 @@ interface Command {
     val feature: Feature
 }
 
-sealed class NavigationCommand(
+sealed class Navigation(
     val subRoute: String = "main",
     private val navArgs: List<NavArg> = emptyList()
-): Command {
-    data class GoToMain(override val feature: Feature) : NavigationCommand()
+) : Command {
+    data class GoToMain(override val feature: Feature) : Navigation()
     open class GoToDetail(override val feature: Feature) :
-        NavigationCommand(DETAIL_SUBROUTE,  listOf(NavArg.CHARACTER_ID, NavArg.LOCATION_ID)) {
+        Navigation(DETAIL_SUBROUTE, listOf(NavArg.CHARACTER_ID, NavArg.LOCATION_ID)) {
         open fun createRoute() = "${feature.route}/$subRoute/"
     }
-    override fun getRoute() = kotlin.run { "${feature.route}/$subRoute/${linkMandatoryOptionalArgs()}" }
+
+    override fun getRoute() =
+        kotlin.run { "${feature.route}/$subRoute/${linkMandatoryOptionalArgs()}" }
 
     //check if with empty args works fine
     private fun linkMandatoryOptionalArgs(): String = with(navArgs) {
@@ -38,20 +40,6 @@ sealed class NavigationCommand(
     override val args = navArgs.map {
         navArgument(it.key) { it.navType }
     }
-
-
-
-//    private fun getMandatoryArguments(): String =
-//        navArgs.filterNot { !it.optional }
-//            .joinToString("/") { "{${it.key}}" }
-//
-//    private fun getOptionArguments(): String =
-//        navArgs.filter { it.optional }
-//            .joinToString("&") { "${it.key}={${it.key}}" }
-//            .let { if (it.isNotEmpty()) "?$it" else "" }
-
-
-
 
     companion object {
         const val DETAIL_SUBROUTE = "detail"

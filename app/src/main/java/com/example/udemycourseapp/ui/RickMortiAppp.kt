@@ -19,7 +19,6 @@ import com.example.udemycourseapp.navigation.RickMortyNavHost
 import com.example.udemycourseapp.navigation.component.RickAndMortyNavigationRail
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RickAndMortyApp(
     windowSizeClass: WindowSizeClass,

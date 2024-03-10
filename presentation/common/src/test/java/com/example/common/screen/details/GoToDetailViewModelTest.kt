@@ -42,7 +42,7 @@ private const val LOCATION_ID_KEY = "locationId"
 private const val ERROR_MESSAGE = "Error Message"
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class DetailViewModelTest {
+internal class GoToDetailViewModelTest {
     private lateinit var getCharacterDetails: IGetCharacterDetailsUseCase
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var detailViewModel: DetailViewModel
