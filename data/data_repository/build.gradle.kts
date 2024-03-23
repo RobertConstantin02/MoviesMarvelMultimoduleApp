@@ -20,20 +20,10 @@ kapt {
 dependencies {
 
     implementation(project(":toplevel:resources"))
-
-    //implementation(project(":data:api"))
-    //implementation(project(":data:remote"))
-    //implementation(project(":data:database"))
     implementation(project(":data:preferences"))
     implementation(project(":data:paging"))
-    //implementation(project(":data:data_mapper"))
-
     api(project(":domain:domain_repository"))
-    //api(project(":domain:domain_model"))
-    //api(project(":domain:usecase"))
-
     api(project(":api_interaction_helper:retrofit"))
-
     testImplementation(project(":test"))
     testImplementation(project(":data:remote"))
     //Unit test

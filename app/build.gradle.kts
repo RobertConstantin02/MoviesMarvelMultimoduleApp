@@ -55,7 +55,7 @@ dependencies {
     implementation(project(":data:data_mapper"))
     implementation(project(":data:paging"))
     implementation(project(":data:data_repository"))
-
+    //QUITAR LOS DE DOMINIO Y VER SI HACEN FALTA PORQUE EN PRESENTACION YA LOS TENGO
     implementation(project(":domain:domain_model"))
     implementation(project(":domain:domain_repository"))
     implementation(project(":domain:usecase"))
